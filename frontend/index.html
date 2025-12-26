@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Productivity Planner</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="app-header">
+        <h1>AI Productivity Planner</h1>
+        <p>Plan your day with the help of AI</p>
+    </header>
+
+    <main class="planner-container">
+        <section class="ai-assistant">
+            <h2>AI Assistant</h2>
+            <div class="ai-chat">
+                <div id="chat-messages" class="chat-messages">
+                    <div class="message ai-message">
+                        Hello! I'm your AI productivity assistant. I can help you plan your day, prioritize tasks, and optimize your schedule. What would you like to accomplish today?
+                    </div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="ai-input" placeholder="Ask me for help with your planning..." />
+                    <button id="send-button">Send</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="task-planner">
+            <h2>Daily Planner</h2>
+
+            <div class="task-input-section">
+                <input type="text" id="task-input" placeholder="Enter a new task..." />
+                <div class="time-inputs">
+                    <input type="time" id="start-time" />
+                    <span>to</span>
+                    <input type="time" id="end-time" />
+                </div>
+                <button id="add-task-btn">Add Task</button>
+            </div>
+
+            <div class="task-filters">
+                <button class="filter-btn active" data-filter="all">All Tasks</button>
+                <button class="filter-btn" data-filter="pending">Pending</button>
+                <button class="filter-btn" data-filter="completed">Completed</button>
+            </div>
+
+            <div id="task-list" class="task-list">
+                <!--tasks will be dynamically added here-->
+            </div>
+        </section>
+
+        <section class="schedule-overview">
+            <h2>Schedule Overview</h2>
+            <div id="schedule-timeline" class="schedule-timeline">
+                <!--timeline will show task time blocks-->
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
