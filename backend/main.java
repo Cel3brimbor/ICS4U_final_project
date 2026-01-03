@@ -28,7 +28,7 @@ public class Main {
             WebServer server = new WebServer(scheduleManager);
             server.start();
 
-            System.out.println("\nServer is running... Press Ctrl+C to stop");
+            System.out.println("\nServer is running...");
 
             Thread.currentThread().join();
 

@@ -15,7 +15,7 @@ import java.util.*;
 
 public class WebServer {
     private static final int PORT = 8080;
-    private static final String FRONTEND_PATH = "../frontend/";
+    private static final String FRONTEND_PATH = "frontend/";
     private ScheduleManager scheduleManager;
 
     public WebServer(ScheduleManager scheduleManager) {
@@ -51,6 +51,8 @@ public class WebServer {
             //build path relative to frontend directory
             Path filePath = Paths.get(FRONTEND_PATH, requestPath.substring(1));
             File file = filePath.toFile();
+
+            //System.out.println("File path: " + filePath);
 
             if (file.exists() && file.isFile()) {
                 //set appropriate content type
