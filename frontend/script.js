@@ -12,6 +12,9 @@ function initializeApp() {
     //update greeting with current time
     updateGreeting();
     setInterval(updateGreeting, 60000); //update every minute
+
+    //initialize navigation
+    initializeNavigation();
 }
 
 function updateGreeting() {
@@ -347,4 +350,61 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// Navigation functions
+function initializeNavigation() {
+    // Navigation is handled by onclick attributes in HTML
+    // This function can be used for additional initialization if needed
+}
+
+function navigateTo(page) {
+    // Remove active class from all nav buttons
+    const navButtons = document.querySelectorAll('.nav-btn');
+    navButtons.forEach(btn => btn.classList.remove('active'));
+
+    // Add active class to clicked button
+    event.target.classList.add('active');
+
+    // Handle navigation based on page
+    switch(page) {
+        case 'home':
+            // Already on home page
+            break;
+        case 'progress':
+            showPage('progress');
+            break;
+        case 'add-task':
+            // Scroll to task input section
+            document.querySelector('.task-input-section').scrollIntoView({ behavior: 'smooth' });
+            break;
+        case 'timer':
+            showPage('timer');
+            break;
+        case 'schedule':
+            // Scroll to schedule overview
+            document.querySelector('.schedule-overview').scrollIntoView({ behavior: 'smooth' });
+            break;
+        case 'tasks':
+            // Scroll to task list
+            document.querySelector('.task-planner').scrollIntoView({ behavior: 'smooth' });
+            break;
+        case 'chatbot':
+            // Scroll to AI assistant
+            document.querySelector('.ai-assistant').scrollIntoView({ behavior: 'smooth' });
+            break;
+        case 'notes':
+            showPage('notes');
+            break;
+        case 'settings':
+            showPage('settings');
+            break;
+        default:
+            console.log(`Navigation to ${page} not implemented yet`);
+    }
+}
+
+function showPage(pageName) {
+    // For now, just show an alert - in a real app, this would navigate to different pages
+    alert(`${pageName.charAt(0).toUpperCase() + pageName.slice(1)} page coming soon!`);
 }

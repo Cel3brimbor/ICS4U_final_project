@@ -1,0 +1,34 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Java (to out)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "mkdir out -Force; javac -d out (Get-ChildItem -Recurse -Filter *.java | % FullName)"
+      ],
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run backend.Main",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "java -cp out backend.Main"
+      ],
+      "dependsOn": ["Build Java (to out)"],
+      "group": "test",
+      "problemMatcher": []
+    }
+  ]
+}
