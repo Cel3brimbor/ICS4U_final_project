@@ -1,11 +1,11 @@
 package backend;
 
-import java.io.IOException;
 import java.util.*;
 import java.time.LocalTime;
 import java.time.LocalDate;
+import java.io.IOException;
 
-public class Main {
+public class TestingServer {
 
     public static void main(String[] args) {
         System.out.println("=== AI Productivity Planner - Backend Server ===\n");
@@ -19,9 +19,9 @@ public class Main {
         System.out.println("Loaded " + scheduleManager.getTaskCount() + " tasks");
 
         //add some sample tasks if none exist
-        if (scheduleManager.getTaskCount() == 0) {
-            addSampleTasks(scheduleManager);
-        }
+        // if (scheduleManager.getTaskCount() == 0) {
+        //     addSampleTasks(scheduleManager);
+        // }
 
         //start web server
         try {
@@ -220,5 +220,5 @@ public class Main {
         int hour = Integer.parseInt(timeParts[0]);
         int minute = Integer.parseInt(timeParts[1]);
         return LocalTime.of(hour, minute);
-    }
+    } 
 }
