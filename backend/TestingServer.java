@@ -1,8 +1,11 @@
 package backend;
 
+<<<<<<<< Updated upstream:backend/TestingServer.java
 import java.util.*;
 import java.time.LocalTime;
 import java.time.LocalDate;
+========
+>>>>>>>> Stashed changes:backend/main.java
 import java.io.IOException;
 
 public class TestingServer {
@@ -39,6 +42,7 @@ public class TestingServer {
             System.out.println("\nServer shutting down...");
         }
     }
+<<<<<<<< Updated upstream:backend/TestingServer.java
 
     private static void addSampleTasks(ScheduleManager scheduleManager) {
         System.out.println("Adding sample tasks...");
@@ -221,4 +225,6 @@ public class TestingServer {
         int minute = Integer.parseInt(timeParts[1]);
         return LocalTime.of(hour, minute);
     } 
+========
+>>>>>>>> Stashed changes:backend/main.java
 }
