@@ -198,8 +198,8 @@ function createTaskElement(task) {
             </div>
         </div>
         <div class="task-actions">
-            <button class="task-action-btn complete-btn" onclick="updateTaskStatus('${task.id}', 'COMPLETED')">
-                ✓ Complete
+            <button class="task-action-btn complete-btn" onclick="updateTaskStatus('${task.id}', '${task.status === 'COMPLETED' ? 'PENDING' : 'COMPLETED'}')">
+                ${task.status === 'COMPLETED' ? '↺ Mark as Incomplete' : '✓ Complete'}
             </button>
             <button class="task-action-btn delete-btn" onclick="deleteTask('${task.id}')">
                 ✕ Delete

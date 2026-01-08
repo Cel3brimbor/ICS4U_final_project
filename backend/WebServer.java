@@ -9,9 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.List;
 
 public class WebServer {
     private static final int PORT = 8080;
@@ -99,7 +97,7 @@ public class WebServer {
 
         private void handleGetTasks(HttpExchange exchange) throws IOException {
             List<Task> tasks = scheduleManager.getTodayTasks();
-            String jsonResponse = tasksToJson(tasks);
+            String jsonResponse = FrontendDataHandler.tasksToJson(tasks);
 
             exchange.getResponseHeaders().set("Content-Type", "application/json");
             exchange.sendResponseHeaders(200, jsonResponse.length());
@@ -121,12 +119,22 @@ public class WebServer {
                 }
                 String requestBody = sb.toString();
 
-                //parse JSON
-                Task newTask = parseTaskFromJson(requestBody);
-                if (newTask == null) {
-                    sendBadRequest(exchange, "Invalid task data");
+                //parse and validate JSON using FrontendDataHandler
+                FrontendDataHandler.TaskCreateRequest request = FrontendDataHandler.parseTaskCreateRequest(requestBody);
+                if (request == null) {
+                    sendBadRequest(exchange, FrontendDataHandler.ERR_INVALID_JSON);
                     return;
                 }
+
+                //validate the request
+                List<String> validationErrors = FrontendDataHandler.validateTaskCreateRequest(request);
+                if (!validationErrors.isEmpty()) {
+                    sendBadRequest(exchange, FrontendDataHandler.createValidationErrorResponse(validationErrors));
+                    return;
+                }
+
+                //create task from validated request
+                Task newTask = FrontendDataHandler.createTaskFromRequest(request);
 
                 //add task to schedule
                 Task addedTask = scheduleManager.addTask(
@@ -139,7 +147,7 @@ public class WebServer {
                     //save to persistence
                     TaskPersistence.saveTasks(scheduleManager);
 
-                    String jsonResponse = taskToJson(addedTask);
+                    String jsonResponse = FrontendDataHandler.taskToJson(addedTask);
                     exchange.getResponseHeaders().set("Content-Type", "application/json");
                     exchange.sendResponseHeaders(201, jsonResponse.length());
 
@@ -193,7 +201,7 @@ public class WebServer {
             }
 
             if (task != null) {
-                String jsonResponse = taskToJson(task);
+                String jsonResponse = FrontendDataHandler.taskToJson(task);
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
                 exchange.sendResponseHeaders(200, jsonResponse.length());
 
@@ -217,14 +225,22 @@ public class WebServer {
                 }
                 String requestBody = sb.toString();
 
-                //parse JSON to get status update
-                String newStatus = parseStatusFromJson(requestBody);
-                if (newStatus == null) {
-                    sendBadRequest(exchange, "Invalid status data");
+                //parse and validate JSON using FrontendDataHandler
+                FrontendDataHandler.TaskUpdateRequest request = FrontendDataHandler.parseTaskUpdateRequest(requestBody);
+                if (request == null) {
+                    sendBadRequest(exchange, FrontendDataHandler.ERR_INVALID_JSON);
                     return;
                 }
 
-                Task.TaskStatus status = Task.TaskStatus.valueOf(newStatus.toUpperCase());
+                //validate the request
+                List<String> validationErrors = FrontendDataHandler.validateTaskUpdateRequest(request);
+                if (!validationErrors.isEmpty()) {
+                    sendBadRequest(exchange, FrontendDataHandler.createValidationErrorResponse(validationErrors));
+                    return;
+                }
+
+                //get status from validated request
+                Task.TaskStatus status = FrontendDataHandler.getTaskStatusFromRequest(request);
                 boolean updated = scheduleManager.updateTaskStatus(taskId, status);
 
                 if (updated) {
@@ -249,110 +265,6 @@ public class WebServer {
                 sendNotFound(exchange, "Task not found");
             }
         }
-    }
-
-    //utility methods for JSON handling
-    private String tasksToJson(List<Task> tasks) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        for (int i = 0; i < tasks.size(); i++) {
-            sb.append(taskToJson(tasks.get(i)));
-            if (i < tasks.size() - 1) sb.append(",");
-        }
-        sb.append("]");
-        return sb.toString();
-    }
-
-    private String taskToJson(Task task) {
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-        return String.format(
-            "{\"id\":\"%s\",\"description\":\"%s\",\"startTime\":\"%s\",\"endTime\":\"%s\",\"status\":\"%s\",\"duration\":%d}",
-            task.getId(),
-            escapeJsonString(task.getDescription()),
-            task.getStartTime().format(timeFormatter),
-            task.getEndTime().format(timeFormatter),
-            task.getStatus().toString(),
-            task.getDurationMinutes()
-        );
-    }
-
-    private Task parseTaskFromJson(String json) {
-        try {
-            //simple JSON parsing (remove braces and split by commas)
-            json = json.trim();
-            if (!json.startsWith("{") || !json.endsWith("}")) return null;
-            json = json.substring(1, json.length() - 1);
-
-            String description = null;
-            String startTimeStr = null;
-            String endTimeStr = null;
-
-            String[] pairs = json.split(",");
-            for (String pair : pairs) {
-                String[] keyValue = pair.split(":", 2);
-                if (keyValue.length != 2) continue;
-
-                String key = keyValue[0].trim().replaceAll("\"", "");
-                String value = keyValue[1].trim().replaceAll("\"", "");
-
-                switch (key) {
-                    case "description":
-                        description = value;
-                        break;
-                    case "startTime":
-                        startTimeStr = value;
-                        break;
-                    case "endTime":
-                        endTimeStr = value;
-                        break;
-                }
-            }
-
-            if (description == null || startTimeStr == null || endTimeStr == null) {
-                return null;
-            }
-
-            LocalTime startTime = LocalTime.parse(startTimeStr);
-            LocalTime endTime = LocalTime.parse(endTimeStr);
-
-            return new Task(description, startTime, endTime);
-
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private String parseStatusFromJson(String json) {
-        try {
-            json = json.trim();
-            if (!json.startsWith("{") || !json.endsWith("}")) return null;
-            json = json.substring(1, json.length() - 1);
-
-            String[] pairs = json.split(",");
-            for (String pair : pairs) {
-                String[] keyValue = pair.split(":", 2);
-                if (keyValue.length != 2) continue;
-
-                String key = keyValue[0].trim().replaceAll("\"", "");
-                String value = keyValue[1].trim().replaceAll("\"", "");
-
-                if ("status".equals(key)) {
-                    return value;
-                }
-            }
-            return null;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private String escapeJsonString(String str) {
-        if (str == null) return "";
-        return str.replace("\\", "\\\\")
-                  .replace("\"", "\\\"")
-                  .replace("\n", "\\n")
-                  .replace("\r", "\\r")
-                  .replace("\t", "\\t");
     }
 
     //http response helper methods
