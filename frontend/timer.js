@@ -17,11 +17,9 @@ function initializeTimerPage() {
     updateTimerDisplay();
     setupEventListeners();
     updateProgressGrid();
-    // TODO: Fetch timer status from your Java backend when implemented
     // fetchTimerStatus();
 }
 
-// Setup event listeners
 function setupEventListeners() {
     document.getElementById('timer-start').addEventListener('click', startTimer);
     document.getElementById('timer-pause').addEventListener('click', pauseTimer);
@@ -69,7 +67,6 @@ async function startTimer() {
         //     body: JSON.stringify({ action: 'start', mode: currentMode })
         // });
 
-        // For now, simulate success
         const response = { ok: true, json: () => Promise.resolve({ success: true, remainingSeconds: currentTime }) };
         const result = await response.json();
 
@@ -98,7 +95,6 @@ async function pauseTimer() {
         //     body: JSON.stringify({ action: 'pause' })
         // });
 
-        // For now, simulate success
         const response = { ok: true };
         if (response.ok) {
             isPaused = true;
@@ -122,7 +118,6 @@ async function stopTimer() {
         //     body: JSON.stringify({ action: 'stop' })
         // });
 
-        // For now, simulate success
         const response = { ok: true };
         if (response.ok) {
             isRunning = false;
@@ -147,7 +142,6 @@ async function resetTimer() {
         //     body: JSON.stringify({ action: 'reset' })
         // });
 
-        // For now, simulate success
         const response = { ok: true, json: () => Promise.resolve({ remainingSeconds: getDefaultTimeForMode(currentMode) }) };
         const result = await response.json();
 
@@ -198,7 +192,7 @@ function timerComplete() {
     clearInterval(timerInterval);
     isRunning = false;
 
-    // Play notification sound if available
+    //play notification sound if available
     playNotification();
 
     // Show notification
