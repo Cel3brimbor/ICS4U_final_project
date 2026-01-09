@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WebServer {
-    private static final int PORT = 8080;
+    private static final int PORT = 8000;
     private static final String FRONTEND_PATH = "frontend/";
     private ScheduleManager scheduleManager;
 
