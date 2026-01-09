@@ -1,4 +1,4 @@
-package backend;
+package backend.objects;
 
 public class Timer {
     

@@ -5,6 +5,8 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import backend.objects.Task;
+
 public class ScheduleManager {
     private List<Task> tasks;
     private Map<LocalDate, List<Task>> tasksByDate;

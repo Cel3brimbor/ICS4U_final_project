@@ -5,6 +5,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 
+import backend.objects.Task;
+
 public class FrontendDataHandler {
 
     private static final int MAX_DESCRIPTION_LENGTH = 200;

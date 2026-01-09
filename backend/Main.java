@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
 import backend.FrontendDataHandler.TaskResponse;
+import backend.objects.Task;
 
 public class Main {
 

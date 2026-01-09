@@ -1,6 +1,9 @@
 package backend;
 
 import java.util.*;
+
+import backend.objects.Task;
+
 import java.time.LocalTime;
 import java.time.LocalDate;
 import java.io.IOException;

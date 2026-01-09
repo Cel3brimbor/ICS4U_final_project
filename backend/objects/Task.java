@@ -1,4 +1,4 @@
-package backend;
+package backend.objects;
 
 import java.time.LocalTime;
 import java.time.LocalDate;

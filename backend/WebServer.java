@@ -1,6 +1,9 @@
 package backend;
 
 import com.sun.net.httpserver.HttpServer;
+
+import backend.objects.Task;
+
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.*;
