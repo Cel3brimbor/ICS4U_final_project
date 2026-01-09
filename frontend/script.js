@@ -379,7 +379,7 @@ function navigateTo(page) {
             document.querySelector('.task-input-section').scrollIntoView({ behavior: 'smooth' });
             break;
         case 'timer':
-            showPage('timer');
+            window.location.href = '/timer.html';
             break;
         case 'schedule':
             // Scroll to schedule overview

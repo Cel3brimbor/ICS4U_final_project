@@ -29,6 +29,7 @@ public class WebServer {
         //API endpoints
         server.createContext("/api/tasks", new TasksHandler());
         server.createContext("/api/tasks/", new TaskHandler()); //for specific task operations
+        // TODO: Add timer endpoint here when you implement Timer.java
 
         server.setExecutor(null);
         server.start();
@@ -312,4 +313,5 @@ public class WebServer {
             os.write(response.getBytes(StandardCharsets.UTF_8));
         }
     }
+
 }

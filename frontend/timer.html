@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Timer - AI Productivity Planner</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="timer.css"> <!-- We'll create this -->
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-content">
+            <button class="back-btn" onclick="goBack()">← Back to Dashboard</button>
+            <h1>Pomodoro Timer</h1>
+        </div>
+    </header>
+
+    <main class="timer-main">
+        <div class="timer-container">
+            <!-- Main Timer Display -->
+            <div class="timer-display">
+                <div class="timer-circle">
+                    <div class="timer-text">
+                        <div id="timer-minutes">25</div>
+                        <div class="timer-separator">:</div>
+                        <div id="timer-seconds">00</div>
+                    </div>
+                </div>
+                <div class="timer-status" id="timer-status">Ready to start</div>
+            </div>
+
+            <!-- Timer Controls -->
+            <div class="timer-controls">
+                <button id="timer-start" class="timer-btn start-btn">Start</button>
+                <button id="timer-pause" class="timer-btn pause-btn" disabled>Pause</button>
+                <button id="timer-stop" class="timer-btn stop-btn">Stop</button>
+                <button id="timer-reset" class="timer-btn reset-btn">Reset</button>
+            </div>
+
+            <!-- Mode Selection -->
+            <div class="timer-modes">
+                <button class="mode-btn active" data-mode="pomodoro" data-duration="1500">
+                    <div class="mode-title">Pomodoro</div>
+                    <div class="mode-desc">25 minutes</div>
+                </button>
+                <button class="mode-btn" data-mode="short-break" data-duration="300">
+                    <div class="mode-title">Short Break</div>
+                    <div class="mode-desc">5 minutes</div>
+                </button>
+                <button class="mode-btn" data-mode="long-break" data-duration="900">
+                    <div class="mode-title">Long Break</div>
+                    <div class="mode-desc">15 minutes</div>
+                </button>
+            </div>
+
+            <!-- Statistics -->
+            <div class="timer-stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="pomodoros-completed">0</div>
+                    <div class="stat-label">Pomodoros<br>Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-focus-time">0</div>
+                    <div class="stat-label">Total Focus<br>Time (min)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="current-streak">0</div>
+                    <div class="stat-label">Current<br>Streak</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Visualization -->
+        <div class="progress-section">
+            <h3>Today's Progress</h3>
+            <div class="progress-grid" id="progress-grid">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <script src="timer.js"></script>
+</body>
+</html>
