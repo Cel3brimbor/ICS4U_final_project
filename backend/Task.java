@@ -35,7 +35,7 @@ public class Task {
         this.priority = "MEDIUM";
     }
 
-    // Constructor for loading from persistence (preserves original ID)
+    //constructor for loading from persistence
     public Task(String id, String description, LocalTime startTime, LocalTime endTime, LocalDate date, TaskStatus status, String priority) {
         this.id = id;
         this.description = description;
@@ -46,7 +46,7 @@ public class Task {
         this.priority = priority;
     }
 
-    // Getters
+    //getters
     public String getId() { return id; }
     public String getDescription() { return description; }
     public LocalTime getStartTime() { return startTime; }
@@ -55,7 +55,7 @@ public class Task {
     public TaskStatus getStatus() { return status; }
     public String getPriority() { return priority; }
 
-    // Setters
+    //setters
     public void setDescription(String description) { this.description = description; }
     public void setStartTime(LocalTime startTime) { this.startTime = startTime; }
     public void setEndTime(LocalTime endTime) { this.endTime = endTime; }
@@ -82,7 +82,6 @@ public class Task {
                 status, priority);
     }
 
-    // For JSON serialization (simple implementation)
     public String toJson() {
         return String.format("{\"id\":\"%s\",\"description\":\"%s\",\"startTime\":\"%s\",\"endTime\":\"%s\",\"date\":\"%s\",\"status\":\"%s\",\"priority\":\"%s\"}",
                 id, description, startTime, endTime, date, status, priority);

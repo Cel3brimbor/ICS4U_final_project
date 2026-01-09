@@ -9,6 +9,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class WebServer {
@@ -29,7 +31,7 @@ public class WebServer {
         //API endpoints
         server.createContext("/api/tasks", new TasksHandler());
         server.createContext("/api/tasks/", new TaskHandler()); //for specific task operations
-        // TODO: Add timer endpoint here when you implement Timer.java
+        // TODO: Add timer endpoint here when implement Timer.java
 
         server.setExecutor(null);
         server.start();
@@ -98,7 +100,7 @@ public class WebServer {
 
         private void handleGetTasks(HttpExchange exchange) throws IOException {
             List<Task> tasks = scheduleManager.getTodayTasks();
-            String jsonResponse = FrontendDataHandler.tasksToJson(tasks);
+            String jsonResponse = tasksToJsonArray(tasks);
 
             exchange.getResponseHeaders().set("Content-Type", "application/json");
             exchange.sendResponseHeaders(200, jsonResponse.length());
@@ -163,6 +165,123 @@ public class WebServer {
                 sendBadRequest(exchange, "Error processing request: " + e.getMessage());
             }
         }
+
+        //helper method to read request body
+        private String readRequestBody(HttpExchange exchange) throws IOException {
+            InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
+            BufferedReader br = new BufferedReader(isr);
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+            return sb.toString();
+        }
+
+        //parse JSON directly into Task object
+        private Task parseTaskFromJson(String json) {
+            try {
+                // Simple JSON parsing - extract field values directly into Task constructor
+                String description = extractJsonString(json, "description");
+                String startTimeStr = extractJsonString(json, "startTime");
+                String endTimeStr = extractJsonString(json, "endTime");
+
+                if (description == null || startTimeStr == null || endTimeStr == null) {
+                    return null;
+                }
+
+                LocalTime startTime = LocalTime.parse(startTimeStr);
+                LocalTime endTime = LocalTime.parse(endTimeStr);
+
+                return new Task(description, startTime, endTime);
+            } catch (Exception e) {
+                System.err.println("Error parsing task JSON: " + e.getMessage());
+                return null;
+            }
+        }
+
+        //validate Task object
+        private List<String> validateTask(Task task) {
+            List<String> errors = new ArrayList<>();
+
+            if (task.getDescription() == null || task.getDescription().trim().isEmpty()) {
+                errors.add("Task description cannot be empty");
+            }
+            if (task.getStartTime() == null) {
+                errors.add("Start time cannot be null");
+            }
+            if (task.getEndTime() == null) {
+                errors.add("End time cannot be null");
+            }
+            if (task.getStartTime() != null && task.getEndTime() != null) {
+                if (task.getStartTime().isAfter(task.getEndTime()) || task.getStartTime().equals(task.getEndTime())) {
+                    errors.add("Start time must be before end time");
+                }
+            }
+
+            return errors;
+        }
+
+        //create validation error response
+        private String createValidationErrorResponse(List<String> errors) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("{\"error\":\"Validation failed\",\"details\":[");
+            for (int i = 0; i < errors.size(); i++) {
+                sb.append("\"").append(errors.get(i)).append("\"");
+                if (i < errors.size() - 1) sb.append(",");
+            }
+            sb.append("]}");
+            return sb.toString();
+        }
+
+        //convert Task to JSON
+        private String taskToJson(Task task) {
+            return String.format(
+                "{\"id\":\"%s\",\"description\":\"%s\",\"startTime\":\"%s\",\"endTime\":\"%s\",\"date\":\"%s\",\"status\":\"%s\",\"priority\":\"%s\"}",
+                task.getId(),
+                escapeJsonString(task.getDescription()),
+                task.getStartTime(),
+                task.getEndTime(),
+                task.getDate(),
+                task.getStatus(),
+                task.getPriority()
+            );
+        }
+
+        //convert list of tasks to JSON array
+        private String tasksToJsonArray(List<Task> tasks) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("[");
+            for (int i = 0; i < tasks.size(); i++) {
+                sb.append(taskToJson(tasks.get(i)));
+                if (i < tasks.size() - 1) {
+                    sb.append(",");
+                }
+            }
+            sb.append("]");
+            return sb.toString();
+        }
+
+        //extract string value from JSON field
+        private String extractJsonString(String json, String fieldName) {
+            String pattern = "\"" + fieldName + "\":\\s*\"([^\"]*)\"";
+            java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
+            java.util.regex.Matcher m = p.matcher(json);
+            if (m.find()) {
+                return m.group(1);
+            }
+            return null;
+        }
+
+        //escape special characters for JSON
+        private String escapeJsonString(String str) {
+            if (str == null) return "";
+            return str.replace("\\", "\\\\")
+                      .replace("\"", "\\\"")
+                      .replace("\n", "\\n")
+                      .replace("\r", "\\r")
+                      .replace("\t", "\\t");
+        }
     }
 
     //handle /api/tasks/{id} (GET, PUT, DELETE specific task)
@@ -202,7 +321,8 @@ public class WebServer {
             }
 
             if (task != null) {
-                String jsonResponse = FrontendDataHandler.taskToJson(task);
+                // Use TaskHandler's own taskToJson method (need to add it)
+                String jsonResponse = taskToJson(task);
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
                 exchange.sendResponseHeaders(200, jsonResponse.length());
 
@@ -210,49 +330,33 @@ public class WebServer {
                     os.write(jsonResponse.getBytes(StandardCharsets.UTF_8));
                 }
             } else {
-                sendNotFound(exchange, "Task not found");
+                sendNotFound(exchange, "{\"error\":\"Task not found\"}");
             }
         }
 
         private void handleUpdateTask(HttpExchange exchange, String taskId) throws IOException {
             try {
-                //read request body
-                InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
-                BufferedReader br = new BufferedReader(isr);
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = br.readLine()) != null) {
-                    sb.append(line);
-                }
-                String requestBody = sb.toString();
+                String requestBody = readRequestBody(exchange);
 
-                //parse and validate JSON using FrontendDataHandler
-                FrontendDataHandler.TaskUpdateRequest request = FrontendDataHandler.parseTaskUpdateRequest(requestBody);
-                if (request == null) {
-                    sendBadRequest(exchange, FrontendDataHandler.ERR_INVALID_JSON);
+                // Extract status from JSON directly
+                String statusStr = extractJsonString(requestBody, "status");
+                if (statusStr == null) {
+                    sendBadRequest(exchange, "{\"error\":\"Status field required\"}");
                     return;
                 }
 
-                //validate the request
-                List<String> validationErrors = FrontendDataHandler.validateTaskUpdateRequest(request);
-                if (!validationErrors.isEmpty()) {
-                    sendBadRequest(exchange, FrontendDataHandler.createValidationErrorResponse(validationErrors));
-                    return;
-                }
-
-                //get status from validated request
-                Task.TaskStatus status = FrontendDataHandler.getTaskStatusFromRequest(request);
+                Task.TaskStatus status = Task.TaskStatus.valueOf(statusStr.toUpperCase());
                 boolean updated = scheduleManager.updateTaskStatus(taskId, status);
 
                 if (updated) {
                     TaskPersistence.saveTasks(scheduleManager);
-                    sendSuccess(exchange, "Task updated successfully");
+                    sendSuccess(exchange, "{\"message\":\"Task updated successfully\"}");
                 } else {
-                    sendNotFound(exchange, "Task not found");
+                    sendNotFound(exchange, "{\"error\":\"Task not found\"}");
                 }
 
             } catch (Exception e) {
-                sendBadRequest(exchange, "Error processing request: " + e.getMessage());
+                sendBadRequest(exchange, "{\"error\":\"Error processing request: " + e.getMessage() + "\"}");
             }
         }
 
@@ -261,10 +365,55 @@ public class WebServer {
 
             if (removed) {
                 TaskPersistence.saveTasks(scheduleManager);
-                sendSuccess(exchange, "Task deleted successfully");
+                sendSuccess(exchange, "{\"message\":\"Task deleted successfully\"}");
             } else {
-                sendNotFound(exchange, "Task not found");
+                sendNotFound(exchange, "{\"error\":\"Task not found\"}");
             }
+        }
+
+        //helper methods for TaskHandler
+
+        private String readRequestBody(HttpExchange exchange) throws IOException {
+            InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
+            BufferedReader br = new BufferedReader(isr);
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+            return sb.toString();
+        }
+
+        private String extractJsonString(String json, String fieldName) {
+            String pattern = "\"" + fieldName + "\":\\s*\"([^\"]*)\"";
+            java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
+            java.util.regex.Matcher m = p.matcher(json);
+            if (m.find()) {
+                return m.group(1);
+            }
+            return null;
+        }
+
+        private String taskToJson(Task task) {
+            return String.format(
+                "{\"id\":\"%s\",\"description\":\"%s\",\"startTime\":\"%s\",\"endTime\":\"%s\",\"date\":\"%s\",\"status\":\"%s\",\"priority\":\"%s\"}",
+                task.getId(),
+                escapeJsonString(task.getDescription()),
+                task.getStartTime(),
+                task.getEndTime(),
+                task.getDate(),
+                task.getStatus(),
+                task.getPriority()
+            );
+        }
+
+        private String escapeJsonString(String str) {
+            if (str == null) return "";
+            return str.replace("\\", "\\\\")
+                      .replace("\"", "\\\"")
+                      .replace("\n", "\\n")
+                      .replace("\r", "\\r")
+                      .replace("\t", "\\t");
         }
     }
 

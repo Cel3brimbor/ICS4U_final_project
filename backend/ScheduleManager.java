@@ -56,6 +56,15 @@ public class ScheduleManager {
         return addTask(description, startTime, endTime, LocalDate.now(), allowOverlap);
     }
 
+    //add task using Task object directly
+    public Task addTask(Task task) {
+        if (task == null) {
+            throw new IllegalArgumentException("Task cannot be null");
+        }
+
+        return addTask(task.getDescription(), task.getStartTime(), task.getEndTime(), task.getDate(), false);
+    }
+
     //add task for a specific date
     public Task addTask(String description, LocalTime startTime, LocalTime endTime, LocalDate date, boolean allowOverlap) {
         if (!allowOverlap) {
