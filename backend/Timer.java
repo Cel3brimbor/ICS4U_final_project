@@ -1,4 +1,4 @@
-package backend.objects;
+package backend;
 
 import java.time.*;
 import java.util.*;
@@ -25,34 +25,29 @@ public class Timer {
         javaTimer.schedule(currentTask, 0, 1000);
     }
 
-    public Timer(){
-        this.javaTimer = new Timer(true);
-    }
-
-    public void startShortBreak() {
+    startShortBreak() {
         //start short break timer
     }
-    public void startLongBreak() {
+
+    startLongBreak() {
         //start long break timer
     }
-    public void pauseTimer() {
+    pauseTimer() {
         //pause timer
     }
-    public void resumeTimer() {
+    resumeTimer() {
         //resume timer
     }
-    public void stopTimer() {
+    stopTimer() {
         //stop timer
     }
-    public void resetTimer() {
+    resetTimer() {
         //reset timer
     }
-    public int getRemainingTime() {
+    getRemainingTime() {
         //get remaining time
     }
-    public int getPomodorosCompleted() {
+    getPomodorosCompleted() {
         //get pomodoros completed
     }
 }
-
-
