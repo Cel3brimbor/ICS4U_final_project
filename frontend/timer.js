@@ -17,7 +17,7 @@ function initializeTimerPage() {
     updateTimerDisplay();
     setupEventListeners();
     updateProgressGrid();
-    // fetchTimerStatus();
+    fetchTimerStatus();
 }
 
 function setupEventListeners() {
@@ -60,14 +60,16 @@ async function fetchTimerStatus() {
 // Start timer
 async function startTimer() {
     try {
-        // TODO: Replace with your Java backend call
-        // const response = await fetch('/api/timer', {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify({ action: 'start', mode: currentMode })
-        // });
+        const response = await fetch('/api/timer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'start', mode: currentMode })
+        });
 
-        const response = { ok: true, json: () => Promise.resolve({ success: true, remainingSeconds: currentTime }) };
+        if (!response.ok) {
+            throw new Error('Failed to start timer');
+        }
+
         const result = await response.json();
 
         if (result.success) {
@@ -111,20 +113,24 @@ async function pauseTimer() {
 // Stop timer
 async function stopTimer() {
     try {
-        // TODO: Replace with your Java backend call
-        // const response = await fetch('/api/timer', {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify({ action: 'stop' })
-        // });
+        const response = await fetch('/api/timer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'stop' })
+        });
 
-        const response = { ok: true };
         if (response.ok) {
-            isRunning = false;
-            isPaused = false;
+            const result = await response.json();
+            isRunning = result.isRunning;
+            currentTime = result.remainingSeconds;
+            pomodorosCompleted = result.pomodorosCompleted || 0;
             clearInterval(timerInterval);
+            updateTimerDisplay();
             updateUI();
-            updateStatus('Timer stopped');
+            updateStatsDisplay();
+            updateStatus(result.message || 'Timer stopped');
+        } else {
+            throw new Error('Failed to stop timer');
         }
     } catch (error) {
         console.error('Failed to stop timer:', error);
