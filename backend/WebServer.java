@@ -240,14 +240,15 @@ public class WebServer {
         //convert Task to JSON
         private String taskToJson(Task task) {
             return String.format(
-                "{\"id\":\"%s\",\"description\":\"%s\",\"startTime\":\"%s\",\"endTime\":\"%s\",\"date\":\"%s\",\"status\":\"%s\",\"priority\":\"%s\"}",
+                "{\"id\":\"%s\",\"description\":\"%s\",\"startTime\":\"%s\",\"endTime\":\"%s\",\"date\":\"%s\",\"status\":\"%s\",\"priority\":\"%s\",\"duration\":%d}",
                 task.getId(),
                 escapeJsonString(task.getDescription()),
                 task.getStartTime(),
                 task.getEndTime(),
                 task.getDate(),
                 task.getStatus(),
-                task.getPriority()
+                task.getPriority(),
+                task.getDurationMinutes()
             );
         }
 
@@ -399,14 +400,15 @@ public class WebServer {
 
         private String taskToJson(Task task) {
             return String.format(
-                "{\"id\":\"%s\",\"description\":\"%s\",\"startTime\":\"%s\",\"endTime\":\"%s\",\"date\":\"%s\",\"status\":\"%s\",\"priority\":\"%s\"}",
+                "{\"id\":\"%s\",\"description\":\"%s\",\"startTime\":\"%s\",\"endTime\":\"%s\",\"date\":\"%s\",\"status\":\"%s\",\"priority\":\"%s\",\"duration\":%d}",
                 task.getId(),
                 escapeJsonString(task.getDescription()),
                 task.getStartTime(),
                 task.getEndTime(),
                 task.getDate(),
                 task.getStatus(),
-                task.getPriority()
+                task.getPriority(),
+                task.getDurationMinutes()
             );
         }
 

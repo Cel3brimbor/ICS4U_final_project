@@ -79,6 +79,8 @@ async function loadTasks() {
         const tasks = await response.json();
         displayTasks(tasks);
 
+        filterTasks('all');
+
     } catch (error) {
         console.error('Error loading tasks:', error);
         showError('Failed to load tasks. Please refresh the page.');
@@ -188,6 +190,7 @@ function createTaskElement(task) {
     const taskDiv = document.createElement('div');
     taskDiv.className = `task-item task-${task.status.toLowerCase()}`;
     taskDiv.setAttribute('data-task-id', task.id);
+    taskDiv.setAttribute('data-task-status', task.status.toLowerCase());
 
     taskDiv.innerHTML = `
         <div class="task-content">
@@ -301,18 +304,24 @@ function filterTasks(filter) {
     const taskItems = document.querySelectorAll('.task-item');
 
     taskItems.forEach(item => {
-        const status = item.className.match(/task-(\w+)/)[1];
+        const status = item.getAttribute('data-task-status');
+        if (!status) return;
 
-        switch (filter) {
+        const normalizedStatus = status.toLowerCase();
+        const normalizedFilter = filter.toLowerCase();
+
+        switch (normalizedFilter) {
             case 'all':
                 item.style.display = 'flex';
                 break;
             case 'pending':
-                item.style.display = status === 'pending' ? 'flex' : 'none';
+                item.style.display = (normalizedStatus === 'pending') ? 'flex' : 'none';
                 break;
             case 'completed':
-                item.style.display = status === 'completed' ? 'flex' : 'none';
+                item.style.display = (normalizedStatus === 'completed') ? 'flex' : 'none';
                 break;
+            default:
+                item.style.display = 'flex';
         }
     });
 }

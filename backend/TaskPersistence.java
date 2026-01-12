@@ -84,7 +84,6 @@ public class TaskPersistence {
     private static List<Task> parseTasksFromJson(String jsonContent) {
         List<Task> tasks = new ArrayList<>();
         try {
-            // Simple JSON parsing - remove array brackets and split by objects
             String content = jsonContent.trim();
             if (content.startsWith("[") && content.endsWith("]")) {
                 content = content.substring(1, content.length() - 1).trim();
@@ -94,18 +93,17 @@ public class TaskPersistence {
                 return tasks;
             }
 
-            // Split by object boundaries (basic approach)
-            String[] objects = content.split("\\},\\s*\\{");
+            String[] objects = content.split("\\}\\s*,\\s*\\{");
             for (int i = 0; i < objects.length; i++) {
-                String obj = objects[i];
-                if (i == 0 && obj.startsWith("{")) {
-                    obj = obj.substring(1);
+                String obj = objects[i].trim();
+                if (!obj.startsWith("{")) {
+                    obj = "{" + obj;
                 }
-                if (i == objects.length - 1 && obj.endsWith("}")) {
-                    obj = obj.substring(0, obj.length() - 1);
+                if (!obj.endsWith("}")) {
+                    obj = obj + "}";
                 }
                 if (!obj.trim().isEmpty()) {
-                    Task task = parseTaskFromJson("{" + obj + "}");
+                    Task task = parseTaskFromJson(obj);
                     if (task != null) {
                         tasks.add(task);
                     }

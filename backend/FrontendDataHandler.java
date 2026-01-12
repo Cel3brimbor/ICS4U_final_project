@@ -92,18 +92,23 @@ public class FrontendDataHandler {
         private String description;
         private String startTime;
         private String endTime;
+        private String date;
         private String status;
+        private String priority;
         private int duration;
 
         public TaskResponse() {}
 
         public TaskResponse(Task task) {
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             this.id = task.getId();
             this.description = task.getDescription();
             this.startTime = task.getStartTime().format(timeFormatter);
             this.endTime = task.getEndTime().format(timeFormatter);
+            this.date = task.getDate().format(dateFormatter);
             this.status = task.getStatus().toString();
+            this.priority = task.getPriority();
             this.duration = task.getDurationMinutes();
         }
 
@@ -128,9 +133,17 @@ public class FrontendDataHandler {
         {
             return status; 
         }
-        public int getDuration() 
+        public int getDuration()
         {
-            return duration; 
+            return duration;
+        }
+        public String getDate()
+        {
+            return date;
+        }
+        public String getPriority()
+        {
+            return priority;
         }
 
         // setters
@@ -351,16 +364,18 @@ public class FrontendDataHandler {
      * @param task Task object
      * @return JSON string
      */
-    public static String taskToJson(Task task) 
+    public static String taskToJson(Task task)
     {
         TaskResponse response = createTaskResponse(task);
         return String.format(
-            "{\"id\":\"%s\",\"description\":\"%s\",\"startTime\":\"%s\",\"endTime\":\"%s\",\"status\":\"%s\",\"duration\":%d}",
+            "{\"id\":\"%s\",\"description\":\"%s\",\"startTime\":\"%s\",\"endTime\":\"%s\",\"date\":\"%s\",\"status\":\"%s\",\"priority\":\"%s\",\"duration\":%d}",
             response.getId(),
             escapeJsonString(response.getDescription()),
             response.getStartTime(),
             response.getEndTime(),
+            response.getDate(),
             response.getStatus(),
+            response.getPriority(),
             response.getDuration()
         );
     }
