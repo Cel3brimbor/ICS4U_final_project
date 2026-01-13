@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Productivity Planner - Notes</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="app-header">
+        <h1>AI Productivity Planner</h1>
+        <p>Quick notes and reminders</p>
+        <nav class="main-navigation">
+            <button class="nav-btn" onclick="navigateTo('home')">Home</button>
+            <button class="nav-btn" onclick="navigateTo('progress')">Progress/Stats</button>
+            <button class="nav-btn" onclick="navigateTo('add-task')">Add Task</button>
+            <button class="nav-btn" onclick="navigateTo('timer')">Timer</button>
+            <button class="nav-btn" onclick="navigateTo('schedule')">Schedule/Timeline</button>
+            <button class="nav-btn active" onclick="navigateTo('notes')">Notes</button>
+            <button class="nav-btn" onclick="navigateTo('chatbot')">Chatbot/Quiz</button>
+            <button class="nav-btn" onclick="navigateTo('settings')">Settings</button>
+        </nav>
+    </header>
+
+    <main class="planner-container">
+        <section class="notes-section">
+            <h2>Quick Notes</h2>
+
+            <div class="note-input-section">
+                <textarea id="note-input" placeholder="Write your note here..." rows="4"></textarea>
+                <button id="add-note-btn">Add Note</button>
+            </div>
+
+            <div id="notes-list" class="notes-list">
+                <!--notes will be dynamically added here-->
+            </div>
+        </section>
+    </main>
+
+    <!-- Message notification area -->
+    <div id="message-container"></div>
+
+    <script src="note.js"></script>
+</body>
+</html>
