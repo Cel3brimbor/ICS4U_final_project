@@ -13,8 +13,9 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("=== AI Productivity Planner - Backend Server ===\n");
 
-        //initialize schedule manager
+        //initialize managers
         ScheduleManager scheduleManager = new ScheduleManager();
+        NoteManager noteManager = new NoteManager();
 
         TaskPersistence.migrateFromTxtToJson();
 
@@ -22,6 +23,11 @@ public class Main {
         System.out.println("Loading existing tasks...");
         TaskPersistence.loadTasks(scheduleManager);
         System.out.println("Loaded " + scheduleManager.getTaskCount() + " tasks");
+
+        //load existing notes from file
+        System.out.println("Loading existing notes...");
+        NotePersistence.loadNotes(noteManager);
+        System.out.println("Loaded " + noteManager.getNoteCount() + " notes");
 
         //fetch and display start time and end time of all tasks present if any
         List<Task> allTasks = scheduleManager.getAllTasks();
@@ -36,6 +42,8 @@ public class Main {
             }
         }
 
+        System.out.println(noteManager.getAllNotesAsString());
+
         //add some sample tasks if none exist
         // if (scheduleManager.getTaskCount() == 0) {
         //     addSampleTasks(scheduleManager);
@@ -43,7 +51,7 @@ public class Main {
 
         //start web server
         try {
-            WebServer server = new WebServer(scheduleManager);
+            WebServer server = new WebServer(scheduleManager, noteManager);
             server.start();
 
             System.out.println("\nServer is running...");
@@ -59,3 +67,4 @@ public class Main {
         }
     }
 }
+

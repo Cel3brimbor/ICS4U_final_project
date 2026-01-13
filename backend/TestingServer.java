@@ -15,6 +15,7 @@ public class TestingServer {
 
         //initialize schedule manager
         ScheduleManager scheduleManager = new ScheduleManager();
+        NoteManager noteManager = new NoteManager();
 
         //load existing tasks from file
         System.out.println("Loading existing tasks...");
@@ -28,7 +29,7 @@ public class TestingServer {
 
         //start web server
         try {
-            WebServer server = new WebServer(scheduleManager);
+            WebServer server = new WebServer(scheduleManager, noteManager);
             server.start();
 
             System.out.println("\nServer is running...");

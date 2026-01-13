@@ -1,10 +1,9 @@
 package backend.objects;
 
-import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Timer {
+public class PomodoroTimer {
     // Timer durations in seconds
     private static final int pomodoroDuration = 25 * 60;    // 25 minutes
     private static final int shortBreakDuration = 5 * 60;   // 5 minutes
@@ -55,7 +54,7 @@ public class Timer {
         utilTimer.scheduleAtFixedRate(currentTask, 0, 1000);
     }
 
-    public Timer(){
+    public PomodoroTimer(){
         this.utilTimer = new java.util.Timer();
         this.remainingSeconds = new AtomicInteger(pomodoroDuration);
         this.isRunning = false;
@@ -64,7 +63,7 @@ public class Timer {
     }
 
     // Constructor with callback for notifications
-    public Timer(TimerCallback callback) {
+    public PomodoroTimer(TimerCallback callback) {
         this();
         this.callback = callback;
     }

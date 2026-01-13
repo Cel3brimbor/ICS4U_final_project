@@ -3,7 +3,7 @@ package backend;
 import com.sun.net.httpserver.HttpServer;
 
 import backend.objects.Task;
-import backend.objects.Timer;
+import backend.objects.PomodoroTimer;
 
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
@@ -471,10 +471,10 @@ public class WebServer {
 
     //handle /api/timer (GET timer status, POST start/stop/pause/resume timer)
     class TimerHandler implements HttpHandler {
-        private Timer timer;
+        private PomodoroTimer timer;
 
         public TimerHandler() {
-            this.timer = new Timer(new Timer.TimerCallback() {
+            this.timer = new PomodoroTimer(new PomodoroTimer.TimerCallback() {
                 @Override
                 public void onTimerComplete(String mode) {
                     System.out.println("Timer completed for mode: " + mode);
@@ -506,7 +506,7 @@ public class WebServer {
         private void handleGetTimerStatus(HttpExchange exchange) throws IOException {
             String jsonResponse = String.format(
                 "{\"isRunning\": %b, \"remainingSeconds\": %d, \"pomodorosCompleted\": %d, \"remainingTimeFormatted\": \"%s\"}",
-                timer.isRunning,
+                timer.isRunning(),
                 timer.getRemainingTime(),
                 timer.getPomodorosCompleted(),
                 timer.getRemainingTimeFormatted()
@@ -575,7 +575,7 @@ public class WebServer {
 
                 String jsonResponse = String.format(
                     "{\"success\": %b, \"message\": \"%s\", \"isRunning\": %b, \"remainingSeconds\": %d, \"pomodorosCompleted\": %d}",
-                    success, message, timer.isRunning, timer.getRemainingTime(), timer.getPomodorosCompleted()
+                    success, message, timer.isRunning(), timer.getRemainingTime(), timer.getPomodorosCompleted()
                 );
 
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
