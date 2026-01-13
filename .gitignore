@@ -31,5 +31,7 @@ backups_old_old/
 backups_old_old_old/
 backups_old_old_old_old/
 
-#tasks
+#tasks and notes
 tasks.txt
+notes.json
+tasks.json
