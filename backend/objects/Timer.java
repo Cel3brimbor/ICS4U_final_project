@@ -1,26 +1,16 @@
 package backend.objects;
 
+//imports
 import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Timer {
-<<<<<<< Updated upstream
-    // Timer durations in seconds
-    private static final int pomodoroDuration = 25 * 60;    // 25 minutes
-    private static final int shortBreakDuration = 5 * 60;   // 5 minutes
-    private static final int longBreakDuration = 15 * 60;    // 15 minutes
-
-    // Instance variables
-    private java.util.Timer utilTimer;
-    private java.util.TimerTask currentTask;
-=======
     private static final int pomodoroDuration = 25 * 60;   
     private static final int shortBreakDuration = 5 * 60;  
     private static final int longBreakDuration = 15 * 60;  
     private Timer javaTimer;
     private TimerTask currentTask;
->>>>>>> Stashed changes
     private AtomicInteger remainingSeconds;
     private boolean isRunning;
     private int pomodorosCompleted = 0;  
