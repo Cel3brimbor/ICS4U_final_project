@@ -3,7 +3,6 @@ package backend;
 import com.sun.net.httpserver.HttpServer;
 
 import backend.objects.Task;
-import backend.objects.PomodoroTimer;
 
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
@@ -21,9 +20,11 @@ public class WebServer {
     private static final int PORT = 8000;
     private static final String FRONTEND_PATH = "frontend/";
     private ScheduleManager scheduleManager;
+    private NoteManager noteManager;
 
-    public WebServer(ScheduleManager scheduleManager) {
+    public WebServer(ScheduleManager scheduleManager, NoteManager noteManager) {
         this.scheduleManager = scheduleManager;
+        this.noteManager = noteManager;
     }
 
     public void start() throws IOException {
@@ -35,7 +36,9 @@ public class WebServer {
         //API endpoints
         server.createContext("/api/tasks", new TasksHandler());
         server.createContext("/api/tasks/", new TaskHandler()); //for specific task operations
-        server.createContext("/api/timer", new TimerHandler());
+        server.createContext("/api/notes", new NotesHandler());
+        server.createContext("/api/notes/", new NoteHandler()); //for specific note operations
+        // TODO: Add timer endpoint here when implement Timer.java
 
         server.setExecutor(null);
         server.start();
@@ -170,17 +173,17 @@ public class WebServer {
             }
         }
 
-        //helper method to read request body
-        private String readRequestBody(HttpExchange exchange) throws IOException {
-            InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
-            BufferedReader br = new BufferedReader(isr);
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-            }
-            return sb.toString();
+    //helper method to read request body
+    public static String readRequestBody(HttpExchange exchange) throws IOException {
+        InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
+        BufferedReader br = new BufferedReader(isr);
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line);
         }
+        return sb.toString();
+    }
 
         //parse JSON directly into Task object
         private Task parseTaskFromJson(String json) {
@@ -267,26 +270,26 @@ public class WebServer {
             return sb.toString();
         }
 
-        //extract string value from JSON field
-        private String extractJsonString(String json, String fieldName) {
-            String pattern = "\"" + fieldName + "\":\\s*\"([^\"]*)\"";
-            java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
-            java.util.regex.Matcher m = p.matcher(json);
-            if (m.find()) {
-                return m.group(1);
-            }
-            return null;
+    //extract string value from JSON field
+    public static String extractJsonString(String json, String fieldName) {
+        String pattern = "\"" + fieldName + "\":\\s*\"([^\"]*)\"";
+        java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
+        java.util.regex.Matcher m = p.matcher(json);
+        if (m.find()) {
+            return m.group(1);
         }
+        return null;
+    }
 
-        //escape special characters for JSON
-        private String escapeJsonString(String str) {
-            if (str == null) return "";
-            return str.replace("\\", "\\\\")
-                      .replace("\"", "\\\"")
-                      .replace("\n", "\\n")
-                      .replace("\r", "\\r")
-                      .replace("\t", "\\t");
-        }
+    //escape special characters for JSON
+    public static String escapeJsonString(String str) {
+        if (str == null) return "";
+        return str.replace("\\", "\\\\")
+                  .replace("\"", "\\\"")
+                  .replace("\n", "\\n")
+                  .replace("\r", "\\r")
+                  .replace("\t", "\\t");
+    }
     }
 
     //handle /api/tasks/{id} (GET, PUT, DELETE specific task)
@@ -423,6 +426,186 @@ public class WebServer {
         }
     }
 
+    //handle /api/notes (GET all notes, POST new note)
+    class NotesHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            String method = exchange.getRequestMethod();
+
+            if ("GET".equals(method)) {
+                handleGetNotes(exchange);
+            } else if ("POST".equals(method)) {
+                handlePostNote(exchange);
+            } else {
+                sendMethodNotAllowed(exchange);
+            }
+        }
+
+        private void handleGetNotes(HttpExchange exchange) throws IOException {
+            List<backend.objects.Note> notes = noteManager.getAllNotes();
+            String jsonResponse = notesToJsonArray(notes);
+
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, jsonResponse.length());
+
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(jsonResponse.getBytes(StandardCharsets.UTF_8));
+            }
+        }
+
+        private void handlePostNote(HttpExchange exchange) throws IOException {
+            try {
+                //read request body
+                InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
+                BufferedReader br = new BufferedReader(isr);
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line);
+                }
+                String requestBody = sb.toString();
+
+                //parse JSON
+                String content = extractJsonString(requestBody, "content");
+                if (content == null || content.trim().isEmpty()) {
+                    sendBadRequest(exchange, "Note content is required");
+                    return;
+                }
+
+                //add note
+                backend.objects.Note newNote = noteManager.addNote(content);
+                NotePersistence.saveNotes(noteManager);
+
+                //return the created note
+                String jsonResponse = noteToJson(newNote);
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                exchange.sendResponseHeaders(201, jsonResponse.length());
+
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(jsonResponse.getBytes(StandardCharsets.UTF_8));
+                }
+            } catch (Exception e) {
+                sendBadRequest(exchange, "Error processing request: " + e.getMessage());
+            }
+        }
+
+        private String notesToJsonArray(List<backend.objects.Note> notes) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("[");
+            for (int i = 0; i < notes.size(); i++) {
+                sb.append(noteToJson(notes.get(i)));
+                if (i < notes.size() - 1) {
+                    sb.append(",");
+                }
+            }
+            sb.append("]");
+            return sb.toString();
+        }
+
+        private String noteToJson(backend.objects.Note note) {
+            return String.format(
+                "{\"content\":\"%s\",\"creationTime\":\"%s\"}",
+                escapeJsonString(note.getContent()),
+                note.getCreationTime()
+            );
+        }
+
+        private String extractJsonString(String json, String fieldName) {
+            String pattern = "\"" + fieldName + "\":\\s*\"([^\"]*)\"";
+            java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
+            java.util.regex.Matcher m = p.matcher(json);
+            if (m.find()) {
+                return m.group(1);
+            }
+            return null;
+        }
+
+        private String escapeJsonString(String str) {
+            if (str == null) return "";
+            return str.replace("\\", "\\\\")
+                      .replace("\"", "\\\"")
+                      .replace("\n", "\\n")
+                      .replace("\r", "\\r")
+                      .replace("\t", "\\t");
+        }
+    }
+
+    //handle /api/notes/{id} (PUT, DELETE specific note)
+    class NoteHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            String method = exchange.getRequestMethod();
+            String path = exchange.getRequestURI().getPath();
+
+            String noteId = path.substring("/api/notes/".length());
+            if (noteId.isEmpty()) {
+                sendBadRequest(exchange, "Note ID required");
+                return;
+            }
+
+            if ("PUT".equals(method)) {
+                handleUpdateNote(exchange, noteId);
+            } else if ("DELETE".equals(method)) {
+                handleDeleteNote(exchange, noteId);
+            } else {
+                sendMethodNotAllowed(exchange);
+            }
+        }
+
+        private void handleUpdateNote(HttpExchange exchange, String noteId) throws IOException {
+            try {
+                String requestBody = readRequestBody(exchange);
+
+                String newContent = extractJsonString(requestBody, "content");
+                if (newContent == null || newContent.trim().isEmpty()) {
+                    sendBadRequest(exchange, "Note content is required");
+                    return;
+                }
+
+                boolean updated = noteManager.updateNote(noteId, newContent);
+                if (updated) {
+                    NotePersistence.saveNotes(noteManager);
+                    sendSuccess(exchange, "Note updated successfully");
+                } else {
+                    sendNotFound(exchange, "Note not found");
+                }
+            } catch (Exception e) {
+                sendBadRequest(exchange, "Error updating note: " + e.getMessage());
+            }
+        }
+
+        private void handleDeleteNote(HttpExchange exchange, String noteId) throws IOException {
+            boolean deleted = noteManager.deleteNote(noteId);
+            if (deleted) {
+                NotePersistence.saveNotes(noteManager);
+                sendSuccess(exchange, "Note deleted successfully");
+            } else {
+                sendNotFound(exchange, "Note not found");
+            }
+        }
+
+        private String readRequestBody(HttpExchange exchange) throws IOException {
+            InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
+            BufferedReader br = new BufferedReader(isr);
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+            return sb.toString();
+        }
+
+        private String extractJsonString(String json, String fieldName) {
+            String pattern = "\"" + fieldName + "\":\\s*\"([^\"]*)\"";
+            java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
+            java.util.regex.Matcher m = p.matcher(json);
+            if (m.find()) {
+                return m.group(1);
+            }
+            return null;
+        }
+    }
+
     //http response helper methods
     private void sendSuccess(HttpExchange exchange, String message) throws IOException {
         String response = "{\"message\":\"" + message + "\"}";
@@ -466,138 +649,6 @@ public class WebServer {
         exchange.sendResponseHeaders(405, response.length());
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(response.getBytes(StandardCharsets.UTF_8));
-        }
-    }
-
-    //handle /api/timer (GET timer status, POST start/stop/pause/resume timer)
-    class TimerHandler implements HttpHandler {
-        private PomodoroTimer timer;
-
-        public TimerHandler() {
-            this.timer = new PomodoroTimer(new PomodoroTimer.TimerCallback() {
-                @Override
-                public void onTimerComplete(String mode) {
-                    System.out.println("Timer completed for mode: " + mode);
-                    // Could add auto-suggestions here
-                    String suggestion = timer.getSuggestedNextMode();
-                    timer.sendReminder("Timer complete! Next suggested: " + suggestion);
-                }
-
-                @Override
-                public void onReminder(String message) {
-                    System.out.println("Timer reminder: " + message);
-                }
-            });
-        }
-
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            String method = exchange.getRequestMethod();
-
-            if ("GET".equals(method)) {
-                handleGetTimerStatus(exchange);
-            } else if ("POST".equals(method)) {
-                handlePostTimerAction(exchange);
-            } else {
-                sendMethodNotAllowed(exchange);
-            }
-        }
-
-        private void handleGetTimerStatus(HttpExchange exchange) throws IOException {
-            String jsonResponse = String.format(
-                "{\"isRunning\": %b, \"remainingSeconds\": %d, \"pomodorosCompleted\": %d, \"remainingTimeFormatted\": \"%s\"}",
-                timer.isRunning(),
-                timer.getRemainingTime(),
-                timer.getPomodorosCompleted(),
-                timer.getRemainingTimeFormatted()
-            );
-
-            exchange.getResponseHeaders().set("Content-Type", "application/json");
-            exchange.sendResponseHeaders(200, jsonResponse.length());
-
-            try (OutputStream os = exchange.getResponseBody()) {
-                os.write(jsonResponse.getBytes(StandardCharsets.UTF_8));
-            }
-        }
-
-        private void handlePostTimerAction(HttpExchange exchange) throws IOException {
-            try {
-                // Read request body (e.g., {"action": "start", "mode": "pomodoro"})
-                InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
-                BufferedReader br = new BufferedReader(isr);
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = br.readLine()) != null) {
-                    sb.append(line);
-                }
-                String requestBody = sb.toString();
-
-                // Simple JSON parsing for action field
-                String action = extractJsonString(requestBody, "action");
-                String mode = extractJsonString(requestBody, "mode");
-
-                boolean success = false;
-                String message = "Action processed";
-
-                if ("start".equals(action)) {
-                    if ("pomodoro".equals(mode)) {
-                        timer.startPomodoro();
-                        success = true;
-                        message = "Pomodoro timer started";
-                    } else if ("short-break".equals(mode)) {
-                        timer.startShortBreak();
-                        success = true;
-                        message = "Short break started";
-                    } else if ("long-break".equals(mode)) {
-                        timer.startLongBreak();
-                        success = true;
-                        message = "Long break started";
-                    }
-                } else if ("pause".equals(action)) {
-                    timer.pauseTimer();
-                    success = true;
-                    message = "Timer paused";
-                } else if ("resume".equals(action)) {
-                    timer.resumeTimer();
-                    success = true;
-                    message = "Timer resumed";
-                } else if ("stop".equals(action)) {
-                    timer.stopTimer();
-                    success = true;
-                    message = "Timer stopped";
-                } else if ("reset".equals(action)) {
-                    timer.resetTimer();
-                    success = true;
-                    message = "Timer reset";
-                } else {
-                    message = "Unknown action: " + action;
-                }
-
-                String jsonResponse = String.format(
-                    "{\"success\": %b, \"message\": \"%s\", \"isRunning\": %b, \"remainingSeconds\": %d, \"pomodorosCompleted\": %d}",
-                    success, message, timer.isRunning(), timer.getRemainingTime(), timer.getPomodorosCompleted()
-                );
-
-                exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.sendResponseHeaders(200, jsonResponse.length());
-
-                try (OutputStream os = exchange.getResponseBody()) {
-                    os.write(jsonResponse.getBytes(StandardCharsets.UTF_8));
-                }
-
-            } catch (Exception e) {
-                sendBadRequest(exchange, "Error processing timer request: " + e.getMessage());
-            }
-        }
-
-        private String extractJsonString(String json, String fieldName) {
-            String pattern = "\"" + fieldName + "\":\\s*\"([^\"]*)\"";
-            java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
-            java.util.regex.Matcher m = p.matcher(json);
-            if (m.find()) {
-                return m.group(1);
-            }
-            return null;
         }
     }
 
