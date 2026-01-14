@@ -392,6 +392,9 @@ function navigateTo(page) {
         case 'notes':
             window.location.href = '/note.html';
             break;
+        case 'ai':
+            window.location.href = '/ai.html';
+            break;
         case 'chatbot':
             document.querySelector('.ai-assistant').scrollIntoView({ behavior: 'smooth' });
             break;

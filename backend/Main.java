@@ -44,7 +44,6 @@ public class Main {
 
         System.out.println(noteManager.getAllNotesAsString());
 
-        //add some sample tasks if none exist
         // if (scheduleManager.getTaskCount() == 0) {
         //     addSampleTasks(scheduleManager);
         // }
