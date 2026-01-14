@@ -1,15 +1,14 @@
 package backend.objects;
 
 //imports
-import java.time.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Timer {
-    private static final int pomodoroDuration = 25 * 60;   
-    private static final int shortBreakDuration = 5 * 60;  
-    private static final int longBreakDuration = 15 * 60;  
-    private Timer javaTimer;
+    private static final int pomodoroDuration = 25 * 60;
+    private static final int shortBreakDuration = 5 * 60;
+    private static final int longBreakDuration = 15 * 60;
+    private java.util.Timer utilTimer;
     private TimerTask currentTask;
     private AtomicInteger remainingSeconds;
     private boolean isRunning;
@@ -28,6 +27,7 @@ public class Timer {
         stopTimer();
         remainingSeconds.set(duration);
         isRunning = true;
+        utilTimer = new java.util.Timer();
         currentTask = new TimerTask() {
             @Override
             public void run() {
@@ -40,7 +40,7 @@ public class Timer {
                     if (callback != null) {
                         callback.onTimerComplete(mode);
                     }
-                    cancel(); 
+                    cancel();
                 }
             }
         };
@@ -48,11 +48,12 @@ public class Timer {
     }
 
     public Timer(){
-        this.utilTimer = new java.util.Timer();
         this.remainingSeconds = new AtomicInteger(pomodoroDuration);
         this.isRunning = false;
         this.pomodorosCompleted = 0;
         this.callback = null;
+        this.utilTimer = null;
+        this.currentTask = null;
     }
 
     public Timer(TimerCallback callback) {
@@ -72,20 +73,45 @@ public class Timer {
         startTimer("long-break", longBreakDuration);
     }
     public void pauseTimer() {
-        utilTimer.cancel();
+        if (currentTask != null) {
+            currentTask.cancel();
+        }
+        if (utilTimer != null) {
+            utilTimer.cancel();
+        }
         isRunning = false;
     }
+
     public void resumeTimer() {
-        utilTimer.schedule(currentTask, 0, 1000);
-        isRunning = true;
+        if (!isRunning && remainingSeconds.get() > 0) {
+            utilTimer = new java.util.Timer();
+            currentTask = new TimerTask() {
+                @Override
+                public void run() {
+                    int remaining = remainingSeconds.decrementAndGet();
+                    if(remaining <= 0) {
+                        isRunning = false;
+                        cancel();
+                    }
+                }
+            };
+            utilTimer.scheduleAtFixedRate(currentTask, 0, 1000);
+            isRunning = true;
+        }
     }
+
     public void stopTimer() {
-        utilTimer.cancel();
+        if (currentTask != null) {
+            currentTask.cancel();
+        }
+        if (utilTimer != null) {
+            utilTimer.cancel();
+        }
         isRunning = false;
     }
+
     public void resetTimer() {
-        utilTimer.cancel();
-        isRunning = false;
+        stopTimer();
         remainingSeconds.set(pomodoroDuration);
     }
     public int getRemainingTime() {
@@ -124,9 +150,6 @@ public class Timer {
 
     public void cleanup() {
         stopTimer();
-        if (utilTimer != null) {
-            utilTimer.cancel();
-        }
     }
 }
 
