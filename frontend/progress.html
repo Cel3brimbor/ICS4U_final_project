@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progress & Stats - AI Productivity Planner</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="timer.css">
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-content">
+            <button class="back-btn" onclick="goBack()">← Back to Dashboard</button>
+            <h1>Progress & Stats</h1>
+        </div>
+    </header>
+
+    <main class="progress-main">
+        <!-- Current Session Stats -->
+        <section class="stats-overview">
+            <h2>Today's Progress</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="today-pomodoros">0</div>
+                    <div class="stat-label">Pomodoros<br>Completed Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="today-focus-time">0</div>
+                    <div class="stat-label">Focus Time<br>Today (min)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="current-streak">0</div>
+                    <div class="stat-label">Current<br>Streak</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="weekly-average">0</div>
+                    <div class="stat-label">Weekly<br>Average</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Progress Visualization -->
+        <section class="progress-visualization">
+            <h2>Recent Progress</h2>
+            <div class="progress-grid" id="progress-grid">
+                <!-- Progress items will be dynamically added -->
+            </div>
+        </section>
+
+        <!-- Session Rating -->
+        <section class="session-rating">
+            <h2>Rate Your Study Session</h2>
+            <div class="rating-container">
+                <p class="rating-prompt">How productive was your last study session?</p>
+                <div class="rating-stars" id="rating-stars">
+                    <span class="star" data-rating="1">★</span>
+                    <span class="star" data-rating="2">★</span>
+                    <span class="star" data-rating="3">★</span>
+                    <span class="star" data-rating="4">★</span>
+                    <span class="star" data-rating="5">★</span>
+                </div>
+                <div class="rating-text" id="rating-text">Click to rate</div>
+            </div>
+            <div class="session-notes">
+                <textarea id="session-notes" placeholder="Add optional notes about your session..."></textarea>
+                <button id="save-rating" class="save-rating-btn">Save Rating</button>
+            </div>
+        </section>
+
+        <!-- Historical Stats -->
+        <section class="historical-stats">
+            <h2>Historical Overview</h2>
+            <div class="history-tabs">
+                <button class="tab-btn active" data-tab="week">This Week</button>
+                <button class="tab-btn" data-tab="month">This Month</button>
+                <button class="tab-btn" data-tab="all">All Time</button>
+            </div>
+            <div class="history-content">
+                <div class="history-stats-grid">
+                    <div class="history-stat">
+                        <div class="history-number" id="period-pomodoros">0</div>
+                        <div class="history-label">Total Pomodoros</div>
+                    </div>
+                    <div class="history-stat">
+                        <div class="history-number" id="period-focus-time">0</div>
+                        <div class="history-label">Total Focus Time (min)</div>
+                    </div>
+                    <div class="history-stat">
+                        <div class="history-number" id="average-rating">0</div>
+                        <div class="history-label">Average Rating</div>
+                    </div>
+                    <div class="history-stat">
+                        <div class="history-number" id="best-streak">0</div>
+                        <div class="history-label">Best Streak</div>
+                    </div>
+                </div>
+                <div class="rating-history" id="rating-history">
+                    <!-- Rating history will be displayed here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Achievement Badges -->
+        <section class="achievements">
+            <h2>Achievements</h2>
+            <div class="achievement-grid" id="achievement-grid">
+                <div class="achievement-card locked" data-achievement="first-pomodoro">
+                    <div class="achievement-icon">🎯</div>
+                    <div class="achievement-title">First Pomodoro</div>
+                    <div class="achievement-desc">Complete your first pomodoro session</div>
+                </div>
+                <div class="achievement-card locked" data-achievement="week-warrior">
+                    <div class="achievement-icon">⚔️</div>
+                    <div class="achievement-title">Week Warrior</div>
+                    <div class="achievement-desc">Complete 7 pomodoros in a week</div>
+                </div>
+                <div class="achievement-card locked" data-achievement="streak-master">
+                    <div class="achievement-icon">🔥</div>
+                    <div class="achievement-title">Streak Master</div>
+                    <div class="achievement-desc">Maintain a 10-day streak</div>
+                </div>
+                <div class="achievement-card locked" data-achievement="focus-champion">
+                    <div class="achievement-icon">👑</div>
+                    <div class="achievement-title">Focus Champion</div>
+                    <div class="achievement-desc">Complete 50 pomodoros total</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="progress.js"></script>
+</body>
+</html>

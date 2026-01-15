@@ -375,7 +375,7 @@ function navigateTo(page) {
         case 'home':
             break;
         case 'progress':
-            showPage('progress');
+            window.location.href = '/progress.html';
             break;
         case 'add-task':
             document.querySelector('.task-input-section').scrollIntoView({ behavior: 'smooth' });

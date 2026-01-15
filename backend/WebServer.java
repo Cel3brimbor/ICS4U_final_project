@@ -10,6 +10,7 @@ import backend.webserver.TaskHandlers;
 import backend.webserver.NoteHandlers;
 import backend.webserver.AIHandlers;
 import backend.webserver.TimerHandlers;
+import backend.webserver.StatsHandlers;
 
 import com.sun.net.httpserver.HttpExchange;
 import java.io.*;
@@ -50,6 +51,10 @@ public class WebServer {
         server.createContext("/api/timer/pause", new TimerHandlers.TimerPauseHandler(timer));
         server.createContext("/api/timer/stop", new TimerHandlers.TimerStopHandler(timer));
         server.createContext("/api/timer/reset", new TimerHandlers.TimerResetHandler(timer));
+
+        // Stats endpoints
+        server.createContext("/api/stats/session", new StatsHandlers.SaveSessionRatingHandler());
+        server.createContext("/api/stats/summary", new StatsHandlers.GetSessionStatsHandler());
 
         server.setExecutor(null);
         server.start();
