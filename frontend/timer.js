@@ -40,9 +40,10 @@ async function fetchTimerStatus() {
         if (response.ok) {
             const status = await response.json();
             isRunning = status.isRunning;
-            isPaused = status.isPaused;
+            isPaused = status.isPaused || false;  // Default to false if not provided
             currentTime = status.remainingSeconds;
-            currentMode = status.mode;
+            // Don't overwrite currentMode - the backend doesn't provide it
+            // currentMode = status.mode;  // Remove this line
 
             updateTimerDisplay();
             updateUI();
@@ -60,45 +61,49 @@ async function fetchTimerStatus() {
 // Start timer
 async function startTimer() {
     try {
-        const response = await fetch('/api/timer', {
+        const response = await fetch('/api/timer/start', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'start', mode: currentMode })
+            body: JSON.stringify({ mode: currentMode })
         });
 
         if (!response.ok) {
-            throw new Error('Failed to start timer');
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to start timer');
         }
 
         const result = await response.json();
 
-        if (result.success) {
+        if (result.status === 'Timer started') {
             isRunning = true;
             isPaused = false;
-            currentTime = result.remainingSeconds;
-            updateTimerDisplay();
+            fetchTimerStatus();  // Update status from backend
             updateUI();
-            startLocalTimer();
             updateStatus('Timer started');
+            startLocalTimer();  // Start the local countdown display
         }
     } catch (error) {
         console.error('Failed to start timer:', error);
-        showError('Failed to start timer');
+        showError('Failed to start timer: ' + error.message);
     }
 }
 
 // Pause timer
 async function pauseTimer() {
     try {
-        // TODO: Replace with your Java backend call
-        // const response = await fetch('/api/timer', {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify({ action: 'pause' })
-        // });
+        const response = await fetch('/api/timer/pause', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
 
-        const response = { ok: true };
-        if (response.ok) {
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to pause timer');
+        }
+
+        const result = await response.json();
+
+        if (result.status === 'Timer paused') {
             isPaused = true;
             clearInterval(timerInterval);
             updateUI();
@@ -106,61 +111,66 @@ async function pauseTimer() {
         }
     } catch (error) {
         console.error('Failed to pause timer:', error);
-        showError('Failed to pause timer');
+        showError('Failed to pause timer: ' + error.message);
     }
 }
 
 // Stop timer
 async function stopTimer() {
     try {
-        const response = await fetch('/api/timer', {
+        const response = await fetch('/api/timer/stop', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'stop' })
+            headers: { 'Content-Type': 'application/json' }
         });
 
-        if (response.ok) {
-            const result = await response.json();
-            isRunning = result.isRunning;
-            currentTime = result.remainingSeconds;
-            pomodorosCompleted = result.pomodorosCompleted || 0;
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to stop timer');
+        }
+
+        const result = await response.json();
+
+        if (result.status === 'Timer stopped') {
+            isRunning = false;
+            isPaused = false;
             clearInterval(timerInterval);
-            updateTimerDisplay();
+            fetchTimerStatus();  // Update status from backend
             updateUI();
-            updateStatsDisplay();
-            updateStatus(result.message || 'Timer stopped');
-        } else {
-            throw new Error('Failed to stop timer');
+            updateStatus('Timer stopped');
         }
     } catch (error) {
         console.error('Failed to stop timer:', error);
-        showError('Failed to stop timer');
+        showError('Failed to stop timer: ' + error.message);
     }
 }
 
 // Reset timer
 async function resetTimer() {
     try {
-        // TODO: Replace with your Java backend call
-        // const response = await fetch('/api/timer', {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify({ action: 'reset' })
-        // });
+        const response = await fetch('/api/timer/reset', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
 
-        const response = { ok: true, json: () => Promise.resolve({ remainingSeconds: getDefaultTimeForMode(currentMode) }) };
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to reset timer');
+        }
+
         const result = await response.json();
 
-        currentTime = result.remainingSeconds;
-        isRunning = false;
-        isPaused = false;
-        clearInterval(timerInterval);
-        updateTimerDisplay();
-        updateUI();
-        updateStatus('Timer reset');
+        if (result.status === 'Timer reset') {
+            currentTime = getDefaultTimeForMode(currentMode);
+            isRunning = false;
+            isPaused = false;
+            clearInterval(timerInterval);
+            fetchTimerStatus();  // Update status from backend
+            updateUI();
+            updateStatus('Timer reset');
+        }
     } catch (error) {
         console.error('Failed to reset timer:', error);
-        showError('Failed to reset timer');
+        showError('Failed to reset timer: ' + error.message);
     }
 }
 
@@ -208,7 +218,7 @@ function timerComplete() {
     // Track completion
     if (currentMode === 'pomodoro') {
         pomodorosCompleted++;
-        totalFocusTime += 25;
+        totalFocusTime += getDefaultTimeForMode(currentMode) / 60;  // Convert seconds to minutes
         currentStreak++;
         saveTimerStats();
         updateProgressGrid();
