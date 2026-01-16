@@ -6,6 +6,13 @@
             "name": "Main",
             "request": "launch",
             "mainClass": "backend.Main",
+            "projectName": "final_project_ab751a4e"
+        },
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "backend.Main",
             "projectName": "ICS4U_final_project_99f4f471"
         },
         {
