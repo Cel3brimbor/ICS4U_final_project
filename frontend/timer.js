@@ -236,17 +236,44 @@ function startLocalTimer() {
     }, 1000);
 }
 
+// Helper function to get settings from localStorage
+function getSettings() {
+    try {
+        const savedSettings = localStorage.getItem('appSettings');
+        if (savedSettings) {
+            const settings = JSON.parse(savedSettings);
+            return {
+                timerNotifications: settings.timerNotifications !== false, // Default to true
+                soundEffects: settings.soundEffects !== false // Default to true
+            };
+        }
+    } catch (e) {
+        console.error('Error loading settings:', e);
+    }
+    // Default settings
+    return {
+        timerNotifications: true,
+        soundEffects: true
+    };
+}
+
 // Handle timer completion
 function timerComplete() {
     clearInterval(timerInterval);
     isRunning = false;
 
-    //play notification sound if available
-    playNotification();
+    const settings = getSettings();
 
-    // Show notification
-    showNotification(`${currentMode.replace('-', ' ').toUpperCase()} Complete!`,
-                    'Great work! Take a moment to stretch and relax.');
+    // Play notification sound only if sound effects are enabled
+    if (settings.soundEffects) {
+        playNotification();
+    }
+
+    // Show notification only if timer notifications are enabled
+    if (settings.timerNotifications) {
+        showNotification(`${currentMode.replace('-', ' ').toUpperCase()} Complete!`,
+                        'Great work! Take a moment to stretch and relax.');
+    }
 
     // Track completion
     if (currentMode === 'pomodoro') {
@@ -387,6 +414,8 @@ function updateProgressGrid() {
 
 // Notification functions
 function showNotification(title, message) {
+    const settings = getSettings();
+    
     // Browser notification (works even when page is not active)
     if ('Notification' in window && Notification.permission === 'granted') {
         try {
@@ -395,7 +424,7 @@ function showNotification(title, message) {
                 icon: '/favicon.ico',
                 tag: 'timer-notification', // Prevents duplicate notifications
                 requireInteraction: false, // Auto-dismiss after a few seconds
-                silent: false // Allow sound
+                silent: !settings.soundEffects // Respect sound setting
             });
 
             // Auto-close notification after 5 seconds
@@ -427,6 +456,13 @@ function showNotification(title, message) {
 }
 
 function playNotification() {
+    const settings = getSettings();
+    
+    // Only play sound if sound effects are enabled
+    if (!settings.soundEffects) {
+        return;
+    }
+    
     // Try to play a notification sound
     try {
         const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8F');
