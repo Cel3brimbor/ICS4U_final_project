@@ -1580,6 +1580,107 @@ body {
     }
 }
 
+/* Dark Mode Support */
+body.dark-mode {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #e0e0e0;
+}
+
+body.dark-mode .app-header h1,
+body.dark-mode .app-header p {
+    color: #e0e0e0;
+}
+
+body.dark-mode .main-navigation .nav-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e0e0e0;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+body.dark-mode .main-navigation .nav-btn:hover,
+body.dark-mode .main-navigation .nav-btn.active {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+body.dark-mode .planner-container {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+}
+
+body.dark-mode .ai-assistant,
+body.dark-mode .task-planner,
+body.dark-mode .schedule-overview {
+    background: rgba(255, 255, 255, 0.08);
+    color: #e0e0e0;
+}
+
+body.dark-mode .task-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .task-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .task-title {
+    color: #e0e0e0;
+}
+
+body.dark-mode .task-time,
+body.dark-mode .task-duration,
+body.dark-mode .task-status {
+    color: #b0b0b0;
+}
+
+body.dark-mode .task-input,
+body.dark-mode .time-inputs input {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #e0e0e0;
+}
+
+body.dark-mode .task-input:focus,
+body.dark-mode .time-inputs input:focus {
+    border-color: #667eea;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+body.dark-mode .task-filters .filter-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e0e0e0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+body.dark-mode .task-filters .filter-btn.active,
+body.dark-mode .task-filters .filter-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+body.dark-mode .message {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .message.ai-message {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+}
+
+body.dark-mode .chat-input input {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #e0e0e0;
+}
+
+body.dark-mode .chat-input input:focus {
+    border-color: #667eea;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+body.dark-mode .chat-input button {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .progress-main {

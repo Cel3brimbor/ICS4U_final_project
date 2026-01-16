@@ -399,7 +399,7 @@ function navigateTo(page) {
             document.querySelector('.ai-assistant').scrollIntoView({ behavior: 'smooth' });
             break;
         case 'settings':
-            showPage('settings');
+            window.location.href = '/settings.html';
             break;
         default:
             console.log(`Navigation to ${page} not implemented yet`);

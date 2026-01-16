@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     initializeTimerPage();
+    requestNotificationPermission();
+    setupPageVisibilityHandling();
 });
 
 let timerInterval;
@@ -385,13 +387,43 @@ function updateProgressGrid() {
 
 // Notification functions
 function showNotification(title, message) {
-    // Browser notification
+    // Browser notification (works even when page is not active)
     if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification(title, { body: message, icon: '/favicon.ico' });
+        try {
+            const notification = new Notification(title, {
+                body: message,
+                icon: '/favicon.ico',
+                tag: 'timer-notification', // Prevents duplicate notifications
+                requireInteraction: false, // Auto-dismiss after a few seconds
+                silent: false // Allow sound
+            });
+
+            // Auto-close notification after 5 seconds
+            setTimeout(() => {
+                notification.close();
+            }, 5000);
+
+            // Handle notification click
+            notification.onclick = function() {
+                window.focus();
+                notification.close();
+            };
+        } catch (e) {
+            console.log('Notification failed:', e);
+        }
+    } else if ('Notification' in window && Notification.permission === 'default') {
+        // Try to request permission and show notification
+        Notification.requestPermission().then(function(permission) {
+            if (permission === 'granted') {
+                showNotification(title, message);
+            }
+        });
     }
 
-    // In-app notification
-    showMessage(message, 'success');
+    // In-app notification (only if page is visible)
+    if (!document.hidden) {
+        showMessage(message, 'success');
+    }
 }
 
 function playNotification() {
@@ -466,7 +498,95 @@ function goBack() {
     window.location.href = '/index.html';
 }
 
-// Request notification permission on page load
-if ('Notification' in window && Notification.permission === 'default') {
-    Notification.requestPermission();
+// Request notification permission for background notifications
+function requestNotificationPermission() {
+    if ('Notification' in window) {
+        // Check if we already have permission
+        if (Notification.permission === 'default') {
+            // Request permission
+            Notification.requestPermission().then(function(permission) {
+                console.log('Notification permission:', permission);
+            });
+        } else if (Notification.permission === 'denied') {
+            console.log('Notifications denied by user');
+        }
+    }
+}
+
+// Handle page visibility changes for better background timer reliability
+function setupPageVisibilityHandling() {
+    let hiddenStartTime = null;
+
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            // Page became hidden
+            hiddenStartTime = Date.now();
+            console.log('Page hidden - timer may be less reliable');
+
+            // Show warning notification if timer is running
+            if (isRunning && Notification.permission === 'granted') {
+                new Notification('Timer Warning', {
+                    body: 'Timer may be less accurate while page is hidden. Check back soon!',
+                    icon: '/favicon.ico'
+                });
+            }
+        } else {
+            // Page became visible again
+            if (hiddenStartTime && isRunning) {
+                const hiddenDuration = Date.now() - hiddenStartTime;
+                console.log(`Page was hidden for ${Math.round(hiddenDuration / 1000)} seconds`);
+
+                // Show welcome back notification
+                if (Notification.permission === 'granted') {
+                    new Notification('Welcome Back!', {
+                        body: 'Your timer is still running. Page visibility may have affected accuracy.',
+                        icon: '/favicon.ico'
+                    });
+                }
+
+                // Attempt to recalibrate the timer
+                recalibrateTimer(hiddenDuration);
+            }
+            hiddenStartTime = null;
+        }
+    });
+
+    // Also handle page focus/blur events
+    window.addEventListener('blur', function() {
+        console.log('Window lost focus');
+    });
+
+    window.addEventListener('focus', function() {
+        console.log('Window regained focus');
+        if (isRunning && Notification.permission === 'granted') {
+            // Show a subtle notification that the timer is still running
+            new Notification('Timer Active', {
+                body: 'Your productivity timer is still running.',
+                icon: '/favicon.ico',
+                silent: true // Don't play sound for focus notifications
+            });
+        }
+    });
+}
+
+// Attempt to recalibrate timer after page visibility change
+function recalibrateTimer(hiddenDuration) {
+    if (!isRunning) return;
+
+    // This is a best-effort attempt to adjust for time spent in background
+    // Note: This is not perfectly accurate due to browser timer throttling
+    const hiddenSeconds = Math.floor(hiddenDuration / 1000);
+
+    if (hiddenSeconds > 0 && currentTime > hiddenSeconds) {
+        // Try to account for missed time
+        console.log(`Adjusting timer by ${hiddenSeconds} seconds due to page being hidden`);
+        currentTime = Math.max(0, currentTime - hiddenSeconds);
+
+        if (currentTime <= 0) {
+            // Timer should have completed while hidden
+            timerComplete();
+        } else {
+            updateTimerDisplay();
+        }
+    }
 }

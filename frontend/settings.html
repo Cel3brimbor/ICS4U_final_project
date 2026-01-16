@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - AI Productivity Planner</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-content">
+            <button class="back-btn" onclick="goBack()">← Back to Dashboard</button>
+            <h1>Settings</h1>
+        </div>
+    </header>
+
+    <main class="settings-main">
+        <!-- Appearance Settings -->
+        <section class="settings-section">
+            <h2>🎨 Appearance</h2>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Dark Mode</h3>
+                    <p>Toggle between light and dark themes</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="dark-mode-toggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Compact View</h3>
+                    <p>Show more content in less space</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="compact-view-toggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </section>
+
+        <!-- Account Settings -->
+        <section class="settings-section">
+            <h2>👤 Account</h2>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Display Name</h3>
+                    <p>Your name as shown in the app</p>
+                </div>
+                <input type="text" id="display-name" class="setting-input" placeholder="Enter your name">
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Email</h3>
+                    <p>Account email address</p>
+                </div>
+                <input type="email" id="account-email" class="setting-input" placeholder="your.email@example.com">
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Profile Picture</h3>
+                    <p>Upload a profile picture</p>
+                </div>
+                <button class="setting-btn" onclick="uploadProfilePicture()">Choose Image</button>
+            </div>
+        </section>
+
+        <!-- Notification Settings -->
+        <section class="settings-section">
+            <h2>🔔 Notifications</h2>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Timer Notifications</h3>
+                    <p>Get notified when timers complete</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="timer-notifications-toggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Break Reminders</h3>
+                    <p>Remind me to take breaks</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="break-reminders-toggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Daily Goals</h3>
+                    <p>Daily productivity goal reminders</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="daily-goals-toggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Sound Effects</h3>
+                    <p>Play sounds for timer events</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="sound-effects-toggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Notification Permission</h3>
+                    <p>Allow browser notifications for timer alerts</p>
+                </div>
+                <button class="setting-btn" onclick="requestNotificationPermission()">Request Permission</button>
+            </div>
+        </section>
+
+        <!-- Privacy Settings -->
+        <section class="settings-section">
+            <h2>🔒 Privacy</h2>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Data Collection</h3>
+                    <p>Allow anonymous usage statistics</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="data-collection-toggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Local Storage Only</h3>
+                    <p>Keep all data on your device</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="local-only-toggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Export Data</h3>
+                    <p>Download your data as JSON</p>
+                </div>
+                <button class="setting-btn" onclick="exportData()">Export Data</button>
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Clear All Data</h3>
+                    <p>Remove all your data from the app</p>
+                </div>
+                <button class="setting-btn danger" onclick="clearAllData()">Clear Data</button>
+            </div>
+        </section>
+
+        <!-- Timer Preferences -->
+        <section class="settings-section">
+            <h2>⏰ Timer Preferences</h2>
+            <div class="info-box">
+                <p><strong>Note:</strong> Timer notifications work best when this page is active. When you leave the page or switch tabs, browser limitations may affect timer accuracy. You'll receive notifications when you return to the page.</p>
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Default Pomodoro Duration</h3>
+                    <p>Minutes for work sessions</p>
+                </div>
+                <select id="pomodoro-duration" class="setting-select">
+                    <option value="15">15 minutes</option>
+                    <option value="20">20 minutes</option>
+                    <option value="25" selected>25 minutes</option>
+                    <option value="30">30 minutes</option>
+                    <option value="35">35 minutes</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Default Short Break</h3>
+                    <p>Minutes for short breaks</p>
+                </div>
+                <select id="short-break-duration" class="setting-select">
+                    <option value="3">3 minutes</option>
+                    <option value="5" selected>5 minutes</option>
+                    <option value="7">7 minutes</option>
+                    <option value="10">10 minutes</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Default Long Break</h3>
+                    <p>Minutes for long breaks</p>
+                </div>
+                <select id="long-break-duration" class="setting-select">
+                    <option value="10">10 minutes</option>
+                    <option value="15" selected>15 minutes</option>
+                    <option value="20">20 minutes</option>
+                    <option value="25">25 minutes</option>
+                </select>
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Auto-start Breaks</h3>
+                    <p>Automatically start breaks after pomodoros</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="auto-start-breaks-toggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </section>
+
+        <!-- Save Settings -->
+        <section class="settings-section">
+            <div class="setting-actions">
+                <button class="save-btn" onclick="saveSettings()">Save Settings</button>
+                <button class="reset-btn" onclick="resetToDefaults()">Reset to Defaults</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="settings.js"></script>
+</body>
+</html>
