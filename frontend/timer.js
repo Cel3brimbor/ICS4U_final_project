@@ -31,6 +31,9 @@ function setupEventListeners() {
             switchMode(this.dataset.mode, parseInt(this.dataset.duration));
         });
     });
+
+    // Custom timer input
+    document.getElementById('set-custom-timer').addEventListener('click', setCustomTimer);
 }
 
 // Fetch timer status from backend
@@ -61,10 +64,17 @@ async function fetchTimerStatus() {
 // Start timer
 async function startTimer() {
     try {
+        const requestData = { mode: currentMode };
+
+        // Include duration for custom timers
+        if (currentMode === 'custom') {
+            requestData.duration = currentTime;
+        }
+
         const response = await fetch('/api/timer/start', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ mode: currentMode })
+            body: JSON.stringify(requestData)
         });
 
         if (!response.ok) {
@@ -188,6 +198,27 @@ function switchMode(mode, duration) {
     updateModeButtons();
     updateTimerDisplay();
     updateStatus(`${mode.replace('-', ' ').toUpperCase()} mode selected`);
+
+    // Show/hide custom timer input
+    const customInput = document.getElementById('custom-timer-input');
+    if (mode === 'custom') {
+        customInput.style.display = 'flex';
+    } else {
+        customInput.style.display = 'none';
+    }
+}
+
+function setCustomTimer() {
+    const minutes = parseInt(document.getElementById('custom-minutes').value) || 0;
+    const seconds = parseInt(document.getElementById('custom-seconds').value) || 0;
+
+    if (minutes === 0 && seconds === 0) {
+        showError('Please set a valid duration');
+        return;
+    }
+
+    const totalSeconds = (minutes * 60) + seconds;
+    switchMode('custom', totalSeconds);
 }
 
 // Start local countdown (for visual feedback)
@@ -239,10 +270,26 @@ function timerComplete() {
                 }
             }, 1000);
         }
-    } else {
-        // After break, suggest starting pomodoro
+    } else if (currentMode === 'custom') {
+        // Track custom timer as focus time (like a pomodoro)
+        const customDurationMinutes = getDefaultTimeForMode(currentMode) / 60;
+        totalFocusTime += customDurationMinutes;
+        currentStreak++;
+        saveTimerStats();
+        updateProgressGrid();
+
+        // After custom timer, suggest a break or another session
         setTimeout(() => {
-            if (confirm('Break time over! Ready to start another pomodoro?')) {
+            if (confirm('Custom timer complete! Would you like to take a short break?')) {
+                switchMode('short-break', 300);
+                startTimer();
+            }
+        }, 1000);
+    } else {
+        // Break modes - don't track as focus time
+        // After break, suggest starting pomodoro or custom timer
+        setTimeout(() => {
+            if (confirm('Break time over! Ready to start another session?')) {
                 switchMode('pomodoro', 1500);
                 startTimer();
             }
@@ -409,6 +456,7 @@ function getDefaultTimeForMode(mode) {
         case 'pomodoro': return 25 * 60;
         case 'short-break': return 5 * 60;
         case 'long-break': return 15 * 60;
+        case 'custom': return currentTime; // Return the actual custom duration
         default: return 25 * 60;
     }
 }

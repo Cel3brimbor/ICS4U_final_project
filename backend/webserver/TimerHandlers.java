@@ -93,8 +93,34 @@ public class TimerHandlers {
                     case "long-break":
                         timer.startLongBreak();
                         break;
+                    case "custom":
+                        // Parse custom duration from request
+                        String durationStr = extractJsonValue(requestBody, "duration");
+                        if (durationStr != null) {
+                            try {
+                                int customDuration = Integer.parseInt(durationStr);
+                                timer.startCustomTimer(customDuration);
+                            } catch (NumberFormatException e) {
+                                String errorResponse = "{\"error\":\"Invalid duration format\"}";
+                                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                                exchange.sendResponseHeaders(400, errorResponse.length());
+                                try (OutputStream os = exchange.getResponseBody()) {
+                                    os.write(errorResponse.getBytes(StandardCharsets.UTF_8));
+                                }
+                                return;
+                            }
+                        } else {
+                            String errorResponse = "{\"error\":\"Custom timer requires duration parameter\"}";
+                            exchange.getResponseHeaders().set("Content-Type", "application/json");
+                            exchange.sendResponseHeaders(400, errorResponse.length());
+                            try (OutputStream os = exchange.getResponseBody()) {
+                                os.write(errorResponse.getBytes(StandardCharsets.UTF_8));
+                            }
+                            return;
+                        }
+                        break;
                     default:
-                        String errorResponse = "{\"error\":\"Invalid mode. Use: pomodoro, short-break, long-break\"}";
+                        String errorResponse = "{\"error\":\"Invalid mode. Use: pomodoro, short-break, long-break, custom\"}";
                         exchange.getResponseHeaders().set("Content-Type", "application/json");
                         exchange.sendResponseHeaders(400, errorResponse.length());
                         try (OutputStream os = exchange.getResponseBody()) {
@@ -232,12 +258,22 @@ public class TimerHandlers {
 
     // Utility method for extracting JSON values
     private static String extractJsonValue(String json, String key) {
-        String pattern = "\"" + key + "\"\\s*:\\s*\"([^\"]+)\"";
-        java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
-        java.util.regex.Matcher m = p.matcher(json);
-        if (m.find()) {
-            return m.group(1);
+        // First try to match string values (with quotes)
+        String stringPattern = "\"" + key + "\"\\s*:\\s*\"([^\"]+)\"";
+        java.util.regex.Pattern stringP = java.util.regex.Pattern.compile(stringPattern);
+        java.util.regex.Matcher stringM = stringP.matcher(json);
+        if (stringM.find()) {
+            return stringM.group(1);
         }
+
+        // Then try to match numeric values (without quotes)
+        String numericPattern = "\"" + key + "\"\\s*:\\s*([0-9]+(?:\\.[0-9]+)?)";
+        java.util.regex.Pattern numericP = java.util.regex.Pattern.compile(numericPattern);
+        java.util.regex.Matcher numericM = numericP.matcher(json);
+        if (numericM.find()) {
+            return numericM.group(1);
+        }
+
         return null;
     }
 

@@ -50,6 +50,23 @@
                     <div class="mode-title">Long Break</div>
                     <div class="mode-desc">15 minutes</div>
                 </button>
+                <button class="mode-btn" data-mode="custom" data-duration="600">
+                    <div class="mode-title">Custom Timer</div>
+                    <div class="mode-desc">Set your own time</div>
+                </button>
+            </div>
+
+            <!-- Custom Timer Input -->
+            <div class="custom-timer-input" id="custom-timer-input" style="display: none;">
+                <div class="time-input-group">
+                    <label for="custom-minutes">Minutes:</label>
+                    <input type="number" id="custom-minutes" min="1" max="120" value="10">
+                </div>
+                <div class="time-input-group">
+                    <label for="custom-seconds">Seconds:</label>
+                    <input type="number" id="custom-seconds" min="0" max="59" value="0">
+                </div>
+                <button id="set-custom-timer" class="timer-btn">Set Timer</button>
             </div>
 
             <!-- Statistics -->

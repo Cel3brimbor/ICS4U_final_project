@@ -72,6 +72,10 @@ public class Timer {
     public void startLongBreak() {
         startTimer("long-break", longBreakDuration);
     }
+
+    public void startCustomTimer(int durationInSeconds) {
+        startTimer("custom", durationInSeconds);
+    }
     public void pauseTimer() {
         if (currentTask != null) {
             currentTask.cancel();
