@@ -255,7 +255,6 @@ function updateHistoryStats(period = 'week') {
 }
 
 function findBestStreak() {
-    // This is a simplified version - in a real app you'd track daily completion
     const sortedSessions = [...sessionHistory].sort((a, b) => new Date(a.date) - new Date(b.date));
 
     let maxStreak = 0;
