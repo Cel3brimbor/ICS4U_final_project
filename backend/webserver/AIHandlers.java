@@ -30,10 +30,9 @@ public class AIHandlers {
             try {
                 String requestBody = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
                 String message = extractJsonValue(requestBody, "message");
-                String accessToken = extractJsonValue(requestBody, "accessToken");
 
-                if (message == null || accessToken == null) {
-                    String errorResponse = "{\"error\":\"Missing required fields: message and accessToken\"}";
+                if (message == null) {
+                    String errorResponse = "{\"error\":\"Missing required field: message\"}";
                     exchange.getResponseHeaders().set("Content-Type", "application/json");
                     exchange.sendResponseHeaders(400, errorResponse.length());
                     try (OutputStream os = exchange.getResponseBody()) {
@@ -42,11 +41,12 @@ public class AIHandlers {
                     return;
                 }
 
-                String response = aiAgent.chat(message, accessToken);
+                String response = aiAgent.chat(message);
                 String jsonResponse = String.format("{\"response\":\"%s\"}", response.replace("\"", "\\\"").replace("\n", "\\n"));
 
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.sendResponseHeaders(200, jsonResponse.length());
+                //exchange.sendResponseHeaders(200, jsonResponse.length());
+                exchange.sendResponseHeaders(200, 0); //to prevent too many byes to stream error
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(jsonResponse.getBytes(StandardCharsets.UTF_8));
                 }
@@ -55,7 +55,8 @@ public class AIHandlers {
                 System.err.println("Error in AI chat: " + e.getMessage());
                 String errorResponse = "{\"error\":\"Internal server error\"}";
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.sendResponseHeaders(500, errorResponse.length());
+                //exchange.sendResponseHeaders(500, errorResponse.length());
+                //exchange.sendResponseHeaders(500, 0);
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(errorResponse.getBytes(StandardCharsets.UTF_8));
                 }
@@ -80,10 +81,9 @@ public class AIHandlers {
             try {
                 String requestBody = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
                 String instruction = extractJsonValue(requestBody, "instruction");
-                String accessToken = extractJsonValue(requestBody, "accessToken");
 
-                if (instruction == null || accessToken == null) {
-                    String errorResponse = "{\"error\":\"Missing required fields: instruction and accessToken\"}";
+                if (instruction == null) {
+                    String errorResponse = "{\"error\":\"Missing required field: instruction\"}";
                     exchange.getResponseHeaders().set("Content-Type", "application/json");
                     exchange.sendResponseHeaders(400, errorResponse.length());
                     try (OutputStream os = exchange.getResponseBody()) {
@@ -92,11 +92,11 @@ public class AIHandlers {
                     return;
                 }
 
-                String result = aiAgent.editNotes(instruction, accessToken);
+                String result = aiAgent.editNotes(instruction);
                 String jsonResponse = String.format("{\"result\":\"%s\"}", result.replace("\"", "\\\"").replace("\n", "\\n"));
 
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.sendResponseHeaders(200, jsonResponse.length());
+                exchange.sendResponseHeaders(200, 0);
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(jsonResponse.getBytes(StandardCharsets.UTF_8));
                 }
@@ -105,7 +105,7 @@ public class AIHandlers {
                 System.err.println("Error in AI edit notes: " + e.getMessage());
                 String errorResponse = "{\"error\":\"Internal server error\"}";
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.sendResponseHeaders(500, errorResponse.length());
+                exchange.sendResponseHeaders(500, 0);
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(errorResponse.getBytes(StandardCharsets.UTF_8));
                 }
@@ -130,10 +130,9 @@ public class AIHandlers {
             try {
                 String requestBody = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
                 String instruction = extractJsonValue(requestBody, "instruction");
-                String accessToken = extractJsonValue(requestBody, "accessToken");
 
-                if (instruction == null || accessToken == null) {
-                    String errorResponse = "{\"error\":\"Missing required fields: instruction and accessToken\"}";
+                if (instruction == null) {
+                    String errorResponse = "{\"error\":\"Missing required field: instruction\"}";
                     exchange.getResponseHeaders().set("Content-Type", "application/json");
                     exchange.sendResponseHeaders(400, errorResponse.length());
                     try (OutputStream os = exchange.getResponseBody()) {
@@ -142,11 +141,11 @@ public class AIHandlers {
                     return;
                 }
 
-                String result = aiAgent.editSchedule(instruction, accessToken);
+                String result = aiAgent.editSchedule(instruction);
                 String jsonResponse = String.format("{\"result\":\"%s\"}", result.replace("\"", "\\\"").replace("\n", "\\n"));
 
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.sendResponseHeaders(200, jsonResponse.length());
+                exchange.sendResponseHeaders(200, 0);
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(jsonResponse.getBytes(StandardCharsets.UTF_8));
                 }
@@ -155,7 +154,7 @@ public class AIHandlers {
                 System.err.println("Error in AI edit schedule: " + e.getMessage());
                 String errorResponse = "{\"error\":\"Internal server error\"}";
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.sendResponseHeaders(500, errorResponse.length());
+                exchange.sendResponseHeaders(500, 0);
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(errorResponse.getBytes(StandardCharsets.UTF_8));
                 }

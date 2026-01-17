@@ -985,9 +985,15 @@ body {
 
 /* AI Assistant Styles */
 .ai-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .mode-selector {
@@ -996,6 +1002,8 @@ body {
     padding: 30px;
     margin-bottom: 30px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 800px;
 }
 
 .mode-selector h2 {
@@ -1044,10 +1052,8 @@ body {
 }
 
 .chat-interface, .agent-interface {
-    background: white;
-    border-radius: 12px;
-    padding: 30px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 800px;
 }
 
 .hidden {

@@ -29,11 +29,11 @@
                 <h2>Choose AI Mode</h2>
                 <div class="mode-buttons">
                     <button id="chat-mode-btn" class="mode-btn active" onclick="setMode('chat')">
-                        <h3>💬 Chat Mode</h3>
+                        <h3>Chat Mode</h3>
                         <p>General conversation and questions</p>
                     </button>
                     <button id="agent-mode-btn" class="mode-btn" onclick="setMode('agent')">
-                        <h3>🤖 Agent Mode</h3>
+                        <h3>Agent Mode</h3>
                         <p>Edit notes and schedule automatically</p>
                     </button>
                 </div>
@@ -43,7 +43,7 @@
             <div id="chat-interface" class="chat-interface">
                 <div class="chat-header">
                     <h2 id="chat-title">💬 Chat Mode</h2>
-                    <p id="chat-description">Ask me anything - I'm here to help!</p>
+                    <p id="chat-description">Ask me anything. I live in this webpage.</p>
                 </div>
 
                 <div id="chat-messages" class="chat-messages">
@@ -61,7 +61,7 @@
             <!-- Agent Interface -->
             <div id="agent-interface" class="agent-interface hidden">
                 <div class="agent-header">
-                    <h2>🤖 Agent Mode</h2>
+                    <h2>Agent Mode</h2>
                     <p>Give me instructions to edit your notes or schedule</p>
                 </div>
 
@@ -69,7 +69,7 @@
                     <div class="action-section">
                         <h3>📝 Note Management</h3>
                         <div class="action-input">
-                            <input type="text" id="note-instruction" placeholder="e.g., 'Add a note about tomorrow's meeting'" />
+                            <input type="text" id="note-instruction" placeholder="e.g., 'Add a note about learning...'" />
                             <button onclick="editNotes()">Execute</button>
                         </div>
                         <div class="example-commands">
@@ -85,7 +85,7 @@
                     <div class="action-section">
                         <h3>📅 Schedule Management</h3>
                         <div class="action-input">
-                            <input type="text" id="schedule-instruction" placeholder="e.g., 'Add a 1-hour meeting at 2 PM'" />
+                            <input type="text" id="schedule-instruction" placeholder="e.g., 'Add a meeting for group project at 4 PM'" />
                             <button onclick="editSchedule()">Execute</button>
                         </div>
                         <div class="example-commands">

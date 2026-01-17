@@ -72,8 +72,8 @@ function setMode(mode) {
         document.getElementById('chat-description').textContent = 'Ask me anything - I\'m here to help!';
 
         const messages = document.getElementById('chat-messages');
-        if (messages.children.length === 1) { 
-            messages.innerHTML = '<div class="message ai-message">Hello! I\'m your AI assistant. In chat mode, I can answer questions, provide advice, and help with general productivity topics. What would you like to talk about?</div>';
+        if (messages.children.length === 1) {
+            messages.innerHTML = '<div class="message ai-message">' + renderMarkdown('Hello! I\'m your AI assistant. In chat mode, I can answer questions, provide advice, and help with general productivity topics. What would you like to talk about?') + '</div>';
         }
 
     } else if (mode === 'agent') {
@@ -106,11 +106,6 @@ function sendMessage() {
 }
 
 function chatWithAI(message) {
-    if (!accessToken) {
-        hideTypingIndicator();
-        addMessage('Please authenticate with Google to use AI features.', 'ai');
-        return;
-    }
 
     fetch('/api/ai/chat', {
         method: 'POST',
@@ -118,15 +113,14 @@ function chatWithAI(message) {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            message: message,
-            accessToken: accessToken
+            message: message
         })
     })
     .then(response => response.json())
     .then(data => {
         hideTypingIndicator();
         if (data.error) {
-            addMessage('Error: ' + data.error, 'ai');
+            addMessage('**Error:** ' + data.error, 'ai');
         } else {
             addMessage(data.response, 'ai');
         }
@@ -134,7 +128,7 @@ function chatWithAI(message) {
     .catch(error => {
         hideTypingIndicator();
         console.error('Error:', error);
-        addMessage('Sorry, I encountered an error. Please try again.', 'ai');
+        addMessage('*Sorry, I encountered an error. Please try again.*', 'ai');
     });
 }
 
@@ -144,10 +138,6 @@ function editNotes() {
 
     if (!instruction) return;
 
-    if (!accessToken) {
-        showAgentResult('Please authenticate with Google to use AI features.', 'error');
-        return;
-    }
 
     showAgentResult('Processing your instruction...', 'info');
 
@@ -157,22 +147,21 @@ function editNotes() {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            instruction: instruction,
-            accessToken: accessToken
+            instruction: instruction
         })
     })
     .then(response => response.json())
     .then(data => {
         if (data.error) {
-            showAgentResult('Error: ' + data.error, 'error');
+            showAgentResult('**Error:** ' + data.error, 'error');
         } else {
             showAgentResult(data.result, 'success');
-            input.value = ''; 
+            input.value = '';
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showAgentResult('Sorry, I encountered an error. Please try again.', 'error');
+        showAgentResult('*Sorry, I encountered an error. Please try again.*', 'error');
     });
 }
 
@@ -182,10 +171,6 @@ function editSchedule() {
 
     if (!instruction) return;
 
-    if (!accessToken) {
-        showAgentResult('Please authenticate with Google to use AI features.', 'error');
-        return;
-    }
 
     showAgentResult('Processing your instruction...', 'info');
 
@@ -195,8 +180,7 @@ function editSchedule() {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            instruction: instruction,
-            accessToken: accessToken
+            instruction: instruction
         })
     })
     .then(response => response.json())
@@ -218,10 +202,49 @@ function addMessage(message, sender) {
     const messages = document.getElementById('chat-messages');
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${sender}-message`;
-    messageDiv.textContent = message;
+    messageDiv.innerHTML = renderMarkdown(message);
     messages.appendChild(messageDiv);
 
     messages.scrollTop = messages.scrollHeight;
+}
+
+// function renderMarkdown(text) {
+//     //convert **bold** to <strong>bold</strong>
+//     text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+//     //convert *italic* to <em>italic</em>
+//     text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+//     return text;
+// }
+
+function renderMarkdown(text) {
+    //line breaks (\n to <br>)
+    text = text.replace(/\n/g, '<br>');
+    
+    //**bold** to <strong>bold</strong>
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    //* italic * to <em>italic</em>
+    text = text.replace(/\*\s+(.*?)\s+\*/g, '<em>$1</em>');
+    
+    //*italic* (without spaces) to <em>italic</em> 
+    text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    
+    //markdown lists (* or -) to proper html lists with indentation
+    //handle lines that start with * or -
+    text = text.replace(/^(\s*)[\*\-]\s+(.+)$/gm, function(match, indent, content) {
+        var indentLevel = indent.length / 2; //2 spaces per indent level
+        var paddingLeft = indentLevel * 20; //20px per indent level
+        return '<div style="margin-left: ' + paddingLeft + 'px; margin-bottom: 4px;">• ' + content + '</div>';
+    });
+    
+    //numbered lists (1. 2. 3...)
+    text = text.replace(/^(\s*)\d+\.\s+(.+)$/gm, function(match, indent, content) {
+        var indentLevel = indent.length / 2;
+        var paddingLeft = indentLevel * 20;
+        return '<div style="margin-left: ' + paddingLeft + 'px; margin-bottom: 4px;">' + match.trim() + '</div>';
+    });
+    
+    return text;
 }
 
 function showTypingIndicator() {
@@ -245,7 +268,7 @@ function showAgentResult(message, type) {
     const results = document.getElementById('agent-results');
     const resultDiv = document.createElement('div');
     resultDiv.className = `agent-result ${type}`;
-    resultDiv.textContent = message;
+    resultDiv.innerHTML = renderMarkdown(message);
 
     results.innerHTML = '';
     results.appendChild(resultDiv);

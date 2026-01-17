@@ -33,11 +33,15 @@ public class Agent {
     /**
      * general chat/conversation with AI - returns text response only. has no editing powers.
      */
-    public String chat(String message, String accessToken) {
-        String prompt = "You are a helpful AI assistant. Respond to the following message: " + message;
+    public String chat(String message) {
+        if (config.getAccessToken() == null || config.getAccessToken().isEmpty()) {
+            return "AI is not configured.";
+        }
+
+        String prompt = message;
 
         try {
-            String response = callGeminiAPI(prompt, accessToken, 500); //higher token limit
+            String response = callGeminiAPI(prompt, 1000); //higher token limit
             return extractContentFromResponse(response);
         } catch (Exception e) {
             System.err.println("Chat failed: " + e.getMessage());
@@ -48,7 +52,7 @@ public class Agent {
     /**
      * AI note editing - can add, modify, or delete notes
      */
-    public String editNotes(String instruction, String accessToken) {
+    public String editNotes(String instruction) {
         try {
             //get current notes
             List<Note> currentNotes = noteManager.getAllNotes();
@@ -64,7 +68,7 @@ public class Agent {
                 instruction
             );
 
-            String aiResponse = callGeminiAPI(prompt, accessToken, 300);
+            String aiResponse = callGeminiAPI(prompt, 300);
             String actionJson = extractContentFromResponse(aiResponse);
 
             //execute
@@ -79,7 +83,7 @@ public class Agent {
     /**
      *schedule editing - agent can add, modify, or delete tasks
      */
-    public String editSchedule(String instruction, String accessToken) {
+    public String editSchedule(String instruction) {
         try {
             //get current tasks
             List<Task> currentTasks = scheduleManager.getTodayTasks();
@@ -96,7 +100,7 @@ public class Agent {
                 instruction
             );
 
-            String aiResponse = callGeminiAPI(prompt, accessToken, 300);
+            String aiResponse = callGeminiAPI(prompt, 300);
             String actionJson = extractContentFromResponse(aiResponse);
 
             //execute
@@ -108,26 +112,22 @@ public class Agent {
         }
     }
 
-    private String callGeminiAPI(String prompt, String accessToken, int maxTokens) throws IOException, InterruptedException {
+    private String callGeminiAPI(String prompt, int maxTokens) throws IOException, InterruptedException {
         String apiUrl = String.format(
-            "https://%s-aiplatform.googleapis.com/v1/projects/%s/locations/%s/endpoints/openapi/chat/completions",
-            config.getLocation(),
-            config.getProjectId(),
-            config.getLocation()
+            "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s",
+            "gemini-2.5-flash-lite",
+            config.getAccessToken()
         );
 
-        String escapedPrompt = prompt.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");
         String jsonPayload = String.format(
-            "{\"model\":\"%s\",\"messages\":[{\"role\":\"user\",\"content\":\"%s\"}],\"temperature\":0.7,\"max_tokens\":%d}",
-            config.getModel(),
-            escapedPrompt,
+            "{\"contents\":[{\"parts\":[{\"text\":\"%s\"}]}],\"generationConfig\":{\"temperature\":0.7,\"maxOutputTokens\":%d}}",
+            prompt.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n"),
             maxTokens
         );
 
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(apiUrl))
             .header("Content-Type", "application/json")
-            .header("Authorization", "Bearer " + accessToken)
             .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
             .build();
 
@@ -141,23 +141,30 @@ public class Agent {
     }
 
     private String extractContentFromResponse(String responseBody) {
-        //extract content from Gemini API response
-        Pattern pattern = Pattern.compile("\"content\"\\s*:\\s*\"([^\"]+)\"");
-        Matcher matcher = pattern.matcher(responseBody);
-
-        if (matcher.find()) {
-            return matcher.group(1).replace("\\\"", "\"").replace("\\n", "\n");
+        try {
+            Pattern pattern = Pattern.compile("\"text\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"");
+            Matcher matcher = pattern.matcher(responseBody);
+            
+            if (matcher.find()) {
+                String extracted = matcher.group(1);
+                extracted = extracted.replace("\\\"", "\"").replace("\\n", "\n").replace("\\t", "\t").replace("\\\\", "\\");
+                return extracted;
+            }
+            
+            Pattern fallbackPattern = Pattern.compile("\"text\"\\s*:\\s*\"([\\s\\S]*?)\"(?=\\s*,|\\s*\\})");
+            Matcher fallbackMatcher = fallbackPattern.matcher(responseBody);
+            
+            if (fallbackMatcher.find()) {
+                String extracted = fallbackMatcher.group(1);
+                extracted = extracted.replace("\\\"", "\"").replace("\\n", "\n").replace("\\t", "\t").replace("\\\\", "\\");
+                return extracted;
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Error parsing AI response: " + e.getMessage());
         }
-
-        //fallback pattern
-        Pattern fallbackPattern = Pattern.compile("\"content\"\\s*:\\s*\"([\\s\\S]*?)\"");
-        Matcher fallbackMatcher = fallbackPattern.matcher(responseBody);
-
-        if (fallbackMatcher.find()) {
-            return fallbackMatcher.group(1).replace("\\\"", "\"").replace("\\n", "\n");
-        }
-
-        return responseBody; //return raw if parsing fails
+        
+        return responseBody.length() > 500 ? responseBody.substring(0, 500) + "..." : responseBody;
     }
 
     private String formatNotesForAI(List<Note> notes) {

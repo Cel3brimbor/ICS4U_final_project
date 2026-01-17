@@ -1,36 +1,40 @@
 package backend.objects;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+
 public class GeminiConfig {
-    private String projectId;
-    private String location;
     private String model;
+    private String accessToken;
 
     public GeminiConfig() {
-        this.projectId = "ai-browser-blocker"; // 
-        this.location = "us-central1";
-        this.model = "google/gemini-2.0-flash-001";
+        loadFromProperties();
     }
 
-    public GeminiConfig(String projectId, String location, String model) {
-        this.projectId = projectId != null ? projectId : "ai-browser-blocker";
-        this.location = location != null ? location : "us-central1";
-        this.model = model != null ? model : "google/gemini-2.0-flash-001";
+    private void loadFromProperties() {
+        Properties props = new Properties();
+
+        try (FileInputStream fis = new FileInputStream("backend/config.properties")) {
+            props.load(fis);
+
+            this.model = props.getProperty("gemini.model", "gemini-2.0-flash-exp");
+            this.accessToken = props.getProperty("gemini.accessToken");
+
+            if (this.accessToken == null) {
+                System.err.println("WARNING: Gemini API not properly configured. Access token not provided.");
+            }
+
+        } catch (IOException e) {
+            System.err.println("Could not load config.properties: " + e.getMessage());
+            //defaults
+            this.model = "gemini-2.0-flash-exp";
+            this.accessToken = null;
+        }
     }
 
-    public String getProjectId() {
-        return projectId;
-    }
-
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
+    public GeminiConfig(String model) {
+        this.model = model != null ? model : "gemini-2.0-flash-exp";
     }
 
     public String getModel() {
@@ -41,8 +45,16 @@ public class GeminiConfig {
         this.model = model;
     }
 
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
     @Override
     public String toString() {
-        return "GeminiConfig{" + "projectId='" + projectId + '\'' + ", location='" + location + '\'' + ", model='" + model + '\'' + '}';
+        return "GeminiConfig{" + "model='" + model + '\'' + ", hasToken=" + (accessToken != null) + '}';
     }
 }

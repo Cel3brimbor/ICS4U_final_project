@@ -35,3 +35,6 @@ backups_old_old_old_old/
 tasks.txt
 notes.json
 tasks.json
+
+#AI config file
+config.properties
