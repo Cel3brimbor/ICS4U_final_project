@@ -259,7 +259,7 @@ function getSettings() {
                 timerNotifications: settings.timerNotifications !== false, // Default to true
                 soundEffects: settings.soundEffects !== false, // Default to true
                 notificationVolume: settings.notificationVolume !== undefined ? settings.notificationVolume : 50, // Default to 50
-                notificationSound: settings.notificationSound || 'beep-beep' // Default to beep-beep
+                notificationSound: settings.notificationSound || 'ringtone-1' // Default to ringtone-1
             };
         }
     } catch (e) {
@@ -270,7 +270,7 @@ function getSettings() {
         timerNotifications: true,
         soundEffects: true,
         notificationVolume: 50,
-        notificationSound: 'beep-beep'
+        notificationSound: 'ringtone-1'
     };
 }
 
@@ -481,7 +481,7 @@ function playNotification() {
     }
     
     const volume = (settings.notificationVolume || 50) / 100;
-    const soundType = settings.notificationSound || 'beep-beep';
+    const soundType = settings.notificationSound || 'ringtone-1';
     
     try {
         // Use the shared sound library if available

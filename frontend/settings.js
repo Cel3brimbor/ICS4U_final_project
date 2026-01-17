@@ -420,66 +420,69 @@ function playSoundPreview(soundType) {
         return;
     }
 
-    // Stop any currently playing preview
-    stopCurrentPreview();
+    // Stop any currently playing preview first
+    if (currentPreviewAudio) {
+        currentPreviewAudio.pause();
+        currentPreviewAudio.currentTime = 0;
+        currentPreviewAudio = null;
+    }
+
+    // Create and play the new preview
+    const volume = (currentSettings.notificationVolume || 50) / 100;
+
+    // Map sound types to MP3 files
+    let soundFile;
+    switch(soundType) {
+        case 'ringtone-1':
+            soundFile = 'sounds/ringtone-1.mp3';
+            break;
+        case 'ringtone-2':
+            soundFile = 'sounds/ringtone-2.mp3';
+            break;
+        case 'ringtone-3':
+            soundFile = 'sounds/ringtone-3.mp3';
+            break;
+        case 'ringtone-4':
+            soundFile = 'sounds/ringtone-4.mp3';
+            break;
+        case 'ringtone-5':
+            soundFile = 'sounds/ringtone-5.mp3';
+            break;
+        default:
+            soundFile = 'sounds/ringtone-1.mp3';
+    }
 
     try {
-        const volume = (currentSettings.notificationVolume || 50) / 100;
-
-        // Map sound types to MP3 files (same logic as notification-sounds.js)
-        let soundFile;
-        switch(soundType) {
-            case 'ringtone-1':
-                soundFile = 'sounds/ringtone-1.mp3';
-                break;
-            case 'ringtone-2':
-                soundFile = 'sounds/ringtone-2.mp3';
-                break;
-            case 'ringtone-3':
-                soundFile = 'sounds/ringtone-3.mp3';
-                break;
-            case 'ringtone-4':
-                soundFile = 'sounds/ringtone-4.mp3';
-                break;
-            case 'ringtone-5':
-                soundFile = 'sounds/ringtone-5.mp3';
-                break;
-            default:
-                soundFile = 'sounds/ringtone-1.mp3';
-        }
-
-        // Create and play the audio directly
         const audio = new Audio(soundFile);
         audio.volume = volume;
         currentPreviewAudio = audio;
 
         audio.play().then(() => {
-            // Clear reference when done
-            audio.onended = () => {
-                if (currentPreviewAudio === audio) {
-                    currentPreviewAudio = null;
-                }
-            };
+            // Audio started playing successfully
         }).catch(err => {
             console.error('Failed to play preview:', err);
+            currentPreviewAudio = null;
+        });
+
+        // Clear reference when audio ends
+        audio.addEventListener('ended', () => {
+            if (currentPreviewAudio === audio) {
+                currentPreviewAudio = null;
+            }
+        });
+
+        audio.addEventListener('error', () => {
             if (currentPreviewAudio === audio) {
                 currentPreviewAudio = null;
             }
         });
 
     } catch (e) {
-        console.error('Failed to play sound preview:', e);
-    }
-}
-
-// Stop any currently playing preview audio
-function stopCurrentPreview() {
-    if (currentPreviewAudio) {
-        currentPreviewAudio.pause();
-        currentPreviewAudio.currentTime = 0;
+        console.error('Failed to create preview audio:', e);
         currentPreviewAudio = null;
     }
 }
+
 
 // Upload custom sound file
 function uploadCustomSound() {

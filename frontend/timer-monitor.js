@@ -184,15 +184,9 @@ function handleTimerCompletion() {
             console.log('Timer notifications disabled in settings');
         }
     } else {
-        // On timer page, just play sound as backup (timer.js should handle the rest)
-        // But only if sound effects are enabled
-        if (settings.soundEffects) {
-            // Use the MP3-based notification sound system
-            if (typeof window.playNotificationSound === 'function') {
-                const volume = (settings.notificationVolume || 50) / 100;
-                window.playNotificationSound(settings.notificationSound, volume, 1);
-            }
-        }
+        // On timer page, timer.js handles all notifications including sound
+        // No need to play sound here to avoid duplicates
+        console.log('On timer page - letting timer.js handle notifications');
     }
 }
 
