@@ -17,7 +17,9 @@ function getSettings() {
             const settings = JSON.parse(savedSettings);
             return {
                 timerNotifications: settings.timerNotifications !== false, // Default to true
-                soundEffects: settings.soundEffects !== false // Default to true
+                soundEffects: settings.soundEffects !== false, // Default to true
+                notificationVolume: settings.notificationVolume !== undefined ? settings.notificationVolume : 50, // Default to 50
+                notificationSound: settings.notificationSound || 'beep-beep' // Default to beep-beep
             };
         }
     } catch (e) {
@@ -26,15 +28,36 @@ function getSettings() {
     // Default settings
     return {
         timerNotifications: true,
-        soundEffects: true
+        soundEffects: true,
+        notificationVolume: 50,
+        notificationSound: 'beep-beep'
     };
 }
 
 // Initialize timer monitoring when page loads
 document.addEventListener('DOMContentLoaded', function() {
     requestNotificationPermission();
+    // Initialize lastTimerStatus by fetching current status first
+    initializeTimerStatus();
     startTimerMonitor();
 });
+
+// Initialize timer status on page load
+async function initializeTimerStatus() {
+    try {
+        const response = await fetch('/api/timer');
+        if (response.ok) {
+            const status = await response.json();
+            lastTimerStatus = {
+                isRunning: status.isRunning,
+                remainingSeconds: status.remainingSeconds || 0
+            };
+            console.log('Timer monitor initialized. Current status:', lastTimerStatus);
+        }
+    } catch (error) {
+        console.error('Failed to initialize timer status:', error);
+    }
+}
 
 // Request notification permission
 function requestNotificationPermission() {
@@ -55,12 +78,24 @@ function startTimerMonitor() {
                 const status = await response.json();
                 
                 // Check if timer just completed
-                // Timer completed if it was running before and now it's not, and remaining time is 0
-                // Also check that we haven't shown a notification in the last 2 seconds (prevent duplicates)
                 const now = Date.now();
-                if (lastTimerStatus.isRunning && !status.isRunning && status.remainingSeconds === 0 && 
-                    (now - lastCompletionTime > 2000)) {
-                    // Timer just completed!
+                const wasRunning = lastTimerStatus.isRunning;
+                const isNowRunning = status.isRunning;
+                const remainingTime = status.remainingSeconds || 0;
+                
+                // More robust detection: timer completed if it was running and now it's not
+                // OR if remaining time is 0 or negative (even if isRunning is still true due to timing)
+                const timerJustCompleted = wasRunning && (!isNowRunning || remainingTime <= 0) && 
+                    (now - lastCompletionTime > 2000);
+                
+                if (timerJustCompleted) {
+                    console.log('Timer completion detected!', {
+                        wasRunning,
+                        isNowRunning,
+                        remainingTime,
+                        lastStatus: lastTimerStatus,
+                        currentStatus: status
+                    });
                     lastCompletionTime = now;
                     handleTimerCompletion();
                 }
@@ -80,15 +115,20 @@ function startTimerMonitor() {
 
 // Handle timer completion - show notification and play sound
 function handleTimerCompletion() {
+    console.log('handleTimerCompletion called');
     const settings = getSettings();
+    console.log('Settings:', settings);
+    console.log('Notification permission:', Notification.permission);
     
     // If we're on the timer page, the timer.js will handle notifications
     // Only show notification if we're on a different page
     const isOnTimerPage = window.location.pathname.includes('timer.html');
+    console.log('Is on timer page:', isOnTimerPage);
     
     if (!isOnTimerPage) {
         // Play notification sound only if sound effects are enabled
         if (settings.soundEffects) {
+            console.log('Playing notification sound');
             playNotificationSound();
         }
         
@@ -96,6 +136,7 @@ function handleTimerCompletion() {
         if (settings.timerNotifications) {
             if ('Notification' in window && Notification.permission === 'granted') {
                 try {
+                    console.log('Creating notification');
                     const notification = new Notification('Timer Complete!', {
                         body: 'Great work! Your timer has finished. Take a moment to stretch and relax.',
                         icon: '/favicon.ico',
@@ -103,6 +144,8 @@ function handleTimerCompletion() {
                         requireInteraction: false,
                         silent: !settings.soundEffects // Respect sound setting
                     });
+                    
+                    console.log('Notification created successfully');
                     
                     // Auto-close after 5 seconds
                     setTimeout(() => {
@@ -119,16 +162,22 @@ function handleTimerCompletion() {
                         notification.close();
                     };
                 } catch (e) {
-                    console.log('Notification failed:', e);
+                    console.error('Notification failed:', e);
                 }
             } else if ('Notification' in window && Notification.permission === 'default') {
+                console.log('Requesting notification permission');
                 // Try to request permission and show notification
                 Notification.requestPermission().then(function(permission) {
+                    console.log('Permission result:', permission);
                     if (permission === 'granted') {
                         handleTimerCompletion(); // Retry after permission granted
                     }
                 });
+            } else {
+                console.warn('Notifications not available or denied. Permission:', Notification.permission);
             }
+        } else {
+            console.log('Timer notifications disabled in settings');
         }
     } else {
         // On timer page, just play sound as backup (timer.js should handle the rest)
@@ -139,14 +188,72 @@ function handleTimerCompletion() {
     }
 }
 
-// Play notification sound (same as timer.js)
+// Play notification sound - iPhone-like ringtone using Web Audio API
 function playNotificationSound() {
+    const settings = getSettings();
+    const volume = (settings.notificationVolume || 50) / 100; // Convert 0-100 to 0-1
+    
     try {
-        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8F');
-        audio.volume = 0.3;
-        audio.play().catch(() => {}); // Ignore errors if sound fails
+        // Use Web Audio API to create a longer ringtone
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const duration = 2.0; // 2 seconds of ringtone
+        const sampleRate = audioContext.sampleRate;
+        const numSamples = duration * sampleRate;
+        const buffer = audioContext.createBuffer(1, numSamples, sampleRate);
+        const data = buffer.getChannelData(0);
+        
+        // Create an iPhone-like ringtone pattern (two-tone ascending pattern)
+        const frequencies = [523.25, 659.25]; // C5 and E5 notes
+        let phase = 0;
+        
+        for (let i = 0; i < numSamples; i++) {
+            const time = i / sampleRate;
+            // Switch between frequencies every 0.3 seconds
+            const freqIndex = Math.floor(time / 0.3) % 2;
+            const frequency = frequencies[freqIndex];
+            
+            // Generate sine wave
+            phase += (2 * Math.PI * frequency) / sampleRate;
+            if (phase > 2 * Math.PI) phase -= 2 * Math.PI;
+            
+            // Apply envelope (fade in/out for each tone)
+            const toneTime = time % 0.3;
+            let envelope = 1.0;
+            if (toneTime < 0.05) {
+                envelope = toneTime / 0.05; // Fade in
+            } else if (toneTime > 0.25) {
+                envelope = (0.3 - toneTime) / 0.05; // Fade out
+            }
+            
+            data[i] = Math.sin(phase) * envelope * volume * 0.3;
+        }
+        
+        // Play the ringtone 3 times (total ~6 seconds)
+        let playCount = 0;
+        function playRingtone() {
+            const source = audioContext.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioContext.destination);
+            source.start(0);
+            playCount++;
+            
+            if (playCount < 3) {
+                source.onended = function() {
+                    setTimeout(() => playRingtone(), 0.1);
+                };
+            }
+        }
+        playRingtone();
+        
     } catch (e) {
-        // Sound not available
+        // Fallback to simple beep if Web Audio API fails
+        console.log('Web Audio API not available, using fallback:', e);
+        try {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8F');
+            audio.volume = volume;
+            audio.play().catch(() => {});
+        } catch (e2) {
+            console.log('Fallback sound also failed:', e2);
+        }
     }
 }
-

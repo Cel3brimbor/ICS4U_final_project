@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeApp() {
-    console.log('AI Productivity Planner initialized');
+    console.log('StudyFlow Productivity Planner initialized');
 
     //update greeting with current time
     updateGreeting();
@@ -15,6 +15,19 @@ function initializeApp() {
 
     //initialize navigation
     initializeNavigation();
+
+    // Apply dark mode if enabled
+    const savedSettings = localStorage.getItem('appSettings');
+    if (savedSettings) {
+        try {
+            const settings = JSON.parse(savedSettings);
+            if (settings.darkMode) {
+                document.body.classList.add('dark-mode');
+            }
+        } catch (e) {
+            console.error('Error loading dark mode setting:', e);
+        }
+    }
 }
 
 function updateGreeting() {

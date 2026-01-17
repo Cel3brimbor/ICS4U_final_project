@@ -20,6 +20,8 @@ const defaultSettings = {
     breakReminders: true,
     dailyGoals: false,
     soundEffects: true,
+    notificationVolume: 50, // 0-100
+    notificationSound: 'beep-beep', // Default sound
 
     // Privacy
     dataCollection: false,
@@ -38,6 +40,18 @@ function initializeSettings() {
     console.log('Settings page initialized');
     // Apply dark mode if it's enabled
     applyDarkMode();
+    // Also apply dark mode to the body when settings page loads
+    const savedSettings = localStorage.getItem('appSettings');
+    if (savedSettings) {
+        try {
+            const settings = JSON.parse(savedSettings);
+            if (settings.darkMode) {
+                document.body.classList.add('dark-mode');
+            }
+        } catch (e) {
+            console.error('Error loading dark mode setting:', e);
+        }
+    }
 }
 
 function setupEventListeners() {
@@ -83,6 +97,36 @@ function setupEventListeners() {
         currentSettings.soundEffects = this.checked;
         saveSettings();
     });
+
+    // Notification volume slider
+    const volumeSlider = document.getElementById('notification-volume');
+    const volumeDisplay = document.getElementById('volume-display');
+    if (volumeSlider && volumeDisplay) {
+        volumeSlider.addEventListener('input', function() {
+            currentSettings.notificationVolume = parseInt(this.value);
+            volumeDisplay.textContent = this.value + '%';
+            saveSettings();
+        });
+    }
+
+    // Notification sound selector
+    const soundSelector = document.getElementById('notification-sound');
+    const customAudioUpload = document.getElementById('custom-audio-upload');
+    if (soundSelector) {
+        soundSelector.addEventListener('change', function() {
+            currentSettings.notificationSound = this.value;
+            saveSettings();
+            
+            // Show/hide custom audio upload based on selection
+            if (this.value === 'custom') {
+                customAudioUpload.style.display = 'flex';
+            } else {
+                customAudioUpload.style.display = 'none';
+                // Play a preview of the selected sound
+                playSoundPreview(this.value);
+            }
+        });
+    }
 
     // Privacy toggles
     document.getElementById('data-collection-toggle').addEventListener('change', function() {
@@ -207,6 +251,10 @@ function applySettingsToUI() {
     document.getElementById('break-reminders-toggle').checked = currentSettings.breakReminders;
     document.getElementById('daily-goals-toggle').checked = currentSettings.dailyGoals;
     document.getElementById('sound-effects-toggle').checked = currentSettings.soundEffects;
+    if (document.getElementById('notification-volume')) {
+        document.getElementById('notification-volume').value = currentSettings.notificationVolume || 50;
+        document.getElementById('volume-display').textContent = (currentSettings.notificationVolume || 50) + '%';
+    }
 
     // Privacy
     document.getElementById('data-collection-toggle').checked = currentSettings.dataCollection;
@@ -338,6 +386,108 @@ function uploadProfilePicture() {
 
 function goBack() {
     window.location.href = '/';
+}
+
+// Play a preview of the selected notification sound
+function playSoundPreview(soundType) {
+    if (soundType === 'custom') {
+        previewCustomSound();
+        return;
+    }
+    
+    try {
+        const volume = (currentSettings.notificationVolume || 50) / 100;
+        if (typeof window.playNotificationSound === 'function') {
+            window.playNotificationSound(soundType, volume, 1); // Play once for preview
+        }
+    } catch (e) {
+        console.error('Failed to play sound preview:', e);
+    }
+}
+
+// Upload custom sound file
+function uploadCustomSound() {
+    const fileInput = document.getElementById('custom-audio-file');
+    const statusElement = document.getElementById('custom-audio-status');
+    const previewBtn = document.getElementById('preview-custom-btn');
+    
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        statusElement.textContent = 'Please select an audio file first.';
+        statusElement.style.color = '#d32f2f';
+        return;
+    }
+    
+    const file = fileInput.files[0];
+    
+    // Validate file type
+    if (!file.type.startsWith('audio/')) {
+        statusElement.textContent = 'Please select a valid audio file (MP3, WAV, OGG, etc.).';
+        statusElement.style.color = '#d32f2f';
+        return;
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        statusElement.textContent = 'File size must be less than 5MB.';
+        statusElement.style.color = '#d32f2f';
+        return;
+    }
+    
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        try {
+            // Store as data URL
+            localStorage.setItem('customNotificationSound', e.target.result);
+            currentSettings.notificationSound = 'custom';
+            saveSettings();
+            
+            statusElement.textContent = 'Custom sound uploaded successfully!';
+            statusElement.style.color = '#2e7d32';
+            previewBtn.style.display = 'inline-block';
+            
+            // Auto-play preview
+            setTimeout(() => previewCustomSound(), 500);
+        } catch (err) {
+            console.error('Failed to save custom sound:', err);
+            statusElement.textContent = 'Failed to save custom sound.';
+            statusElement.style.color = '#d32f2f';
+        }
+    };
+    
+    reader.onerror = function() {
+        statusElement.textContent = 'Failed to read audio file.';
+        statusElement.style.color = '#d32f2f';
+    };
+    
+    reader.readAsDataURL(file);
+}
+
+// Preview custom uploaded sound
+function previewCustomSound() {
+    const customAudioData = localStorage.getItem('customNotificationSound');
+    const statusElement = document.getElementById('custom-audio-status');
+    
+    if (!customAudioData) {
+        statusElement.textContent = 'No custom sound uploaded.';
+        statusElement.style.color = '#d32f2f';
+        return;
+    }
+    
+    try {
+        const audio = new Audio(customAudioData);
+        const volume = (currentSettings.notificationVolume || 50) / 100;
+        audio.volume = volume;
+        audio.play().catch(err => {
+            console.error('Failed to play preview:', err);
+            statusElement.textContent = 'Failed to play preview.';
+            statusElement.style.color = '#d32f2f';
+        });
+    } catch (e) {
+        console.error('Preview failed:', e);
+        statusElement.textContent = 'Failed to preview sound.';
+        statusElement.style.color = '#d32f2f';
+    }
 }
 
 function showSuccess(message) {

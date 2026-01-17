@@ -112,6 +112,42 @@
             </div>
             <div class="setting-item">
                 <div class="setting-info">
+                    <h3>Notification Volume</h3>
+                    <p>Adjust the volume of timer notification sounds (0-100%)</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; flex: 1; max-width: 300px;">
+                    <input type="range" id="notification-volume" min="0" max="100" value="50" style="flex: 1;">
+                    <span id="volume-display" style="min-width: 40px; text-align: right;">50%</span>
+                </div>
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h3>Notification Sound</h3>
+                    <p>Choose your preferred notification ringtone</p>
+                </div>
+                <select id="notification-sound" class="setting-select">
+                    <option value="beep-beep">Beep Beep (Default)</option>
+                    <option value="gentle-chime">Gentle Chime</option>
+                    <option value="upward-bell">Upward Bell</option>
+                    <option value="soft-notification">Soft Notification</option>
+                    <option value="friendly-tone">Friendly Tone</option>
+                    <option value="custom">Custom Upload</option>
+                </select>
+            </div>
+            <div class="setting-item" id="custom-audio-upload" style="display: none;">
+                <div class="setting-info">
+                    <h3>Upload Custom Sound</h3>
+                    <p>Upload your own audio file (MP3, WAV, OGG supported)</p>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <input type="file" id="custom-audio-file" accept="audio/*" style="flex: 1;">
+                    <button class="setting-btn" onclick="uploadCustomSound()">Upload Sound</button>
+                    <button class="setting-btn" onclick="previewCustomSound()" style="display: none;" id="preview-custom-btn">Preview Sound</button>
+                    <span id="custom-audio-status" style="font-size: 0.9em; color: #666;"></span>
+                </div>
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
                     <h3>Notification Permission</h3>
                     <p>Allow browser notifications for timer alerts</p>
                 </div>
@@ -222,6 +258,7 @@
         </section>
     </main>
 
+    <script src="notification-sounds.js"></script>
     <script src="settings.js"></script>
     <script src="timer-monitor.js"></script>
 </body>

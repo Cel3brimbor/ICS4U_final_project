@@ -2,6 +2,19 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeTimerPage();
     requestNotificationPermission();
     setupPageVisibilityHandling();
+
+    // Apply dark mode if enabled
+    const savedSettings = localStorage.getItem('appSettings');
+    if (savedSettings) {
+        try {
+            const settings = JSON.parse(savedSettings);
+            if (settings.darkMode) {
+                document.body.classList.add('dark-mode');
+            }
+        } catch (e) {
+            console.error('Error loading dark mode setting:', e);
+        }
+    }
 });
 
 let timerInterval;
@@ -244,7 +257,9 @@ function getSettings() {
             const settings = JSON.parse(savedSettings);
             return {
                 timerNotifications: settings.timerNotifications !== false, // Default to true
-                soundEffects: settings.soundEffects !== false // Default to true
+                soundEffects: settings.soundEffects !== false, // Default to true
+                notificationVolume: settings.notificationVolume !== undefined ? settings.notificationVolume : 50, // Default to 50
+                notificationSound: settings.notificationSound || 'beep-beep' // Default to beep-beep
             };
         }
     } catch (e) {
@@ -253,7 +268,9 @@ function getSettings() {
     // Default settings
     return {
         timerNotifications: true,
-        soundEffects: true
+        soundEffects: true,
+        notificationVolume: 50,
+        notificationSound: 'beep-beep'
     };
 }
 
@@ -463,13 +480,61 @@ function playNotification() {
         return;
     }
     
-    // Try to play a notification sound
+    const volume = (settings.notificationVolume || 50) / 100;
+    const soundType = settings.notificationSound || 'beep-beep';
+    
     try {
-        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8FIHnB7tyfSwkTWLjl66RcFg5Fm9/yvGUgBzCLzPK6ZTAFHXPA7dmhUQhQXrTp66hVFApGn+DyvmQdBzeL0fK8Zy8F');
-        audio.volume = 0.3;
-        audio.play().catch(() => {}); // Ignore errors if sound fails
+        // Use the shared sound library if available
+        if (typeof window.playNotificationSound === 'function') {
+            window.playNotificationSound(soundType, volume, 3);
+        } else {
+            // Fallback to beep-beep if library not loaded
+            createBeepBeepFallback(volume);
+        }
     } catch (e) {
-        // Sound not available
+        console.log('Sound playback failed:', e);
+        createBeepBeepFallback(volume);
+    }
+}
+
+// Fallback beep-beep sound
+function createBeepBeepFallback(volume) {
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const duration = 0.4;
+        const sampleRate = audioContext.sampleRate;
+        const numSamples = duration * sampleRate;
+        const buffer = audioContext.createBuffer(1, numSamples, sampleRate);
+        const data = buffer.getChannelData(0);
+        
+        const frequency = 800;
+        let phase = 0;
+        
+        for (let i = 0; i < numSamples; i++) {
+            const time = i / sampleRate;
+            const envelope = Math.exp(-time * 8);
+            phase += (2 * Math.PI * frequency) / sampleRate;
+            if (phase > 2 * Math.PI) phase -= 2 * Math.PI;
+            data[i] = Math.sin(phase) * envelope * volume * 0.3;
+        }
+        
+        let playCount = 0;
+        function playBeep() {
+            const source = audioContext.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioContext.destination);
+            source.start(0);
+            playCount++;
+            
+            if (playCount < 2) {
+                source.onended = function() {
+                    setTimeout(() => playBeep(), 0.1);
+                };
+            }
+        }
+        playBeep();
+    } catch (e) {
+        console.log('Fallback sound failed:', e);
     }
 }
 

@@ -10,6 +10,19 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeAI() {
     console.log('AI Assistant initialized');
     setMode('chat');
+
+    // Apply dark mode if enabled
+    const savedSettings = localStorage.getItem('appSettings');
+    if (savedSettings) {
+        try {
+            const settings = JSON.parse(savedSettings);
+            if (settings.darkMode) {
+                document.body.classList.add('dark-mode');
+            }
+        } catch (e) {
+            console.error('Error loading dark mode setting:', e);
+        }
+    }
 }
 
 function setupAIEventListeners() {
