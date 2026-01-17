@@ -18,8 +18,10 @@ public class PE {
             System.out.println("Options:");
             System.out.println("1. Chat (processed response)");
             System.out.println("2. Test prompt (raw response only)");
-            System.out.println("3. MOdel compliance test");
-            System.out.println("4. Exit");
+            System.out.println("3. Model compliance test");
+            System.out.println("4. Planner test");
+            System.out.println("5. Notes test");
+            System.out.println("6. Exit");
             System.out.print("Enter choice (1-4): ");
 
             String choice = scanner.nextLine().trim();
@@ -35,6 +37,12 @@ public class PE {
                     customPromptTest(agent, scanner);
                     break;
                 case "4":
+                    plannerTest(agent, scanner);
+                    break;
+                case "5":
+                    notesTest(agent, scanner);
+                    break;
+                case "6":
                     System.out.println("Exiting...");
                     scanner.close();
                     return;
