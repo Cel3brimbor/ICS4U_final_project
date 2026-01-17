@@ -486,7 +486,7 @@ function playNotification() {
     try {
         // Use the shared sound library if available
         if (typeof window.playNotificationSound === 'function') {
-            window.playNotificationSound(soundType, volume, 3);
+            window.playNotificationSound(soundType, volume, 1);
         } else {
             // Fallback to beep-beep if library not loaded
             createBeepBeepFallback(volume);

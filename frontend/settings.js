@@ -21,7 +21,7 @@ const defaultSettings = {
     dailyGoals: false,
     soundEffects: true,
     notificationVolume: 50, // 0-100
-    notificationSound: 'beep-beep', // Default sound
+    notificationSound: 'ringtone-1', // Default sound
 
     // Privacy
     dataCollection: false,
@@ -37,7 +37,6 @@ const defaultSettings = {
 let currentSettings = {};
 
 function initializeSettings() {
-    console.log('Settings page initialized');
     // Apply dark mode if it's enabled
     applyDarkMode();
     // Also apply dark mode to the body when settings page loads
@@ -209,7 +208,15 @@ function updateNotificationStatus() {
         statusElement.classList.add(statusClass);
 
         // Find notification section and add status
-        const notificationSection = document.querySelector('.settings-section:has(h2:contains("🔔"))');
+        const settingsSections = document.querySelectorAll('.settings-section');
+        let notificationSection = null;
+        for (const section of settingsSections) {
+            const h2 = section.querySelector('h2');
+            if (h2 && h2.textContent.includes('🔔')) {
+                notificationSection = section;
+                break;
+            }
+        }
         if (notificationSection) {
             const existingStatus = notificationSection.querySelector('.notification-status');
             if (existingStatus) {
@@ -254,6 +261,20 @@ function applySettingsToUI() {
     if (document.getElementById('notification-volume')) {
         document.getElementById('notification-volume').value = currentSettings.notificationVolume || 50;
         document.getElementById('volume-display').textContent = (currentSettings.notificationVolume || 50) + '%';
+    }
+
+    // Set notification sound selector value
+    if (document.getElementById('notification-sound')) {
+        document.getElementById('notification-sound').value = currentSettings.notificationSound || 'ringtone-1';
+        // Show/hide custom audio upload based on selection
+        const customAudioUpload = document.getElementById('custom-audio-upload');
+        if (customAudioUpload) {
+            if (currentSettings.notificationSound === 'custom') {
+                customAudioUpload.style.display = 'flex';
+            } else {
+                customAudioUpload.style.display = 'none';
+            }
+        }
     }
 
     // Privacy
@@ -388,20 +409,75 @@ function goBack() {
     window.location.href = '/';
 }
 
+
+// Global variable to track current preview audio
+let currentPreviewAudio = null;
+
 // Play a preview of the selected notification sound
 function playSoundPreview(soundType) {
     if (soundType === 'custom') {
         previewCustomSound();
         return;
     }
-    
+
+    // Stop any currently playing preview
+    stopCurrentPreview();
+
     try {
         const volume = (currentSettings.notificationVolume || 50) / 100;
-        if (typeof window.playNotificationSound === 'function') {
-            window.playNotificationSound(soundType, volume, 1); // Play once for preview
+
+        // Map sound types to MP3 files (same logic as notification-sounds.js)
+        let soundFile;
+        switch(soundType) {
+            case 'ringtone-1':
+                soundFile = 'sounds/ringtone-1.mp3';
+                break;
+            case 'ringtone-2':
+                soundFile = 'sounds/ringtone-2.mp3';
+                break;
+            case 'ringtone-3':
+                soundFile = 'sounds/ringtone-3.mp3';
+                break;
+            case 'ringtone-4':
+                soundFile = 'sounds/ringtone-4.mp3';
+                break;
+            case 'ringtone-5':
+                soundFile = 'sounds/ringtone-5.mp3';
+                break;
+            default:
+                soundFile = 'sounds/ringtone-1.mp3';
         }
+
+        // Create and play the audio directly
+        const audio = new Audio(soundFile);
+        audio.volume = volume;
+        currentPreviewAudio = audio;
+
+        audio.play().then(() => {
+            // Clear reference when done
+            audio.onended = () => {
+                if (currentPreviewAudio === audio) {
+                    currentPreviewAudio = null;
+                }
+            };
+        }).catch(err => {
+            console.error('Failed to play preview:', err);
+            if (currentPreviewAudio === audio) {
+                currentPreviewAudio = null;
+            }
+        });
+
     } catch (e) {
         console.error('Failed to play sound preview:', e);
+    }
+}
+
+// Stop any currently playing preview audio
+function stopCurrentPreview() {
+    if (currentPreviewAudio) {
+        currentPreviewAudio.pause();
+        currentPreviewAudio.currentTime = 0;
+        currentPreviewAudio = null;
     }
 }
 

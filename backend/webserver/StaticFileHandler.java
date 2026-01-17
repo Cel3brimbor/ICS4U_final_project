@@ -23,7 +23,7 @@ public class StaticFileHandler implements HttpHandler {
         Path filePath = Paths.get(FRONTEND_PATH, requestPath.substring(1));
         File file = filePath.toFile();
 
-        //System.out.println("File path: " + filePath);
+        // System.out.println("File path: " + filePath); // Debug logging disabled
 
         if (file.exists() && file.isFile()) {
             //set appropriate content type
@@ -49,6 +49,7 @@ public class StaticFileHandler implements HttpHandler {
         if (path.endsWith(".html")) return "text/html";
         if (path.endsWith(".css")) return "text/css";
         if (path.endsWith(".js")) return "application/javascript";
+        if (path.endsWith(".mp3")) return "audio/mpeg";
         return "text/plain";
     }
 }

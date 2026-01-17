@@ -19,7 +19,7 @@ function getSettings() {
                 timerNotifications: settings.timerNotifications !== false, // Default to true
                 soundEffects: settings.soundEffects !== false, // Default to true
                 notificationVolume: settings.notificationVolume !== undefined ? settings.notificationVolume : 50, // Default to 50
-                notificationSound: settings.notificationSound || 'beep-beep' // Default to beep-beep
+                notificationSound: settings.notificationSound || 'ringtone-1' // Default to ringtone-1
             };
         }
     } catch (e) {
@@ -30,7 +30,7 @@ function getSettings() {
         timerNotifications: true,
         soundEffects: true,
         notificationVolume: 50,
-        notificationSound: 'beep-beep'
+        notificationSound: 'ringtone-1'
     };
 }
 
@@ -128,8 +128,12 @@ function handleTimerCompletion() {
     if (!isOnTimerPage) {
         // Play notification sound only if sound effects are enabled
         if (settings.soundEffects) {
-            console.log('Playing notification sound');
-            playNotificationSound();
+            console.log('Playing notification sound:', settings.notificationSound);
+            // Use the MP3-based notification sound system
+            if (typeof window.playNotificationSound === 'function') {
+                const volume = (settings.notificationVolume || 50) / 100;
+                window.playNotificationSound(settings.notificationSound, volume, 1);
+            }
         }
         
         // Show browser notification only if timer notifications are enabled
@@ -183,13 +187,17 @@ function handleTimerCompletion() {
         // On timer page, just play sound as backup (timer.js should handle the rest)
         // But only if sound effects are enabled
         if (settings.soundEffects) {
-            playNotificationSound();
+            // Use the MP3-based notification sound system
+            if (typeof window.playNotificationSound === 'function') {
+                const volume = (settings.notificationVolume || 50) / 100;
+                window.playNotificationSound(settings.notificationSound, volume, 1);
+            }
         }
     }
 }
 
-// Play notification sound - iPhone-like ringtone using Web Audio API
-function playNotificationSound() {
+// Legacy notification sound function - no longer used (replaced by MP3-based system)
+function playLegacyNotificationSound() {
     const settings = getSettings();
     const volume = (settings.notificationVolume || 50) / 100; // Convert 0-100 to 0-1
     
