@@ -207,7 +207,7 @@ public class PE {
                 "IMPORTANT VALIDATION:\n" +
                 "- For ADD: You MUST have description, start time, and end time\n" +
                 "- For UPDATE/COMPLETE/DELETE: You MUST identify which specific task\n" +
-                "- If information is missing, respond with {\"action\":\"NEED_INFO\",\"message\":\"what you need\"}\n\n" +
+                "- If information is missing (such as lack of task duration), respond with {\"action\":\"NEED_INFO\",\"message\":\"what you need\"}\n\n" +
                 "Respond with a JSON object. Examples:\n" +
                 "- To add a task: {\"action\":\"ADD\",\"description\":\"task name\",\"startTime\":\"14:00\",\"endTime\":\"15:00\"}\n" +
                 "- To complete a task: {\"action\":\"COMPLETE\",\"taskId\":\"task_12345\"}\n" +
@@ -260,11 +260,10 @@ public class PE {
             String prompt = String.format(
                 "You are an AI assistant that can edit notes. User's current notes:\n%s\n\n" +
                 "User instruction: %s\n\n" +
-                "IMPORTANT VALIDATION:\n" +
-                "- For ADD: You MUST have meaningful content (not just a few words)\n" +
+                "IMPORTANT VALIDATIOb:\n" +
                 "- For UPDATE: You MUST have both noteId and new content\n" +
                 "- For DELETE: You MUST identify which specific note to delete\n" +
-                "- If information is missing or unclear, respond with {\"action\":\"NEED_INFO\",\"message\":\"what you need\"}\n\n" +
+                "- If information is missing or unclear (such as lack of context), respond with {\"action\":\"NEED_INFO\",\"message\":\"what you need\"}\n\n" +
                 "Respond with a JSON object. Examples:\n" +
                 "- To add a note: {\"action\":\"ADD\",\"content\":\"note content here\"}\n" +
                 "- To update a note: {\"action\":\"UPDATE\",\"noteId\":\"note_identifier\",\"content\":\"updated content\"}\n" +

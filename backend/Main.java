@@ -1,10 +1,10 @@
 package backend;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Scanner;
 import backend.FrontendDataHandler.TaskResponse;
 import backend.objects.Task;
+import java.util.List;
 
 public class Main {
 
@@ -30,25 +30,20 @@ public class Main {
         System.out.println("Loaded " + noteManager.getNoteCount() + " notes");
 
         //fetch and display start time and end time of all tasks present if any
-        List<Task> allTasks = scheduleManager.getAllTasks();
-        if (!allTasks.isEmpty()) {
-            System.out.println("\n=== Task Schedule ===");
-            for (Task task : allTasks) {
-                System.out.println("Task: " + task.getDescription());
-                System.out.println("Date: " + task.getDate());
-                System.out.println("Start Time: " + task.getStartTime());
-                System.out.println("End Time: " + task.getEndTime());
-                System.out.println("---");
-            }
-        }
-
-        System.out.println(noteManager.getAllNotesAsString());
-
-        // if (scheduleManager.getTaskCount() == 0) {
-        //     addSampleTasks(scheduleManager);
+        // List<Task> allTasks = scheduleManager.getAllTasks();
+        // if (!allTasks.isEmpty()) {
+        //     System.out.println("\n=== Task Schedule ===");
+        //     for (Task task : allTasks) {
+        //         System.out.println("Task: " + task.getDescription());
+        //         System.out.println("Date: " + task.getDate());
+        //         System.out.println("Start Time: " + task.getStartTime());
+        //         System.out.println("End Time: " + task.getEndTime());
+        //         System.out.println("---");
+        //     }
         // }
 
-        //start web server
+        //System.out.println(noteManager.getAllNotesAsString());
+
         try {
             WebServer server = new WebServer(scheduleManager, noteManager);
             server.start();
