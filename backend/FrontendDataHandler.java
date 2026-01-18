@@ -1,9 +1,12 @@
 package backend;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import backend.objects.Task;
 
@@ -29,40 +32,49 @@ public class FrontendDataHandler {
         private String description;
         private String startTime;
         private String endTime;
+        private String date;
 
         public TaskCreateRequest() {}
 
-        public String getDescription() 
-        { 
-            return description; 
-        }
-        public String getStartTime() 
+        public String getDescription()
         {
-            return startTime; 
+            return description;
         }
-        public String getEndTime() 
+        public String getStartTime()
         {
-            return endTime; 
+            return startTime;
+        }
+        public String getEndTime()
+        {
+            return endTime;
+        }
+        public String getDate()
+        {
+            return date;
         }
 
-        public void setDescription(String description) 
+        public void setDescription(String description)
         {
-            this.description = description; 
+            this.description = description;
         }
-        public void setStartTime(String startTime) 
+        public void setStartTime(String startTime)
         {
-            this.startTime = startTime; 
+            this.startTime = startTime;
         }
-        public void setEndTime(String endTime) 
+        public void setEndTime(String endTime)
         {
-            this.endTime = endTime; 
+            this.endTime = endTime;
+        }
+        public void setDate(String date)
+        {
+            this.date = date;
         }
 
         @Override
-        public String toString() 
+        public String toString()
         {
-            return String.format("TaskCreateRequest{description='%s', startTime='%s', endTime='%s'}",
-                    description, startTime, endTime);
+            return String.format("TaskCreateRequest{description='%s', startTime='%s', endTime='%s', date='%s'}",
+                    description, startTime, endTime, date);
         }
     }
 
@@ -187,39 +199,62 @@ public class FrontendDataHandler {
      */
     public static TaskCreateRequest parseTaskCreateRequest(String json) {
         try {
-            json = json.trim();
-            if (!json.startsWith("{") || !json.endsWith("}")) {
-                return null;
-            }
-            json = json.substring(1, json.length() - 1);
+            // Ultra-simple approach for reliability
+            // System.out.println("Parsing JSON: " + json);
 
             TaskCreateRequest request = new TaskCreateRequest();
-            String[] pairs = json.split(",");
 
-            for (String pair : pairs) 
-            {
-                String[] keyValue = pair.split(":", 2);
-                if (keyValue.length != 2) continue;
-
-                String key = keyValue[0].trim().replaceAll("\"", "");
-                String value = keyValue[1].trim().replaceAll("\"", "");
-
-                switch (key) {
-                    case "description":
-                        request.setDescription(value);
-                        break;
-                    case "startTime":
-                        request.setStartTime(value);
-                        break;
-                    case "endTime":
-                        request.setEndTime(value);
-                        break;
+            // Extract each field individually using simple string operations
+            String descPattern = "\"description\":\"";
+            int descStart = json.indexOf(descPattern);
+            if (descStart != -1) {
+                descStart += descPattern.length();
+                int descEnd = json.indexOf("\"", descStart);
+                if (descEnd != -1) {
+                    request.setDescription(json.substring(descStart, descEnd));
                 }
             }
+
+            String startPattern = "\"startTime\":\"";
+            int startStart = json.indexOf(startPattern);
+            if (startStart != -1) {
+                startStart += startPattern.length();
+                int startEnd = json.indexOf("\"", startStart);
+                if (startEnd != -1) {
+                    request.setStartTime(json.substring(startStart, startEnd));
+                }
+            }
+
+            String endPattern = "\"endTime\":\"";
+            int endStart = json.indexOf(endPattern);
+            if (endStart != -1) {
+                endStart += endPattern.length();
+                int endEnd = json.indexOf("\"", endStart);
+                if (endEnd != -1) {
+                    request.setEndTime(json.substring(endStart, endEnd));
+                }
+            }
+
+            String datePattern = "\"date\":\"";
+            int dateStart = json.indexOf(datePattern);
+            if (dateStart != -1) {
+                dateStart += datePattern.length();
+                int dateEnd = json.indexOf("\"", dateStart);
+                if (dateEnd != -1) {
+                    request.setDate(json.substring(dateStart, dateEnd));
+                }
+            }
+
+            // System.out.println("Parsed successfully: desc=" + request.getDescription() +
+            //                  ", start=" + request.getStartTime() +
+            //                  ", end=" + request.getEndTime() +
+            //                  ", date=" + request.getDate());
 
             return request;
 
         } catch (Exception e) {
+            System.err.println("Error parsing task create request: " + e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }
@@ -262,7 +297,7 @@ public class FrontendDataHandler {
     public static List<String> validateTaskCreateRequest(TaskCreateRequest request) {
         List<String> errors = new ArrayList<>();
 
-        //validate
+        //validate description
         if (request.getDescription() == null || request.getDescription().trim().isEmpty()) {
             errors.add(ERR_MISSING_DESCRIPTION);
         } else if (request.getDescription().length() > MAX_DESCRIPTION_LENGTH) {
@@ -281,6 +316,15 @@ public class FrontendDataHandler {
             errors.add(ERR_MISSING_END_TIME);
         } else if (!isValidTimeFormat(request.getEndTime())) {
             errors.add(ERR_INVALID_TIME_FORMAT + " for end time");
+        }
+
+        //validate date if provided
+        if (request.getDate() != null && !request.getDate().trim().isEmpty()) {
+            try {
+                LocalDate.parse(request.getDate());
+            } catch (DateTimeParseException e) {
+                errors.add("Invalid date format. Expected YYYY-MM-DD");
+            }
         }
 
         if (request.getStartTime() != null && request.getEndTime() != null &&
@@ -325,11 +369,18 @@ public class FrontendDataHandler {
         return errors;
     }
 
-    public static Task createTaskFromRequest(TaskCreateRequest request) 
+    public static Task createTaskFromRequest(TaskCreateRequest request)
     {
         LocalTime startTime = LocalTime.parse(request.getStartTime());
         LocalTime endTime = LocalTime.parse(request.getEndTime());
-        return new Task(request.getDescription(), startTime, endTime);
+
+        // Use provided date or default to today
+        if (request.getDate() != null && !request.getDate().trim().isEmpty()) {
+            LocalDate date = LocalDate.parse(request.getDate());
+            return new Task(request.getDescription(), startTime, endTime, date);
+        } else {
+            return new Task(request.getDescription(), startTime, endTime);
+        }
     }
 
     public static Task.TaskStatus getTaskStatusFromRequest(TaskUpdateRequest request) 

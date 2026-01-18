@@ -1,6 +1,8 @@
 // Schedule & Timeline Management
 let currentPriorityEvent = null;
 let selectedDate = new Date().toISOString().split('T')[0];
+let currentView = 'timeline'; // 'timeline' or 'calendar'
+let calendarStartDate = new Date(); // Start of the week for calendar view
 
 // Initialize the schedule page
 document.addEventListener('DOMContentLoaded', function() {
@@ -21,7 +23,12 @@ function initializeSchedulePage() {
     document.getElementById('clear-priority-event').addEventListener('click', clearPriorityEvent);
     document.getElementById('refresh-timeline').addEventListener('click', refreshTimeline);
     document.getElementById('timeline-date').addEventListener('change', handleDateChange);
+    document.getElementById('view-mode').addEventListener('change', handleViewModeChange);
     document.getElementById('schedule-add-task-btn').addEventListener('click', addTaskFromSchedule);
+
+    // Calendar navigation
+    document.getElementById('prev-week').addEventListener('click', () => navigateCalendar(-7));
+    document.getElementById('next-week').addEventListener('click', () => navigateCalendar(7));
 
     // Load settings for dark mode
     loadSettings();
@@ -278,12 +285,118 @@ function timeToMinutes(timeString) {
 
 function handleDateChange(event) {
     selectedDate = event.target.value;
-    loadScheduleTimeline();
+    if (currentView === 'timeline') {
+        loadScheduleTimeline();
+    } else {
+        loadCalendarView();
+    }
+}
+
+function handleViewModeChange(event) {
+    currentView = event.target.value;
+
+    const timelineView = document.getElementById('timeline-view');
+    const calendarView = document.getElementById('calendar-view');
+    const dateControl = document.querySelector('label[for="timeline-date"]').parentElement;
+
+    if (currentView === 'timeline') {
+        timelineView.style.display = 'block';
+        calendarView.style.display = 'none';
+        dateControl.style.display = 'block';
+        loadScheduleTimeline();
+    } else {
+        timelineView.style.display = 'none';
+        calendarView.style.display = 'block';
+        dateControl.style.display = 'none';
+        loadCalendarView();
+    }
+}
+
+function navigateCalendar(days) {
+    calendarStartDate.setDate(calendarStartDate.getDate() + days);
+    loadCalendarView();
+}
+
+async function loadCalendarView() {
+    try {
+        // Calculate the week start (Sunday) and end (Saturday)
+        const weekStart = new Date(calendarStartDate);
+        weekStart.setDate(weekStart.getDate() - weekStart.getDay()); // Go to Sunday
+
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekEnd.getDate() + 6); // Go to Saturday
+
+        // Update calendar title
+        const titleElement = document.getElementById('calendar-title');
+        const weekStartStr = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const weekEndStr = weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        titleElement.textContent = `${weekStartStr} - ${weekEndStr}`;
+
+        // Fetch tasks for the entire week
+        const weekTasks = {};
+        for (let i = 0; i < 7; i++) {
+            const currentDate = new Date(weekStart);
+            currentDate.setDate(currentDate.getDate() + i);
+            const dateStr = currentDate.toISOString().split('T')[0];
+
+            try {
+                const tasks = await fetchTasksForDate(dateStr);
+                weekTasks[dateStr] = tasks;
+            } catch (error) {
+                console.error(`Error fetching tasks for ${dateStr}:`, error);
+                weekTasks[dateStr] = [];
+            }
+        }
+
+        // Render calendar
+        renderCalendar(weekStart, weekTasks);
+
+    } catch (error) {
+        console.error('Error loading calendar view:', error);
+        showMessage('Failed to load calendar', 'error');
+    }
+}
+
+function renderCalendar(weekStart, weekTasks) {
+    const calendarDays = document.getElementById('calendar-days');
+    calendarDays.innerHTML = '';
+
+    const today = new Date().toISOString().split('T')[0];
+
+    for (let i = 0; i < 7; i++) {
+        const currentDate = new Date(weekStart);
+        currentDate.setDate(currentDate.getDate() + i);
+        const dateStr = currentDate.toISOString().split('T')[0];
+        const dayNumber = currentDate.getDate();
+
+        const dayElement = document.createElement('div');
+        dayElement.className = `calendar-day ${dateStr === today ? 'today' : ''}`;
+
+        dayElement.innerHTML = `<div class="calendar-day-number">${dayNumber}</div>`;
+
+        // Add tasks for this day
+        const dayTasks = weekTasks[dateStr] || [];
+        dayTasks.forEach(task => {
+            const taskElement = document.createElement('div');
+            taskElement.className = `calendar-task ${task.status.toLowerCase()}`;
+            taskElement.textContent = task.description;
+            taskElement.title = `${task.description} (${task.startTime} - ${task.endTime})`;
+            taskElement.addEventListener('click', () => editTask(task.id));
+            dayElement.appendChild(taskElement);
+        });
+
+        calendarDays.appendChild(dayElement);
+    }
 }
 
 function refreshTimeline() {
-    loadScheduleTimeline();
-    showMessage('Timeline refreshed', 'info');
+    if (currentView === 'timeline') {
+        loadScheduleTimeline();
+        showMessage('Timeline refreshed', 'info');
+    } else {
+        loadCalendarView();
+        showMessage('Calendar refreshed', 'info');
+    }
 }
 
 function scrollToTaskForm() {
@@ -326,37 +439,49 @@ async function addTaskFromSchedule() {
     const startTime = startDateTime.toTimeString().slice(0, 5); // HH:mm format
     const endTime = endDateTime.toTimeString().slice(0, 5); // HH:mm format
 
+    const requestData = {
+        description: taskText,
+        startTime: startTime,
+        endTime: endTime,
+        date: date
+    };
+
+    // console.log('Sending task creation request:', requestData);
+
     try {
         const response = await fetch('/api/tasks', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                description: taskText,
-                startTime: startTime,
-                endTime: endTime,
-                date: date,
-                priority: 'MEDIUM'
-            })
+            body: JSON.stringify(requestData)
         });
 
+        const responseText = await response.text();
+        // console.log('Response status:', response.status);
+        // console.log('Response text:', responseText);
+
         if (!response.ok) {
-            throw new Error('Failed to add task');
+            // console.error('Task creation failed:', response.status, errorText);
+            showMessage(`Failed to add task: ${responseText || 'Unknown error'}`, 'error');
+            return;
         }
 
         // Clear form and reset to defaults
         taskInput.value = '';
         setDefaultDatetimeValues();
 
-        // Refresh timeline - check if task appears on current selected date
-        // For multi-day tasks, we'll show them on the start date
-        loadScheduleTimeline();
+        // Refresh display based on current view
+        if (currentView === 'timeline') {
+            loadScheduleTimeline();
+        } else {
+            loadCalendarView();
+        }
 
         showMessage('Task added successfully!', 'success');
 
     } catch (error) {
-        console.error('Error adding task:', error);
+        // console.error('Error adding task:', error);
         showMessage('Failed to add task', 'error');
     }
 }

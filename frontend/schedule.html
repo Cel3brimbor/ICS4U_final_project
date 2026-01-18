@@ -85,21 +85,53 @@
                     <input type="date" id="timeline-date" class="setting-input">
                 </div>
                 <div class="control-group">
-                    <button id="refresh-timeline" class="setting-btn">Refresh Timeline</button>
+                    <label for="view-mode">View Mode:</label>
+                    <select id="view-mode" class="setting-select">
+                        <option value="timeline">Timeline View</option>
+                        <option value="calendar">Calendar View</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <button id="refresh-timeline" class="setting-btn">Refresh</button>
                 </div>
             </div>
 
             <!-- Timeline Visualization -->
-            <div class="timeline-container">
-                <div class="timeline-header">
-                    <div class="time-marker">00:00</div>
-                    <div class="time-marker">06:00</div>
-                    <div class="time-marker">12:00</div>
-                    <div class="time-marker">18:00</div>
-                    <div class="time-marker">23:59</div>
+            <div id="timeline-view" class="view-container">
+                <div class="timeline-container">
+                    <div class="timeline-header">
+                        <div class="time-marker">00:00</div>
+                        <div class="time-marker">06:00</div>
+                        <div class="time-marker">12:00</div>
+                        <div class="time-marker">18:00</div>
+                        <div class="time-marker">23:59</div>
+                    </div>
+                    <div id="schedule-timeline" class="schedule-timeline">
+                        <!-- Timeline will be populated here -->
+                    </div>
                 </div>
-                <div id="schedule-timeline" class="schedule-timeline">
-                    <!-- Timeline will be populated here -->
+            </div>
+
+            <!-- Calendar Visualization -->
+            <div id="calendar-view" class="view-container" style="display: none;">
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <button id="prev-week" class="calendar-nav">← Previous Week</button>
+                        <h3 id="calendar-title">Current Week</h3>
+                        <button id="next-week" class="calendar-nav">Next Week →</button>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="calendar-day-header">Sunday</div>
+                        <div class="calendar-day-header">Monday</div>
+                        <div class="calendar-day-header">Tuesday</div>
+                        <div class="calendar-day-header">Wednesday</div>
+                        <div class="calendar-day-header">Thursday</div>
+                        <div class="calendar-day-header">Friday</div>
+                        <div class="calendar-day-header">Saturday</div>
+                        <div id="calendar-days" class="calendar-days">
+                            <!-- Calendar days will be populated here -->
+                        </div>
+                    </div>
                 </div>
             </div>
 

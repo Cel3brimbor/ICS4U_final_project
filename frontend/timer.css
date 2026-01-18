@@ -726,6 +726,169 @@ body.dark-mode .schedule-stats {
     border-radius: 8px;
 }
 
+/* Calendar View Styles */
+.calendar-container {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #e1e5e9;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.calendar-header h3 {
+    color: #2c3e50;
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.calendar-nav {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.calendar-nav:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+}
+
+.calendar-day-header {
+    text-align: center;
+    font-weight: 600;
+    color: #2c3e50;
+    padding: 10px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.calendar-days {
+    display: contents;
+}
+
+.calendar-day {
+    min-height: 120px;
+    background: white;
+    border: 1px solid #e1e5e9;
+    border-radius: 6px;
+    padding: 8px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.calendar-day:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.calendar-day.today {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    border-color: #667eea;
+}
+
+.calendar-day.other-month {
+    background: #f8f9fa;
+    opacity: 0.6;
+}
+
+.calendar-day-number {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 4px;
+    font-size: 1.1rem;
+}
+
+.calendar-day.today .calendar-day-number {
+    color: #667eea;
+}
+
+.calendar-task {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    margin: 1px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+.calendar-task.completed {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.calendar-task.in_progress {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+}
+
+.calendar-task.pending {
+    background: linear-gradient(135deg, #6c757d, #495057);
+}
+
+/* View Container Management */
+.view-container {
+    transition: opacity 0.3s ease;
+}
+
+.view-container.hidden {
+    display: none !important;
+}
+
+/* Dark Mode Calendar Styles */
+body.dark-mode .calendar-container {
+    background: rgba(42, 42, 58, 0.9);
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .calendar-header h3 {
+    color: #f0f0f0;
+}
+
+body.dark-mode .calendar-day-header {
+    color: #f0f0f0;
+    background: rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .calendar-day {
+    background: rgba(52, 52, 68, 0.8);
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .calendar-day.other-month {
+    background: rgba(42, 42, 58, 0.6);
+}
+
+body.dark-mode .calendar-day-number {
+    color: #f0f0f0;
+}
+
+body.dark-mode .calendar-day.today .calendar-day-number {
+    color: #667eea;
+}
+
+body.dark-mode .calendar-task {
+    color: white;
+}
+
 body.dark-mode .setting-btn {
     background: rgba(102, 126, 234, 0.8);
     color: #f0f0f0;

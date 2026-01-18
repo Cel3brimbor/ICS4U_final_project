@@ -63,17 +63,25 @@ public class TaskHandlers {
                     sb.append(line);
                 }
                 String requestBody = sb.toString();
+                // System.out.println("Received request body: " + requestBody);
 
                 //parse and validate JSON using FrontendDataHandler
                 FrontendDataHandler.TaskCreateRequest request = FrontendDataHandler.parseTaskCreateRequest(requestBody);
                 if (request == null) {
+                    // System.out.println("Failed to parse JSON request");
                     sendBadRequest(exchange, FrontendDataHandler.ERR_INVALID_JSON);
                     return;
                 }
 
+                // System.out.println("Parsed request: description=" + request.getDescription() +
+                //                  ", startTime=" + request.getStartTime() +
+                //                  ", endTime=" + request.getEndTime() +
+                //                  ", date=" + request.getDate());
+
                 //validate the request
                 List<String> validationErrors = FrontendDataHandler.validateTaskCreateRequest(request);
                 if (!validationErrors.isEmpty()) {
+                    // System.out.println("Validation errors: " + validationErrors);
                     sendBadRequest(exchange, FrontendDataHandler.createValidationErrorResponse(validationErrors));
                     return;
                 }
@@ -81,12 +89,8 @@ public class TaskHandlers {
                 //create task from validated request
                 Task newTask = FrontendDataHandler.createTaskFromRequest(request);
 
-                //add task to schedule
-                Task addedTask = scheduleManager.addTask(
-                    newTask.getDescription(),
-                    newTask.getStartTime(),
-                    newTask.getEndTime()
-                );
+                //add task to schedule (use the Task object which has the correct date)
+                Task addedTask = scheduleManager.addTask(newTask);
 
                 if (addedTask != null) {
                     //save to persistence
@@ -104,7 +108,13 @@ public class TaskHandlers {
                 }
 
             } catch (Exception e) {
-                sendBadRequest(exchange, "Error processing request: " + e.getMessage());
+                System.err.println("CRITICAL ERROR in handlePostTask: " + e.getMessage());
+                e.printStackTrace();
+                try {
+                    sendBadRequest(exchange, "Internal server error: " + e.getMessage());
+                } catch (Exception sendError) {
+                    System.err.println("Failed to send error response: " + sendError.getMessage());
+                }
             }
         }
 
