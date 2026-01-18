@@ -162,14 +162,42 @@ function updateScheduleTimeline(tasks) {
 
     timeline.innerHTML = '';
 
+    // Get the actual width of the timeline container after CSS is applied
+    const timelineRect = timeline.getBoundingClientRect();
+    // Subtract padding from timelineWidth to get the usable content width for positioning
+    const style = getComputedStyle(timeline);
+    const paddingLeft = parseFloat(style.paddingLeft);
+    const paddingRight = parseFloat(style.paddingRight);
+    const timelineContentWidth = timelineRect.width - paddingLeft - paddingRight;
+    const hourWidth = timelineContentWidth / 24;
+
+    // Add time markers above the timeline
+    for (let hour = 0; hour <= 24; hour++) {
+        const marker = document.createElement('div');
+        marker.className = 'time-marker';
+        // Position markers relative to the content area, adjusting for padding
+        marker.style.left = (paddingLeft + hour * hourWidth) + 'px';
+        marker.textContent = hour === 24 ? '24:00' : `${hour.toString().padStart(2, '0')}:00`;
+        timeline.appendChild(marker);
+    }
+
     // Add priority event first if it exists
     if (currentPriorityEvent && currentPriorityEvent.date === selectedDate) {
-        const priorityBlock = createPriorityEventBlock(currentPriorityEvent);
+        const priorityBlock = createPriorityEventBlock(currentPriorityEvent, hourWidth, paddingLeft);
         timeline.appendChild(priorityBlock);
     }
 
     if (tasks.length === 0 && !currentPriorityEvent) {
-        timeline.innerHTML = '<div class="no-schedule">No tasks scheduled for this date</div>';
+        const noSchedule = document.createElement('div');
+        noSchedule.className = 'no-schedule';
+        noSchedule.textContent = 'No tasks scheduled for this date';
+        noSchedule.style.position = 'absolute';
+        noSchedule.style.top = '50%';
+        noSchedule.style.left = '50%';
+        noSchedule.style.transform = 'translate(-50%, -50%)';
+        noSchedule.style.color = '#6c757d';
+        noSchedule.style.fontSize = '1.1rem';
+        timeline.appendChild(noSchedule);
         return;
     }
 
@@ -178,12 +206,12 @@ function updateScheduleTimeline(tasks) {
 
     // Create timeline blocks for tasks
     tasks.forEach(task => {
-        const block = createTaskBlock(task);
+        const block = createTaskBlock(task, hourWidth, paddingLeft);
         timeline.appendChild(block);
     });
 }
 
-function createPriorityEventBlock(event) {
+function createPriorityEventBlock(event, hourWidth, paddingLeft) {
     const block = document.createElement('div');
     block.className = 'timeline-block priority-event';
 
@@ -192,23 +220,28 @@ function createPriorityEventBlock(event) {
     const endHour = parseInt(event.endTime.split(':')[0]);
     const endMinute = parseInt(event.endTime.split(':')[1]);
 
-    const startPosition = (startHour * 60 + startMinute) / (24 * 60) * 100;
-    const duration = ((endHour * 60 + endMinute) - (startHour * 60 + startMinute)) / (24 * 60) * 100;
+    const startMinutes = startHour * 60 + startMinute;
+    const endMinutes = endHour * 60 + endMinute;
+    const durationMinutes = Math.max(endMinutes - startMinutes, 30); // Minimum 30 minutes for visibility
 
-    block.style.left = startPosition + '%';
-    block.style.width = Math.max(duration, 2) + '%'; // Minimum width for visibility
+    // Calculate position and width using pixel values, adjusting for padding
+    const leftPosition = paddingLeft + (startMinutes / (24 * 60)) * (24 * hourWidth);
+    const width = Math.max((durationMinutes / (24 * 60)) * (24 * hourWidth), 80); // Minimum 80px width
+
+    block.style.left = leftPosition + 'px';
+    block.style.width = width + 'px';
 
     block.innerHTML = `
         <div class="timeline-content">
             <div class="timeline-title">⭐ ${escapeHtml(event.title)}</div>
-            <div class="timeline-time">${event.startTime} - ${event.endTime}</div>
+            <div class="timeline-priority">PRIORITY</div>
         </div>
     `;
 
     return block;
 }
 
-function createTaskBlock(task) {
+function createTaskBlock(task, hourWidth, paddingLeft) {
     const block = document.createElement('div');
     block.className = `timeline-block timeline-${task.status.toLowerCase()}`;
 
@@ -217,37 +250,39 @@ function createTaskBlock(task) {
     const endHour = parseInt(task.endTime.split(':')[0]);
     const endMinute = parseInt(task.endTime.split(':')[1]);
 
-    // Check if this is a multi-day task (end time is before start time)
     const isMultiDay = (endHour * 60 + endMinute) < (startHour * 60 + startMinute);
 
-    const startPosition = (startHour * 60 + startMinute) / (24 * 60) * 100;
-
-    let duration;
-    let endTimeDisplay = task.endTime;
-
     if (isMultiDay) {
-        // Multi-day task: show from start time to end of day (23:59)
-        duration = (24 * 60 - (startHour * 60 + startMinute)) / (24 * 60) * 100;
-        endTimeDisplay = "23:59 (next day)";
         block.classList.add('multi-day-task');
-    } else {
-        // Single-day task
-        duration = ((endHour * 60 + endMinute) - (startHour * 60 + startMinute)) / (24 * 60) * 100;
     }
 
-    block.style.left = startPosition + '%';
-    block.style.width = Math.max(duration, 1) + '%';
+    const startMinutes = startHour * 60 + startMinute;
+    let endMinutes;
+
+    if (isMultiDay) {
+        endMinutes = 24 * 60; // End of day for multi-day tasks
+    } else {
+        endMinutes = endHour * 60 + endMinute;
+    }
+
+    const durationMinutes = Math.max(endMinutes - startMinutes, 15); // Minimum 15 minutes for visibility
+
+    // Calculate position and width using pixel values, adjusting for padding
+    const leftPosition = paddingLeft + (startMinutes / (24 * 60)) * (24 * hourWidth);
+    const width = Math.max((durationMinutes / (24 * 60)) * (24 * hourWidth), 60); // Minimum 60px width
+
+    block.style.position = 'absolute';
+    block.style.left = leftPosition + 'px';
+    block.style.width = width + 'px';
 
     block.innerHTML = `
         <div class="timeline-content">
             <div class="timeline-title">${escapeHtml(task.description)}${isMultiDay ? ' 🌙' : ''}</div>
-            <div class="timeline-time">${task.startTime} - ${endTimeDisplay}</div>
             <div class="timeline-priority">${task.priority}</div>
         </div>
     `;
 
-    // Add click handler to edit task
-    block.addEventListener('click', () => editTask(task.id));
+    block.addEventListener('click', () => showTaskDetails(task));
 
     return block;
 }
@@ -415,10 +450,12 @@ async function addTaskFromSchedule() {
     const taskInput = document.getElementById('schedule-task-input');
     const startDatetime = document.getElementById('schedule-start-datetime');
     const endDatetime = document.getElementById('schedule-end-datetime');
+    const prioritySelect = document.getElementById('task-priority');
 
     const taskText = taskInput.value.trim();
     const startValue = startDatetime.value;
     const endValue = endDatetime.value;
+    const priority = prioritySelect.value;
 
     if (!taskText || !startValue || !endValue) {
         showMessage('Please fill in all fields', 'error');
@@ -443,7 +480,8 @@ async function addTaskFromSchedule() {
         description: taskText,
         startTime: startTime,
         endTime: endTime,
-        date: date
+        date: date,
+        priority: priority
     };
 
     // console.log('Sending task creation request:', requestData);
@@ -577,6 +615,105 @@ function showMessage(message, type = 'info') {
             notification.parentNode.removeChild(notification);
         }
     }, 3000);
+}
+
+// Task Details Modal
+function showTaskDetails(task) {
+    // Create modal overlay
+    const modal = document.createElement('div');
+    modal.className = 'task-modal-overlay';
+    modal.innerHTML = `
+        <div class="task-modal">
+            <div class="task-modal-header">
+                <h3>Task Details</h3>
+                <button class="modal-close-btn" onclick="closeTaskModal()">×</button>
+            </div>
+            <div class="task-modal-content">
+                <div class="task-detail-row">
+                    <strong>Description:</strong>
+                    <span>${escapeHtml(task.description)}</span>
+                </div>
+                <div class="task-detail-row">
+                    <strong>Time:</strong>
+                    <span>${task.startTime} - ${task.endTime}</span>
+                </div>
+                <div class="task-detail-row">
+                    <strong>Date:</strong>
+                    <span>${formatDate(task.date)}</span>
+                </div>
+                <div class="task-detail-row">
+                    <strong>Status:</strong>
+                    <span class="status-badge status-${task.status.toLowerCase()}">${task.status.replace('_', ' ')}</span>
+                </div>
+                <div class="task-detail-row">
+                    <strong>Priority:</strong>
+                    <span>${task.priority}</span>
+                </div>
+                <div class="task-detail-row">
+                    <strong>Duration:</strong>
+                    <span>${calculateDuration(task.startTime, task.endTime)}</span>
+                </div>
+            </div>
+            <div class="task-modal-actions">
+                <button class="modal-btn edit-btn" onclick="editTask('${task.id}')">Edit Task</button>
+                <button class="modal-btn close-btn" onclick="closeTaskModal()">Close</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
+
+    // Close modal when clicking outside
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeTaskModal();
+        }
+    });
+
+    // Close modal on escape key
+    document.addEventListener('keydown', handleEscapeKey);
+}
+
+function closeTaskModal() {
+    const modal = document.querySelector('.task-modal-overlay');
+    if (modal) {
+        modal.remove();
+        document.body.style.overflow = '';
+        document.removeEventListener('keydown', handleEscapeKey);
+    }
+}
+
+function handleEscapeKey(e) {
+    if (e.key === 'Escape') {
+        closeTaskModal();
+    }
+}
+
+function calculateDuration(startTime, endTime) {
+    const start = new Date(`2000-01-01T${startTime}`);
+    const end = new Date(`2000-01-01T${endTime}`);
+
+    if (end < start) {
+        // Multi-day task
+        const nextDay = new Date(end);
+        nextDay.setDate(nextDay.getDate() + 1);
+        const durationMs = nextDay - start;
+        const hours = Math.floor(durationMs / (1000 * 60 * 60));
+        const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+        return `${hours}h ${minutes}m (multi-day)`;
+    }
+
+    const durationMs = end - start;
+    const hours = Math.floor(durationMs / (1000 * 60 * 60));
+    const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (hours > 0) {
+        return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m`;
 }
 
 function goBack() {

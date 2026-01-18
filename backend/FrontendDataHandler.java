@@ -33,6 +33,7 @@ public class FrontendDataHandler {
         private String startTime;
         private String endTime;
         private String date;
+        private String priority;
 
         public TaskCreateRequest() {}
 
@@ -52,6 +53,10 @@ public class FrontendDataHandler {
         {
             return date;
         }
+        public String getPriority()
+        {
+            return priority;
+        }
 
         public void setDescription(String description)
         {
@@ -68,6 +73,10 @@ public class FrontendDataHandler {
         public void setDate(String date)
         {
             this.date = date;
+        }
+        public void setPriority(String priority)
+        {
+            this.priority = priority;
         }
 
         @Override
@@ -245,10 +254,21 @@ public class FrontendDataHandler {
                 }
             }
 
+            String priorityPattern = "\"priority\":\"";
+            int priorityStart = json.indexOf(priorityPattern);
+            if (priorityStart != -1) {
+                priorityStart += priorityPattern.length();
+                int priorityEnd = json.indexOf("\"", priorityStart);
+                if (priorityEnd != -1) {
+                    request.setPriority(json.substring(priorityStart, priorityEnd));
+                }
+            }
+
             // System.out.println("Parsed successfully: desc=" + request.getDescription() +
             //                  ", start=" + request.getStartTime() +
             //                  ", end=" + request.getEndTime() +
-            //                  ", date=" + request.getDate());
+            //                  ", date=" + request.getDate() +
+            //                  ", priority=" + request.getPriority());
 
             return request;
 
@@ -374,12 +394,20 @@ public class FrontendDataHandler {
         LocalTime startTime = LocalTime.parse(request.getStartTime());
         LocalTime endTime = LocalTime.parse(request.getEndTime());
 
+        // Use provided priority or default to MEDIUM
+        String priority = (request.getPriority() != null && !request.getPriority().trim().isEmpty())
+                         ? request.getPriority() : "MEDIUM";
+
         // Use provided date or default to today
         if (request.getDate() != null && !request.getDate().trim().isEmpty()) {
             LocalDate date = LocalDate.parse(request.getDate());
-            return new Task(request.getDescription(), startTime, endTime, date);
+            Task task = new Task(request.getDescription(), startTime, endTime, date);
+            task.setPriority(priority);
+            return task;
         } else {
-            return new Task(request.getDescription(), startTime, endTime);
+            Task task = new Task(request.getDescription(), startTime, endTime);
+            task.setPriority(priority);
+            return task;
         }
     }
 

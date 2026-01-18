@@ -235,6 +235,34 @@ function updateScheduleTimeline(tasks) {
 
     timeline.innerHTML = '';
 
+    // Add time markers/labels with responsive spacing
+    const screenWidth = window.innerWidth;
+
+    // Responsive marker intervals based on screen size
+    let markerInterval;
+    if (screenWidth < 640) {
+        markerInterval = 8; // Every 8 hours on very small screens
+    } else if (screenWidth < 1024) {
+        markerInterval = 6; // Every 6 hours on tablets
+    } else if (screenWidth < 1440) {
+        markerInterval = 4; // Every 4 hours on laptops
+    } else {
+        markerInterval = 3; // Every 3 hours on large screens
+    }
+
+    for (let hour = 0; hour <= 24; hour += markerInterval) {
+        if (hour > 24) break;
+
+        const marker = document.createElement('div');
+        marker.className = 'time-marker';
+        marker.style.left = (hour / 24) * 100 + '%';
+        marker.textContent = hour === 24 ? '24:00' : `${hour.toString().padStart(2, '0')}:00`;
+        marker.style.position = 'absolute';
+        marker.style.top = '-40px';
+        marker.style.zIndex = '20';
+        timeline.appendChild(marker);
+    }
+
     //create timeline blocks
     tasks.forEach(task => {
         const block = document.createElement('div');
@@ -250,12 +278,11 @@ function updateScheduleTimeline(tasks) {
         const duration = ((endHour * 60 + endMinute) - (startHour * 60 + startMinute)) / (24 * 60) * 100;
 
         block.style.left = startPosition + '%';
-        block.style.width = duration + '%';
+        block.style.width = Math.max(duration, 1) + '%'; // Minimum 1% width
 
         block.innerHTML = `
             <div class="timeline-content">
                 <div class="timeline-title">${escapeHtml(task.description)}</div>
-                <div class="timeline-time">${task.startTime} - ${task.endTime}</div>
             </div>
         `;
 

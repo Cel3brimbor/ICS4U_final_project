@@ -495,16 +495,36 @@
     font-size: 0.8rem;
     color: #6c757d;
     font-weight: 500;
+    position: absolute;
+    top: -25px; /* Adjusted to sit just above the top padding */
+    transform: translateX(-50%);
+    white-space: nowrap;
+    z-index: 5;
+}
+
+/* Schedule timeline specific time markers */
+.schedule-timeline .time-marker {
+    font-size: 0.7rem; /* Slightly smaller for cleaner look */
+    color: #495057; /* Darker color for better contrast */
+    font-weight: 500;
 }
 
 .schedule-timeline {
     position: relative;
-    height: 200px;
-    background: #f8f9fa;
+    height: 500px; /* Fixed height for the timeline area */
+    width: 100%;
+    max-width: 1200px; /* Limit maximum width */
+    margin: 0 auto; /* Center the timeline */
+    background: #f8f9fa; /* Clean light background */
     border: 1px solid #e1e5e9;
     border-radius: 8px;
-    padding: 1rem;
-    margin-top: 1rem;
+    padding: 40px 15px 15px 15px; /* Adjusted padding to ensure markers fit above and content below */
+    margin-top: 1.5rem;
+    box-sizing: border-box;
+    overflow-x: hidden; /* Absolutely no horizontal scrolling */
+    overflow-y: hidden; /* No vertical scrolling within the timeline itself */
+    display: flex;
+    flex-direction: column;
 }
 
 .timeline-legend {
@@ -567,13 +587,18 @@
     border: 2px solid #FFD700;
     box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
     z-index: 10;
+    top: 10px; /* Adjusted to sit within new padding */
+    height: 70px; /* Increased height for better visibility */
+    min-width: 90px;
 }
 
 .timeline-block.priority-event .timeline-title {
+    color: #2c3e50;
     font-weight: 700;
 }
 
-.timeline-block.priority-event .timeline-time {
+.timeline-block.priority-event .timeline-priority {
+    color: #2c3e50;
     opacity: 1;
     font-weight: 600;
 }
@@ -581,26 +606,33 @@
 .timeline-block.multi-day-task {
     border-style: dashed;
     border-width: 2px;
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.8), rgba(75, 0, 130, 0.8));
 }
 
 .timeline-block.multi-day-task .timeline-title {
     font-style: italic;
 }
 
-/* Enhanced Timeline Block Styling */
+/* Timeline Block Styling */
 .timeline-block {
     position: absolute;
-    top: 20px;
-    height: 60px;
-    border-radius: 6px;
+    top: 10px; /* Adjusted to sit within new padding */
+    height: 60px; /* Optimal height for content */
+    min-width: 80px;
+    border-radius: 4px;
     color: white;
-    padding: 0.5rem;
+    padding: 4px; /* Adjusted padding */
     box-sizing: border-box;
-    overflow: hidden;
+    overflow: hidden; /* Ensure content within block is hidden if it exceeds block size */
     cursor: pointer;
     transition: all 0.3s ease;
     border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Space out title and priority */
+    align-items: center; /* Center horizontally */
 }
 
 .timeline-block:hover {
@@ -622,34 +654,46 @@
 }
 
 .timeline-content {
-    height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 4px 8px;
+    justify-content: flex-start;
+    align-items: center; /* Center content horizontally */
+    padding: 0; /* Remove internal padding, controlled by block */
+    gap: 2px;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
 }
 
 .timeline-title {
-    font-size: 0.85rem;
+    font-size: 0.75rem; /* Standard font size */
     font-weight: 600;
-    margin-bottom: 0.25rem;
-    white-space: nowrap;
+    line-height: 1.1;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+    word-wrap: break-word;
+    hyphens: auto;
+    text-align: center; /* Center the title */
+    width: 100%;
     overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-}
-
-.timeline-time {
-    font-size: 0.75rem;
-    opacity: 0.9;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Limit to 2 lines */
+    -webkit-box-orient: vertical;
+    line-clamp: 2;
+    margin-bottom: 2px; /* Small gap between title and priority */
 }
 
 .timeline-priority {
-    font-size: 0.7rem;
-    opacity: 0.8;
-    text-transform: uppercase;
+    font-size: 0.55rem; /* Slightly smaller for subtle look */
     font-weight: 600;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 1px 3px;
+    border-radius: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    align-self: center; /* Center horizontally */
+    white-space: nowrap;
+    margin-top: auto;
 }
 
 /* Dark Mode Styles for Schedule Page */
@@ -695,318 +739,75 @@ body.dark-mode .priority-event-card {
 body.dark-mode .timeline-block.priority-event {
     background: linear-gradient(135deg, rgba(255, 215, 0, 0.9), rgba(255, 165, 0, 0.9));
     border-color: rgba(255, 215, 0, 0.8);
-    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+    color: #2c3e50;
 }
 
 body.dark-mode .timeline-block.multi-day-task {
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.8), rgba(75, 0, 130, 0.8));
     border-style: dashed;
-    border-color: rgba(102, 126, 234, 0.6);
+    border-color: rgba(138, 43, 226, 0.6);
 }
 
-body.dark-mode .task-input-section {
-    background: rgba(52, 52, 68, 0.8);
-    border: 1px solid rgba(102, 126, 234, 0.2);
-    border-radius: 12px;
-}
-
-body.dark-mode .timeline-container {
-    background: rgba(42, 42, 58, 0.9);
-    border-radius: 8px;
-    border: 1px solid rgba(102, 126, 234, 0.2);
-}
-
-body.dark-mode .timeline-header {
-    border-bottom: 1px solid rgba(102, 126, 234, 0.2);
-    background: rgba(52, 52, 68, 0.6);
-}
-
-body.dark-mode .schedule-stats {
-    background: rgba(42, 42, 58, 0.8);
-    border: 1px solid rgba(102, 126, 234, 0.2);
-    border-radius: 8px;
-}
-
-/* Calendar View Styles */
-.calendar-container {
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 20px;
-    border: 1px solid #e1e5e9;
-}
-
-.calendar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.calendar-header h3 {
-    color: #2c3e50;
-    margin: 0;
-    font-size: 1.4rem;
-}
-
-.calendar-nav {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-}
-
-.calendar-nav:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
-}
-
-.calendar-day-header {
-    text-align: center;
-    font-weight: 600;
-    color: #2c3e50;
-    padding: 10px;
-    background: rgba(102, 126, 234, 0.1);
-    border-radius: 6px;
-    font-size: 0.9rem;
-}
-
-.calendar-days {
-    display: contents;
-}
-
-.calendar-day {
-    min-height: 120px;
-    background: white;
-    border: 1px solid #e1e5e9;
-    border-radius: 6px;
-    padding: 8px;
-    position: relative;
-    transition: all 0.3s ease;
-}
-
-.calendar-day:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transform: translateY(-1px);
-}
-
-.calendar-day.today {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-    border-color: #667eea;
-}
-
-.calendar-day.other-month {
-    background: #f8f9fa;
-    opacity: 0.6;
-}
-
-.calendar-day-number {
-    font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 4px;
-    font-size: 1.1rem;
-}
-
-.calendar-day.today .calendar-day-number {
-    color: #667eea;
-}
-
-.calendar-task {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 0.7rem;
-    margin: 1px 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    cursor: pointer;
-}
-
-.calendar-task.completed {
-    background: linear-gradient(135deg, #28a745, #20c997);
-}
-
-.calendar-task.in_progress {
-    background: linear-gradient(135deg, #ffc107, #fd7e14);
-}
-
-.calendar-task.pending {
-    background: linear-gradient(135deg, #6c757d, #495057);
-}
-
-/* View Container Management */
-.view-container {
-    transition: opacity 0.3s ease;
-}
-
-.view-container.hidden {
-    display: none !important;
-}
-
-/* Dark Mode Calendar Styles */
-body.dark-mode .calendar-container {
-    background: rgba(42, 42, 58, 0.9);
-    border-color: rgba(102, 126, 234, 0.2);
-}
-
-body.dark-mode .calendar-header h3 {
-    color: #f0f0f0;
-}
-
-body.dark-mode .calendar-day-header {
-    color: #f0f0f0;
-    background: rgba(102, 126, 234, 0.2);
-}
-
-body.dark-mode .calendar-day {
-    background: rgba(52, 52, 68, 0.8);
-    border-color: rgba(102, 126, 234, 0.2);
-}
-
-body.dark-mode .calendar-day.other-month {
-    background: rgba(42, 42, 58, 0.6);
-}
-
-body.dark-mode .calendar-day-number {
-    color: #f0f0f0;
-}
-
-body.dark-mode .calendar-day.today .calendar-day-number {
-    color: #667eea;
-}
-
-body.dark-mode .calendar-task {
-    color: white;
-}
-
-body.dark-mode .setting-btn {
-    background: rgba(102, 126, 234, 0.8);
-    color: #f0f0f0;
-    border: 1px solid rgba(102, 126, 234, 0.3);
-}
-
-body.dark-mode .setting-btn:hover {
-    background: rgba(102, 126, 234, 0.9);
-    border-color: rgba(102, 126, 234, 0.5);
-    color: #ffffff;
-}
-
-/* Dark mode styles for schedule page headings */
-body.dark-mode .timer-container h2 {
-    color: #f0f0f0;
-}
-
-/* Dark mode styles for schedule page inputs */
-body.dark-mode #schedule-task-input {
-    background: rgba(62, 62, 78, 0.9);
-    border-color: rgba(102, 126, 234, 0.3);
-    color: #f0f0f0;
-}
-
-body.dark-mode #schedule-task-input:focus {
-    border-color: #667eea;
-    background: rgba(72, 72, 88, 0.95);
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
-}
-
-body.dark-mode #priority-title,
-body.dark-mode #priority-start,
-body.dark-mode #priority-end,
-body.dark-mode #schedule-start-time,
-body.dark-mode #schedule-end-time {
-    background: rgba(62, 62, 78, 0.9);
-    border-color: rgba(102, 126, 234, 0.3);
-    color: #f0f0f0;
-}
-
-body.dark-mode #priority-title:focus,
-body.dark-mode #priority-start:focus,
-body.dark-mode #priority-end:focus,
-body.dark-mode #schedule-start-time:focus,
-body.dark-mode #schedule-end-time:focus {
-    border-color: #667eea;
-    background: rgba(72, 72, 88, 0.95);
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
-}
-
-/* Responsive Design for Schedule Page */
+/* Responsive Timeline Design */
 @media (max-width: 768px) {
-    .app-header .back-btn {
-        position: static;
-        margin-bottom: 10px;
-        align-self: flex-start;
-    }
-
-    .page-title {
-        font-size: 1.8rem;
-        margin: 5px 0 15px 0;
-    }
-
-    .header-actions {
-        gap: 8px;
-        margin: 15px 0;
-    }
-
-    .clear-btn {
-        flex: 1;
-        min-width: 80px;
-        font-size: 0.85rem;
-        padding: 8px 12px;
-    }
-
-    .timeline-controls {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .control-group {
-        width: 100%;
-    }
-
-    .datetime-inputs {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .datetime-group {
-        min-width: unset;
-        width: 100%;
-    }
-
-    .timeline-legend {
-        gap: 15px;
-    }
-
-    .legend-item {
-        font-size: 0.8rem;
-    }
-
-    .schedule-stats {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-    }
-
     .timeline-block {
         height: 50px;
-        top: 15px;
+        top: 8px;
+        min-width: 100px;
+        max-width: 160px;
+        padding: 3px 4px;
     }
 
     .timeline-title {
-        font-size: 0.8rem;
+        font-size: 0.65rem;
+        -webkit-line-clamp: 1;
+        line-clamp: 1;
+        margin-bottom: 1px;
     }
 
-    .timeline-time {
+    .timeline-priority {
+        font-size: 0.55rem;
+        padding: 1px 2px;
+    }
+
+    .timeline-block.priority-event {
+        height: 55px;
+        min-width: 120px;
+        max-width: 180px;
+    }
+
+    .time-marker {
+        font-size: 0.65rem;
+        padding: 1px 2px;
+    }
+}
+
+/* Tablet Styles */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .schedule-timeline {
+        height: 450px;
+        max-width: 1200px;
+    }
+
+    .timeline-block {
+        height: 55px;
+        min-width: 110px;
+        max-width: 180px;
+    }
+
+    .timeline-title {
         font-size: 0.7rem;
+    }
+
+    .timeline-priority {
+        font-size: 0.58rem;
+    }
+
+    .timeline-block.priority-event {
+        height: 65px;
+        min-width: 130px;
+        max-width: 200px;
     }
 }
 
@@ -1261,4 +1062,247 @@ body.dark-mode .datetime-group input[type="datetime-local"]:focus {
     border-color: #667eea;
     background: rgba(72, 72, 88, 0.95);
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.priority-input-group {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.priority-input-group label {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 0.9rem;
+}
+
+.priority-input-group select {
+    padding: 0.75rem;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    background: white;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.priority-input-group select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    outline: none;
+}
+
+/* Dark mode for priority selector */
+body.dark-mode .priority-input-group label {
+    color: #f0f0f0;
+}
+
+body.dark-mode .priority-input-group select {
+    background: rgba(62, 62, 78, 0.9);
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #f0f0f0;
+}
+
+body.dark-mode .priority-input-group select:focus {
+    border-color: #667eea;
+    background: rgba(72, 72, 88, 0.95);
+}
+
+/* Task Details Modal */
+.task-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.task-modal {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease-out;
+}
+
+.task-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e1e5e9;
+}
+
+.task-modal-header h3 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+    background: #f8f9fa;
+    color: #2c3e50;
+}
+
+.task-modal-content {
+    padding: 1.5rem;
+}
+
+.task-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.task-detail-row:last-child {
+    border-bottom: none;
+}
+
+.task-detail-row strong {
+    color: #2c3e50;
+    font-weight: 600;
+    min-width: 120px;
+}
+
+.task-detail-row span {
+    color: #6c757d;
+    text-align: right;
+    flex: 1;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-in_progress {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-completed {
+    background: #d4edda;
+    color: #155724;
+}
+
+.task-modal-actions {
+    display: flex;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-top: 1px solid #e1e5e9;
+    justify-content: flex-end;
+}
+
+.modal-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.edit-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.edit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.close-btn {
+    background: #6c757d;
+    color: white;
+}
+
+.close-btn:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Dark Mode Modal Styles */
+body.dark-mode .task-modal {
+    background: rgba(42, 42, 58, 0.95);
+    color: #f0f0f0;
+}
+
+body.dark-mode .task-modal-header {
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .task-modal-header h3 {
+    color: #f0f0f0;
+}
+
+body.dark-mode .modal-close-btn:hover {
+    background: rgba(52, 52, 68, 0.8);
+    color: #f0f0f0;
+}
+
+body.dark-mode .task-detail-row {
+    border-color: rgba(102, 126, 234, 0.1);
+}
+
+body.dark-mode .task-detail-row strong {
+    color: #f0f0f0;
+}
+
+body.dark-mode .task-detail-row span {
+    color: #c0c0c0;
+}
+
+body.dark-mode .task-modal-actions {
+    border-color: rgba(102, 126, 234, 0.2);
 }

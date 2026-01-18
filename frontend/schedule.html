@@ -39,6 +39,14 @@
                     <input type="datetime-local" id="schedule-end-datetime" />
                 </div>
             </div>
+            <div class="priority-input-group">
+                <label for="task-priority">Priority:</label>
+                <select id="task-priority" class="setting-select">
+                    <option value="LOW">Low</option>
+                    <option value="MEDIUM" selected>Medium</option>
+                    <option value="HIGH">High</option>
+                </select>
+            </div>
             <button id="schedule-add-task-btn">Add Task</button>
         </div>
     </div>
@@ -99,13 +107,6 @@
             <!-- Timeline Visualization -->
             <div id="timeline-view" class="view-container">
                 <div class="timeline-container">
-                    <div class="timeline-header">
-                        <div class="time-marker">00:00</div>
-                        <div class="time-marker">06:00</div>
-                        <div class="time-marker">12:00</div>
-                        <div class="time-marker">18:00</div>
-                        <div class="time-marker">23:59</div>
-                    </div>
                     <div id="schedule-timeline" class="schedule-timeline">
                         <!-- Timeline will be populated here -->
                     </div>

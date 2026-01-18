@@ -398,38 +398,11 @@ body {
     transform: translateY(-1px);
 }
 
-/* schedule overview */
-.schedule-timeline {
-    min-height: 300px;
-    background: #f8f9fa;
-    border-radius: 12px;
-    padding: 20px;
-    border: 1px solid #e9ecef;
-}
-
-.time-slot {
-    display: flex;
-    align-items: center;
-    padding: 10px 15px;
-    margin-bottom: 8px;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    background: white;
-    border-left: 3px solid #667eea;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
-}
-
-.time-slot:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.time-slot .time {
-    font-weight: 600;
-    margin-right: 15px;
-    min-width: 70px;
-    color: #667eea;
+.no-tasks {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+    font-style: italic;
 }
 
 /* animations */
@@ -670,117 +643,6 @@ body {
     font-style: italic;
 }
 
-/* schedule timeline */
-.schedule-timeline {
-    position: relative;
-    height: 200px;
-    background: #f8f9fa;
-    border: 1px solid #e1e5e9;
-    border-radius: 8px;
-    padding: 1rem;
-    margin-top: 1rem;
-}
-
-.timeline-block {
-    position: absolute;
-    top: 20px;
-    height: 60px;
-    background: #5a6fd8;
-    border-radius: 4px;
-    color: white;
-    padding: 0.5rem;
-    box-sizing: border-box;
-    overflow: hidden;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.timeline-block:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-}
-
-.timeline-block.timeline-completed {
-    background: #28a745;
-}
-
-.timeline-block.timeline-in_progress {
-    background: #ffc107;
-}
-
-.timeline-content {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.timeline-title {
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.timeline-time {
-    font-size: 0.75rem;
-    opacity: 0.9;
-}
-
-.timeline-priority {
-    font-size: 0.7rem;
-    opacity: 0.8;
-    text-transform: uppercase;
-    font-weight: 600;
-}
-
-.no-schedule {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: #6c757d;
-    font-style: italic;
-}
-
-/* message notifications */
-.message-notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 1rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 500;
-    z-index: 1000;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    animation: slideIn 0.3s ease-out;
-}
-
-.message-notification.success {
-    background: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-
-.message-notification.error {
-    background: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
 /* Notes Styles */
 .notes-section {
     background: white;
@@ -973,55 +835,6 @@ body {
     background: #f8f9fa;
     border-radius: 10px;
     border: 2px dashed #dee2e6;
-}
-
-@media (max-width: 768px) {
-    .task-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.75rem;
-    }
-
-    .note-item {
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .note-actions {
-        align-self: flex-end;
-        flex-wrap: wrap;
-    }
-
-    .note-action-btn {
-        flex: 1;
-        min-width: 80px;
-        justify-content: center;
-    }
-
-    .task-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.25rem;
-    }
-
-    .task-actions {
-        margin-left: 0;
-        width: 100%;
-        justify-content: flex-end;
-    }
-
-    .timeline-block {
-        height: 50px;
-        top: 15px;
-    }
-
-    .timeline-title {
-        font-size: 0.8rem;
-    }
-
-    .timeline-time {
-        font-size: 0.7rem;
-    }
 }
 
 /* AI Assistant Styles */
