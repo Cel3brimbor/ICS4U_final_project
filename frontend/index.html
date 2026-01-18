@@ -48,6 +48,14 @@
                     <span>to</span>
                     <input type="time" id="end-time" />
                 </div>
+                <div class="priority-input-group">
+                    <label for="task-priority">Priority:</label>
+                    <select id="task-priority" class="setting-select">
+                        <option value="LOW">Low</option>
+                        <option value="MEDIUM" selected>Medium</option>
+                        <option value="HIGH">High</option>
+                    </select>
+                </div>
                 <button id="add-task-btn">Add Task</button>
             </div>
 
@@ -69,6 +77,34 @@
             </div>
         </section>
     </main>
+
+    <!-- Edit Task -->
+    <div id="edit-task-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Task</h3>
+                <span class="modal-close" onclick="closeEditTaskModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="edit-task-description">Task Description:</label>
+                    <input type="text" id="edit-task-description" placeholder="Enter task description..." />
+                </div>
+                <div class="form-group">
+                    <label for="edit-task-priority">Priority:</label>
+                    <select id="edit-task-priority" class="setting-select">
+                        <option value="LOW">Low</option>
+                        <option value="MEDIUM">Medium</option>
+                        <option value="HIGH">High</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeEditTaskModal()">Cancel</button>
+                <button class="btn-primary" onclick="saveTaskEdit()">Save Changes</button>
+            </div>
+        </div>
+    </div>
 
     <script src="notification-sounds.js"></script>
     <script src="script.js"></script>

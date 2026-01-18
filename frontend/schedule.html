@@ -29,19 +29,14 @@
         <h2>Add New Task</h2>
         <div class="task-input-section">
             <input type="text" id="schedule-task-input" placeholder="Enter a new task..." />
-            <div class="datetime-inputs">
-                <div class="datetime-group">
-                    <label for="schedule-start-datetime">Start Date & Time:</label>
-                    <input type="datetime-local" id="schedule-start-datetime" />
-                </div>
-                <div class="datetime-group">
-                    <label for="schedule-end-datetime">End Date & Time:</label>
-                    <input type="datetime-local" id="schedule-end-datetime" />
-                </div>
+            <div class="time-inputs">
+                <input type="time" id="schedule-start-time" />
+                <span>to</span>
+                <input type="time" id="schedule-end-time" />
             </div>
             <div class="priority-input-group">
-                <label for="task-priority">Priority:</label>
-                <select id="task-priority" class="setting-select">
+                <label for="schedule-task-priority">Priority:</label>
+                <select id="schedule-task-priority" class="setting-select">
                     <option value="LOW">Low</option>
                     <option value="MEDIUM" selected>Medium</option>
                     <option value="HIGH">High</option>
@@ -52,8 +47,8 @@
     </div>
 
     <!-- Priority Event Section -->
-        <div class="timer-container">
-            <h2>Priority Event</h2>
+    <div class="timer-container">
+        <h2>Priority Event</h2>
             <p class="priority-description">Set an important event that will always appear at the top of your timeline</p>
 
             <div class="custom-timer-input">
@@ -117,22 +112,25 @@
             <div id="calendar-view" class="view-container" style="display: none;">
                 <div class="calendar-container">
                     <div class="calendar-header">
-                        <button id="prev-week" class="calendar-nav">← Previous Week</button>
-                        <h3 id="calendar-title">Current Week</h3>
-                        <button id="next-week" class="calendar-nav">Next Week →</button>
+                        <button id="prev-week" class="calendar-nav">← Previous Month</button>
+                        <h3 id="calendar-title">Current Month</h3>
+                        <button id="next-week" class="calendar-nav">Next Month →</button>
                     </div>
-                    <div class="calendar-grid">
-                        <div class="calendar-day-header">Sunday</div>
-                        <div class="calendar-day-header">Monday</div>
-                        <div class="calendar-day-header">Tuesday</div>
-                        <div class="calendar-day-header">Wednesday</div>
-                        <div class="calendar-day-header">Thursday</div>
-                        <div class="calendar-day-header">Friday</div>
-                        <div class="calendar-day-header">Saturday</div>
-                        <div id="calendar-days" class="calendar-days">
-                            <!-- Calendar days will be populated here -->
-                        </div>
-                    </div>
+                    <table class="calendar-table">
+                        <thead>
+                            <tr>
+                                <th class="calendar-day-header">Sunday</th>
+                                <th class="calendar-day-header">Monday</th>
+                                <th class="calendar-day-header">Tuesday</th>
+                                <th class="calendar-day-header">Wednesday</th>
+                                <th class="calendar-day-header">Thursday</th>
+                                <th class="calendar-day-header">Friday</th>
+                                <th class="calendar-day-header">Saturday</th>
+                            </tr>
+                        </thead>
+                        <tbody id="calendar-body">
+                        </tbody>
+                    </table>
                 </div>
             </div>
 

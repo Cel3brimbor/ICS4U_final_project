@@ -130,6 +130,44 @@ public class ScheduleManager {
         return false;
     }
 
+    //update task description
+    public boolean updateTaskDescription(String taskId, String description) {
+        for (Task task : tasks) {
+            if (task.getId().equals(taskId)) {
+                task.setDescription(description);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //update task priority
+    public boolean updateTaskPriority(String taskId, String priority) {
+        for (Task task : tasks) {
+            if (task.getId().equals(taskId)) {
+                task.setPriority(priority);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //update multiple task properties
+    public boolean updateTask(String taskId, String description, String priority) {
+        for (Task task : tasks) {
+            if (task.getId().equals(taskId)) {
+                if (description != null && !description.trim().isEmpty()) {
+                    task.setDescription(description);
+                }
+                if (priority != null && !priority.trim().isEmpty()) {
+                    task.setPriority(priority);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
     //remove task
     public boolean removeTask(String taskId) {
         Task taskToRemove = null;

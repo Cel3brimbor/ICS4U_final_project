@@ -208,19 +208,21 @@ public class PE {
                 "You are an AI assistant that can edit schedules. Current tasks for today:\n%s\n\n" +
                 "User instruction: %s\n\n" +
                 "IMPORTANT VALIDATION:\n" +
-                "- For ADD: You MUST have description, start time, and end time\n" +
-                "- For ADD_MULTIPLE: You MUST provide an array of tasks, each with description, startTime, and endTime\n" +
+                "- For ADD: You MUST have description, start time, and end time. Priority is optional (HIGH/MEDIUM/LOW, defaults to MEDIUM)\n" +
+                "- For ADD_MULTIPLE: You MUST provide an array of tasks, each with description, startTime, and endTime. Priority is optional for each task\n" +
+                "- For UPDATE: You MUST identify which specific task and provide at least one field to update (description, priority, or status)\n" +
                 "- For UPDATE/COMPLETE/DELETE: You MUST identify which specific task\n" +
                 "- If the task requested to be edited or deleted doesn't exist, use {\"action\":\"ITEM_NOT_FOUND\",\"itemType\":\"task\",\"itemId\":\"taskId-here\"}\n" +
                 "- If information is missing, respond with {\"action\":\"NEED_INFO\",\"message\":\"what you need\"}\n\n" +
                 "- Tasks cannot happen simutaneously (i.e. have overlapped durations). A new task can only start before or after a current one."+
                 "Respond with a JSON object. Examples:\n" +
-                "- To add a task: {\"action\":\"ADD\",\"description\":\"task name\",\"startTime\":\"14:00\",\"endTime\":\"15:00\"}\n" +
-                "- To add multiple tasks: {\"action\":\"ADD_MULTIPLE\",\"tasks\":[{\"description\":\"task 1\",\"startTime\":\"14:00\",\"endTime\":\"15:00\"},{\"description\":\"task 2\",\"startTime\":\"15:30\",\"endTime\":\"16:30\"}, etc in this format]}\n" +
+                "- To add a task: {\"action\":\"ADD\",\"description\":\"task name\",\"startTime\":\"14:00\",\"endTime\":\"15:00\",\"priority\":\"HIGH\"}\n" +
+                "- To add multiple tasks: {\"action\":\"ADD_MULTIPLE\",\"tasks\":[{\"description\":\"task 1\",\"startTime\":\"14:00\",\"endTime\":\"15:00\",\"priority\":\"HIGH\"},{\"description\":\"task 2\",\"startTime\":\"15:30\",\"endTime\":\"16:30\"}]}\n" +
+                "- To update a task: {\"action\":\"UPDATE\",\"taskId\":\"task_12345\",\"description\":\"New title\",\"priority\":\"HIGH\"}\n" +
                 "- To complete a task: {\"action\":\"COMPLETE\",\"taskId\":\"task_12345\"}\n" +
                 "- To delete a task: {\"action\":\"DELETE\",\"taskId\":\"task_12345\"}\n" +
                 "- If unclear: {\"action\":\"NEED_INFO\",\"message\":\"Please specify which task to complete\"}\n\n" +
-                "Choose the appropriate action based on the user's instruction. Use 24-hour time format (HH:MM).",
+                "Choose the appropriate action based on the user's instruction. Use 24-hour time format (HH:MM). Priority values: HIGH, MEDIUM, LOW.",
                 scheduleContext,
                 instruction
             );

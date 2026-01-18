@@ -297,15 +297,42 @@ public class TaskHandlers {
             try {
                 String requestBody = readRequestBody(exchange);
 
-                // Extract status from JSON directly
                 String statusStr = extractJsonString(requestBody, "status");
-                if (statusStr == null) {
-                    sendBadRequest(exchange, "{\"error\":\"Status field required\"}");
+                String description = extractJsonString(requestBody, "description");
+                String priority = extractJsonString(requestBody, "priority");
+
+                if (statusStr == null && description == null && priority == null) {
+                    sendBadRequest(exchange, "{\"error\":\"At least one field (status, description, or priority) must be provided\"}");
                     return;
                 }
 
-                Task.TaskStatus status = Task.TaskStatus.valueOf(statusStr.toUpperCase());
-                boolean updated = scheduleManager.updateTaskStatus(taskId, status);
+                boolean updated = false;
+
+                //update status
+                if (statusStr != null) {
+                    try {
+                        Task.TaskStatus status = Task.TaskStatus.valueOf(statusStr.toUpperCase());
+                        updated = scheduleManager.updateTaskStatus(taskId, status);
+                    } catch (IllegalArgumentException e) {
+                        sendBadRequest(exchange, "{\"error\":\"Invalid status value: " + statusStr + "\"}");
+                        return;
+                    }
+                }
+
+                //update description
+                if (description != null) {
+                    updated = scheduleManager.updateTaskDescription(taskId, description) || updated;
+                }
+
+                // update priority
+                if (priority != null) {
+                    //validate
+                    if (!priority.equals("HIGH") && !priority.equals("MEDIUM") && !priority.equals("LOW")) {
+                        sendBadRequest(exchange, "{\"error\":\"Invalid priority value. Must be HIGH, MEDIUM, or LOW\"}");
+                        return;
+                    }
+                    updated = scheduleManager.updateTaskPriority(taskId, priority) || updated;
+                }
 
                 if (updated) {
                     TaskPersistence.saveTasks(scheduleManager);

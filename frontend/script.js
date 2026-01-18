@@ -104,10 +104,12 @@ async function addTask() {
     const taskInput = document.getElementById('task-input');
     const startTimeInput = document.getElementById('start-time');
     const endTimeInput = document.getElementById('end-time');
+    const priorityInput = document.getElementById('task-priority');
 
     const description = taskInput.value.trim();
     const startTime = startTimeInput.value;
     const endTime = endTimeInput.value;
+    const priority = priorityInput.value;
 
     //validation
     if (!description) {
@@ -135,7 +137,8 @@ async function addTask() {
             body: JSON.stringify({
                 description: description,
                 startTime: startTime,
-                endTime: endTime
+                endTime: endTime,
+                priority: priority
             })
         });
 
@@ -217,8 +220,11 @@ function createTaskElement(task) {
             </div>
         </div>
         <div class="task-actions">
+            <button class="task-action-btn edit-btn" onclick="openEditTaskModal('${task.id}', '${escapeHtml(task.description)}', '${task.priority}')">
+                ✏️ Edit
+            </button>
             <button class="task-action-btn complete-btn" onclick="updateTaskStatus('${task.id}', '${task.status === 'COMPLETED' ? 'PENDING' : 'COMPLETED'}')">
-                ${task.status === 'COMPLETED' ? '↺ Mark as Incomplete' : '✓ Complete'}
+                ${task.status === 'COMPLETED' ? 'Mark as Incomplete' : '✓ Complete'}
             </button>
             <button class="task-action-btn delete-btn" onclick="deleteTask('${task.id}')">
                 ✕ Delete
@@ -246,7 +252,7 @@ function updateScheduleTimeline(tasks) {
         return;
     }
 
-    // Filter for tasks that are in progress or pending
+    //filter for tasks that are in progress or pending
     const activeTasks = tasks.filter(task => task.status === 'IN_PROGRESS' || task.status === 'PENDING');
 
     if (activeTasks.length === 0) {
@@ -257,7 +263,7 @@ function updateScheduleTimeline(tasks) {
         return;
     }
 
-    // Sort by priority (HIGH > MEDIUM > LOW) then by start time
+    //sort by priority (HIGH > MEDIUM > LOW) then by start time
     activeTasks.sort((a, b) => {
         const priorityOrder = { 'HIGH': 3, 'MEDIUM': 2, 'LOW': 1 };
         const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
@@ -265,7 +271,7 @@ function updateScheduleTimeline(tasks) {
         return a.startTime.localeCompare(b.startTime);
     });
 
-    // Create task list items
+    //create task list items
     activeTasks.forEach(task => {
         const taskItem = document.createElement('div');
         taskItem.className = `schedule-task-item task-${task.status.toLowerCase()}`;
@@ -282,6 +288,66 @@ function updateScheduleTimeline(tasks) {
 
         timeline.appendChild(taskItem);
     });
+}
+
+//task editing modal functions
+let currentEditingTaskId = null;
+
+function openEditTaskModal(taskId, currentDescription, currentPriority) {
+    currentEditingTaskId = taskId;
+    document.getElementById('edit-task-description').value = unescapeHtml(currentDescription);
+    document.getElementById('edit-task-priority').value = currentPriority;
+    document.getElementById('edit-task-modal').style.display = 'block';
+}
+
+function closeEditTaskModal() {
+    document.getElementById('edit-task-modal').style.display = 'none';
+    currentEditingTaskId = null;
+    document.getElementById('edit-task-description').value = '';
+    document.getElementById('edit-task-priority').value = 'MEDIUM';
+}
+
+async function saveTaskEdit() {
+    const description = document.getElementById('edit-task-description').value.trim();
+    const priority = document.getElementById('edit-task-priority').value;
+
+    if (!description) {
+        showError('Please enter a task description');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/tasks/${currentEditingTaskId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                description: description,
+                priority: priority
+            })
+        });
+
+        if (response.ok) {
+            closeEditTaskModal();
+            await loadTasks();
+            showSuccess('Task updated successfully!');
+        } else {
+            const errorData = await response.json();
+            showError(errorData.error || 'Failed to update task');
+        }
+    } catch (error) {
+        console.error('Error updating task:', error);
+        showError('Failed to update task');
+    }
+}
+
+//close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('edit-task-modal');
+    if (event.target === modal) {
+        closeEditTaskModal();
+    }
 }
 
 async function updateTaskStatus(taskId, status) {
@@ -393,6 +459,12 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+function unescapeHtml(html) {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.textContent;
 }
 
 // Navigation functions

@@ -30,10 +30,21 @@ public class ScheduleActionHandler {
                     LocalTime startTime = LocalTime.parse(startMatcher.group(1));
                     LocalTime endTime = LocalTime.parse(endMatcher.group(1));
 
+                    String priority = "MEDIUM";
+                    Pattern priorityPattern = Pattern.compile("\"priority\"\\s*:\\s*\"([^\"]+)\"");
+                    Matcher priorityMatcher = priorityPattern.matcher(actionJson);
+                    if (priorityMatcher.find()) {
+                        String parsedPriority = priorityMatcher.group(1).toUpperCase();
+                        if (parsedPriority.equals("HIGH") || parsedPriority.equals("MEDIUM") || parsedPriority.equals("LOW")) {
+                            priority = parsedPriority;
+                        }
+                    }
+
                     Task newTask = scheduleManager.addTask(description, startTime, endTime, LocalDate.now(), true);
                     if (newTask != null) {
+                        newTask.setPriority(priority);
                         backend.TaskPersistence.saveTasks(scheduleManager);
-                        return "Added task: " + description + " (" + startTime + " - " + endTime + ")";
+                        return "Added task: " + description + " (" + startTime + " - " + endTime + ", Priority: " + priority + ")";
                     } else {
                         return "Could not add task due to scheduling conflict.";
                     }
@@ -66,9 +77,21 @@ public class ScheduleActionHandler {
                             LocalTime startTime = LocalTime.parse(startMatcher.group(1));
                             LocalTime endTime = LocalTime.parse(endMatcher.group(1));
 
+                            //parse priority (optional, defaults to MEDIUM)
+                            String priority = "MEDIUM";
+                            Pattern priorityPattern = Pattern.compile("\"priority\"\\s*:\\s*\"([^\"]+)\"");
+                            Matcher priorityMatcher = priorityPattern.matcher(taskStr);
+                            if (priorityMatcher.find()) {
+                                String parsedPriority = priorityMatcher.group(1).toUpperCase();
+                                if (parsedPriority.equals("HIGH") || parsedPriority.equals("MEDIUM") || parsedPriority.equals("LOW")) {
+                                    priority = parsedPriority;
+                                }
+                            }
+
                             Task newTask = scheduleManager.addTask(description, startTime, endTime, LocalDate.now(), true);
                             if (newTask != null) {
-                                resultMessage.append("- ").append(description).append(" (").append(startTime).append(" - ").append(endTime).append(")\n");
+                                newTask.setPriority(priority);
+                                resultMessage.append("- ").append(description).append(" (").append(startTime).append(" - ").append(endTime).append(", Priority: ").append(priority).append(")\n");
                                 successCount++;
                             } else {
                                 resultMessage.append("- ").append(description).append(" (CONFLICT - not added)\n");
@@ -83,18 +106,6 @@ public class ScheduleActionHandler {
                         resultMessage.append(", ").append(conflictCount).append(" conflicts");
                     }
                     return resultMessage.toString();
-                }
-            } else if (AIResponseHandler.containsAction(actionJson, "UPDATE")) {
-                Pattern idPattern = Pattern.compile("\"taskId\"\\s*:\\s*\"([^\"]+)\"");
-                Matcher idMatcher = idPattern.matcher(actionJson);
-                if (idMatcher.find()) {
-                    String taskId = idMatcher.group(1);
-                    if (scheduleManager.updateTaskStatus(taskId, Task.TaskStatus.COMPLETED)) {
-                        backend.TaskPersistence.saveTasks(scheduleManager);
-                        return "Marked task as completed.";
-                    } else {
-                        return "Could not find task with ID: " + taskId;
-                    }
                 }
             } else if (AIResponseHandler.containsAction(actionJson, "DELETE")) {
                 Pattern idPattern = Pattern.compile("\"taskId\"\\s*:\\s*\"([^\"]+)\"");
@@ -138,6 +149,45 @@ public class ScheduleActionHandler {
                         resultMessage.append(", ").append(notFoundCount).append(" not found");
                     }
                     return resultMessage.toString();
+                }
+            } else if (AIResponseHandler.containsAction(actionJson, "UPDATE")) {
+                Pattern idPattern = Pattern.compile("\"taskId\"\\s*:\\s*\"([^\"]+)\"");
+                Matcher idMatcher = idPattern.matcher(actionJson);
+                if (idMatcher.find()) {
+                    String taskId = idMatcher.group(1);
+
+                    String description = null;
+                    String priority = null;
+
+                    Pattern descPattern = Pattern.compile("\"description\"\\s*:\\s*\"([^\"]+)\"");
+                    Matcher descMatcher = descPattern.matcher(actionJson);
+                    if (descMatcher.find()) {
+                        description = descMatcher.group(1);
+                    }
+
+                    Pattern priorityPattern = Pattern.compile("\"priority\"\\s*:\\s*\"([^\"]+)\"");
+                    Matcher priorityMatcher = priorityPattern.matcher(actionJson);
+                    if (priorityMatcher.find()) {
+                        priority = priorityMatcher.group(1).toUpperCase();
+                        if (!priority.equals("HIGH") && !priority.equals("MEDIUM") && !priority.equals("LOW")) {
+                            priority = null;
+                        }
+                    }
+
+                    if (description != null || priority != null) {
+                        boolean updated = scheduleManager.updateTask(taskId, description, priority);
+                        if (updated) {
+                            backend.TaskPersistence.saveTasks(scheduleManager);
+                            StringBuilder updateMsg = new StringBuilder("Updated task:");
+                            if (description != null) updateMsg.append(" description");
+                            if (priority != null) updateMsg.append(" priority to ").append(priority);
+                            return updateMsg.toString();
+                        } else {
+                            return "Could not find task with ID: " + taskId;
+                        }
+                    } else {
+                        return "No valid fields provided for update (description or priority required)";
+                    }
                 }
             } else if (AIResponseHandler.containsAction(actionJson, "COMPLETE")) {
                 Pattern idPattern = Pattern.compile("\"taskId\"\\s*:\\s*\"([^\"]+)\"");

@@ -1,10 +1,8 @@
-// Schedule & Timeline Management
 let currentPriorityEvent = null;
 let selectedDate = new Date().toISOString().split('T')[0];
-let currentView = 'timeline'; // 'timeline' or 'calendar'
-let calendarStartDate = new Date(); // Start of the week for calendar view
+let currentView = 'timeline'; 
+let calendarStartDate = new Date(); 
 
-// Initialize the schedule page
 document.addEventListener('DOMContentLoaded', function() {
     initializeSchedulePage();
     loadPriorityEvent();
@@ -12,13 +10,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeSchedulePage() {
-    // Set default date to today
     document.getElementById('timeline-date').value = selectedDate;
 
-    // Set default datetime values (current time for start, +1 hour for end)
     setDefaultDatetimeValues();
 
-    // Event listeners
     document.getElementById('set-priority-event').addEventListener('click', setPriorityEvent);
     document.getElementById('clear-priority-event').addEventListener('click', clearPriorityEvent);
     document.getElementById('refresh-timeline').addEventListener('click', refreshTimeline);
@@ -26,25 +21,22 @@ function initializeSchedulePage() {
     document.getElementById('view-mode').addEventListener('change', handleViewModeChange);
     document.getElementById('schedule-add-task-btn').addEventListener('click', addTaskFromSchedule);
 
-    // Calendar navigation
-    document.getElementById('prev-week').addEventListener('click', () => navigateCalendar(-7));
-    document.getElementById('next-week').addEventListener('click', () => navigateCalendar(7));
+    document.getElementById('prev-week').addEventListener('click', () => navigateCalendar(-1));
+    document.getElementById('next-week').addEventListener('click', () => navigateCalendar(1));
 
-    // Load settings for dark mode
     loadSettings();
 }
 
 function setDefaultDatetimeValues() {
     const now = new Date();
-    const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000); // Add 1 hour
+    const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
 
-    // Format for datetime-local input (YYYY-MM-DDTHH:mm)
-    const formatDatetime = (date) => {
-        return date.toISOString().slice(0, 16);
+    const formatTime = (date) => {
+        return date.toTimeString().slice(0, 5); // HH:mm format
     };
 
-    document.getElementById('schedule-start-datetime').value = formatDatetime(now);
-    document.getElementById('schedule-end-datetime').value = formatDatetime(oneHourLater);
+    document.getElementById('schedule-start-time').value = formatTime(now);
+    document.getElementById('schedule-end-time').value = formatTime(oneHourLater);
 }
 
 function loadSettings() {
@@ -61,7 +53,6 @@ function loadSettings() {
     }
 }
 
-// Priority Event Management
 function setPriorityEvent() {
     const title = document.getElementById('priority-title').value.trim();
     const startTime = document.getElementById('priority-start').value;
@@ -88,7 +79,7 @@ function setPriorityEvent() {
 
     savePriorityEvent();
     displayPriorityEvent();
-    loadScheduleTimeline(); // Refresh timeline to show priority event
+    loadScheduleTimeline();
     showMessage('Priority event set successfully!', 'success');
 }
 
@@ -130,19 +121,16 @@ function displayPriorityEvent() {
         </div>
     `;
 
-    // Fill form with current values
     document.getElementById('priority-title').value = currentPriorityEvent.title;
     document.getElementById('priority-start').value = currentPriorityEvent.startTime;
     document.getElementById('priority-end').value = currentPriorityEvent.endTime;
 }
 
-// Timeline Management
 async function loadScheduleTimeline() {
     try {
         const response = await fetch('/api/tasks');
         const tasks = await response.json();
 
-        // Filter tasks for selected date
         const dateTasks = tasks.filter(task => {
             const taskDate = new Date(task.date).toISOString().split('T')[0];
             return taskDate === selectedDate;
@@ -162,26 +150,21 @@ function updateScheduleTimeline(tasks) {
 
     timeline.innerHTML = '';
 
-    // Get the actual width of the timeline container after CSS is applied
     const timelineRect = timeline.getBoundingClientRect();
-    // Subtract padding from timelineWidth to get the usable content width for positioning
     const style = getComputedStyle(timeline);
     const paddingLeft = parseFloat(style.paddingLeft);
     const paddingRight = parseFloat(style.paddingRight);
     const timelineContentWidth = timelineRect.width - paddingLeft - paddingRight;
     const hourWidth = timelineContentWidth / 24;
 
-    // Add time markers above the timeline
     for (let hour = 0; hour <= 24; hour++) {
         const marker = document.createElement('div');
         marker.className = 'time-marker';
-        // Position markers relative to the content area, adjusting for padding
         marker.style.left = (paddingLeft + hour * hourWidth) + 'px';
         marker.textContent = hour === 24 ? '24:00' : `${hour.toString().padStart(2, '0')}:00`;
         timeline.appendChild(marker);
     }
 
-    // Add priority event first if it exists (always at the top)
     if (currentPriorityEvent && currentPriorityEvent.date === selectedDate) {
         const priorityBlock = createPriorityEventBlock(currentPriorityEvent, hourWidth, paddingLeft);
         timeline.appendChild(priorityBlock);
@@ -201,13 +184,10 @@ function updateScheduleTimeline(tasks) {
         return;
     }
 
-    // Sort tasks by start time
     tasks.sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-    // Position tasks with stacking to avoid overlaps
     const positionedTasks = positionTasksWithStacking(tasks, hourWidth, paddingLeft);
 
-    // Create timeline blocks for tasks
     positionedTasks.forEach(taskData => {
         const block = createTaskBlock(taskData.task, hourWidth, paddingLeft, taskData.top);
         timeline.appendChild(block);
@@ -225,11 +205,10 @@ function createPriorityEventBlock(event, hourWidth, paddingLeft) {
 
     const startMinutes = startHour * 60 + startMinute;
     const endMinutes = endHour * 60 + endMinute;
-    const durationMinutes = Math.max(endMinutes - startMinutes, 30); // Minimum 30 minutes for visibility
+    const durationMinutes = Math.max(endMinutes - startMinutes, 30);
 
-    // Calculate position and width using pixel values, adjusting for padding
     const leftPosition = paddingLeft + (startMinutes / (24 * 60)) * (24 * hourWidth);
-    const width = Math.max((durationMinutes / (24 * 60)) * (24 * hourWidth), 80); // Minimum 80px width
+    const width = Math.max((durationMinutes / (24 * 60)) * (24 * hourWidth), 80); 
 
     block.style.left = leftPosition + 'px';
     block.style.width = width + 'px';
@@ -246,7 +225,7 @@ function createPriorityEventBlock(event, hourWidth, paddingLeft) {
 
 function positionTasksWithStacking(tasks, hourWidth, paddingLeft) {
     const positionedTasks = [];
-    const rows = []; // Each row represents a vertical level
+    const rows = []; 
 
     tasks.forEach(task => {
         const startHour = parseInt(task.startTime.split(':')[0]);
@@ -261,7 +240,6 @@ function positionTasksWithStacking(tasks, hourWidth, paddingLeft) {
         const leftPosition = paddingLeft + (startMinutes / (24 * 60)) * (24 * hourWidth);
         const width = Math.max((endMinutes - startMinutes) / (24 * 60) * (24 * hourWidth), 60);
 
-        // Find the first row where this task doesn't overlap with existing tasks
         let rowIndex = 0;
         let foundRow = false;
 
@@ -402,44 +380,49 @@ function handleViewModeChange(event) {
     }
 }
 
-function navigateCalendar(days) {
-    calendarStartDate.setDate(calendarStartDate.getDate() + days);
+function navigateCalendar(months) {
+    calendarStartDate.setMonth(calendarStartDate.getMonth() + months);
     loadCalendarView();
 }
 
 async function loadCalendarView() {
     try {
-        // Calculate the week start (Sunday) and end (Saturday)
-        const weekStart = new Date(calendarStartDate);
-        weekStart.setDate(weekStart.getDate() - weekStart.getDay()); // Go to Sunday
+        // Calculate the month start (1st of the month) and month boundaries
+        const monthStart = new Date(calendarStartDate.getFullYear(), calendarStartDate.getMonth(), 1);
+        const monthEnd = new Date(calendarStartDate.getFullYear(), calendarStartDate.getMonth() + 1, 0);
 
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekEnd.getDate() + 6); // Go to Saturday
+        // Calculate the calendar grid start (Sunday of the week containing month start)
+        const calendarStart = new Date(monthStart);
+        calendarStart.setDate(calendarStart.getDate() - calendarStart.getDay());
+
+        // Calculate the calendar grid end (Saturday of the week containing month end)
+        const calendarEnd = new Date(monthEnd);
+        calendarEnd.setDate(calendarEnd.getDate() + (6 - calendarEnd.getDay()));
 
         // Update calendar title
         const titleElement = document.getElementById('calendar-title');
-        const weekStartStr = weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        const weekEndStr = weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        titleElement.textContent = `${weekStartStr} - ${weekEndStr}`;
+        const monthName = monthStart.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        titleElement.textContent = monthName;
 
-        // Fetch tasks for the entire week
-        const weekTasks = {};
-        for (let i = 0; i < 7; i++) {
-            const currentDate = new Date(weekStart);
-            currentDate.setDate(currentDate.getDate() + i);
+        // Fetch tasks for the entire month
+        const monthTasks = {};
+        const currentDate = new Date(calendarStart);
+        while (currentDate <= calendarEnd) {
             const dateStr = currentDate.toISOString().split('T')[0];
 
             try {
                 const tasks = await fetchTasksForDate(dateStr);
-                weekTasks[dateStr] = tasks;
+                monthTasks[dateStr] = tasks;
             } catch (error) {
                 console.error(`Error fetching tasks for ${dateStr}:`, error);
-                weekTasks[dateStr] = [];
+                monthTasks[dateStr] = [];
             }
+
+            currentDate.setDate(currentDate.getDate() + 1);
         }
 
         // Render calendar
-        renderCalendar(weekStart, weekTasks);
+        renderCalendar(calendarStart, calendarEnd, monthTasks);
 
     } catch (error) {
         console.error('Error loading calendar view:', error);
@@ -447,35 +430,59 @@ async function loadCalendarView() {
     }
 }
 
-function renderCalendar(weekStart, weekTasks) {
-    const calendarDays = document.getElementById('calendar-days');
-    calendarDays.innerHTML = '';
+function renderCalendar(calendarStart, calendarEnd, monthTasks) {
+    const calendarBody = document.getElementById('calendar-body');
+    calendarBody.innerHTML = '';
 
     const today = new Date().toISOString().split('T')[0];
+    const currentMonth = calendarStartDate.getMonth();
+    const currentYear = calendarStartDate.getFullYear();
 
-    for (let i = 0; i < 7; i++) {
-        const currentDate = new Date(weekStart);
-        currentDate.setDate(currentDate.getDate() + i);
-        const dateStr = currentDate.toISOString().split('T')[0];
-        const dayNumber = currentDate.getDate();
+    // Calculate total days to display (6 weeks × 7 days = 42 days)
+    const totalDays = Math.ceil((calendarEnd - calendarStart) / (1000 * 60 * 60 * 24)) + 1;
 
-        const dayElement = document.createElement('div');
-        dayElement.className = `calendar-day ${dateStr === today ? 'today' : ''}`;
+    // Create 6 rows (weeks)
+    for (let week = 0; week < 6; week++) {
+        const row = document.createElement('tr');
 
-        dayElement.innerHTML = `<div class="calendar-day-number">${dayNumber}</div>`;
+        // Create 7 cells per row (days)
+        for (let day = 0; day < 7; day++) {
+            const dayIndex = week * 7 + day;
+            const currentDate = new Date(calendarStart);
+            currentDate.setDate(currentDate.getDate() + dayIndex);
+            const dateStr = currentDate.toISOString().split('T')[0];
+            const dayNumber = currentDate.getDate();
+            const isCurrentMonth = currentDate.getMonth() === currentMonth && currentDate.getFullYear() === currentYear;
 
-        // Add tasks for this day
-        const dayTasks = weekTasks[dateStr] || [];
-        dayTasks.forEach(task => {
-            const taskElement = document.createElement('div');
-            taskElement.className = `calendar-task ${task.status.toLowerCase()}`;
-            taskElement.textContent = task.description;
-            taskElement.title = `${task.description} (${task.startTime} - ${task.endTime})`;
-            taskElement.addEventListener('click', () => editTask(task.id));
-            dayElement.appendChild(taskElement);
-        });
+            const cell = document.createElement('td');
+            cell.className = `calendar-day ${dateStr === today ? 'today' : ''} ${!isCurrentMonth ? 'other-month' : ''}`;
 
-        calendarDays.appendChild(dayElement);
+            cell.innerHTML = `<div class="calendar-day-number">${dayNumber}</div>`;
+
+            // Add tasks for this day
+            const dayTasks = monthTasks[dateStr] || [];
+            dayTasks.slice(0, 3).forEach(task => { // Limit to 3 tasks per day for space
+                const taskElement = document.createElement('div');
+                taskElement.className = `calendar-task ${task.status.toLowerCase()}`;
+                taskElement.textContent = task.description.length > 15 ? task.description.substring(0, 15) + '...' : task.description;
+                taskElement.title = `${task.description} (${task.startTime} - ${task.endTime})`;
+                taskElement.addEventListener('click', () => editTask(task.id));
+                cell.appendChild(taskElement);
+            });
+
+            // Add indicator if there are more tasks
+            if (dayTasks.length > 3) {
+                const moreIndicator = document.createElement('div');
+                moreIndicator.className = 'calendar-more-tasks';
+                moreIndicator.textContent = `+${dayTasks.length - 3} more`;
+                moreIndicator.title = `${dayTasks.length - 3} additional tasks`;
+                cell.appendChild(moreIndicator);
+            }
+
+            row.appendChild(cell);
+        }
+
+        calendarBody.appendChild(row);
     }
 }
 
@@ -503,39 +510,31 @@ function addTaskToTimeline() {
 // Add task directly from schedule page
 async function addTaskFromSchedule() {
     const taskInput = document.getElementById('schedule-task-input');
-    const startDatetime = document.getElementById('schedule-start-datetime');
-    const endDatetime = document.getElementById('schedule-end-datetime');
-    const prioritySelect = document.getElementById('task-priority');
+    const startTimeInput = document.getElementById('schedule-start-time');
+    const endTimeInput = document.getElementById('schedule-end-time');
+    const prioritySelect = document.getElementById('schedule-task-priority');
+    const selectedDate = document.getElementById('timeline-date').value;
 
     const taskText = taskInput.value.trim();
-    const startValue = startDatetime.value;
-    const endValue = endDatetime.value;
+    const startTime = startTimeInput.value;
+    const endTime = endTimeInput.value;
     const priority = prioritySelect.value;
 
-    if (!taskText || !startValue || !endValue) {
+    if (!taskText || !startTime || !endTime) {
         showMessage('Please fill in all fields', 'error');
         return;
     }
 
-    // Parse datetime values
-    const startDateTime = new Date(startValue);
-    const endDateTime = new Date(endValue);
-
-    if (startDateTime >= endDateTime) {
-        showMessage('End date/time must be after start date/time', 'error');
+    if (startTime >= endTime) {
+        showMessage('End time must be after start time', 'error');
         return;
     }
-
-    // Extract date and time components for backend compatibility
-    const date = startDateTime.toISOString().split('T')[0]; // YYYY-MM-DD format
-    const startTime = startDateTime.toTimeString().slice(0, 5); // HH:mm format
-    const endTime = endDateTime.toTimeString().slice(0, 5); // HH:mm format
 
     const requestData = {
         description: taskText,
         startTime: startTime,
         endTime: endTime,
-        date: date,
+        date: selectedDate,
         priority: priority
     };
 
