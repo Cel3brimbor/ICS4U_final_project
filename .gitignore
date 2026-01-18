@@ -24,13 +24,14 @@ commands.txt
 hs_err_pid*
 replay_pid*
 
-# backup folders
+# backup and archive folders
 backup/
 backups/
 backups_old/
 backups_old_old/
 backups_old_old_old/
 backups_old_old_old_old/
+archives/
 
 #tasks and notes
 tasks.txt

@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "PE",
+            "request": "launch",
+            "mainClass": "backend.PE",
+            "projectName": "final_project_ab751a4e"
+        },
+        {
+            "type": "java",
             "name": "Main",
             "request": "launch",
             "mainClass": "backend.Main",

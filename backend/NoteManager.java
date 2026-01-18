@@ -32,12 +32,12 @@ public class NoteManager {
     }
 
     public boolean deleteNote(String noteId) {
-        return notes.removeIf(note -> noteId.equals(getNoteId(note)));
+        return notes.removeIf(note -> noteId.equals(note.getId()));
     }
 
     public boolean updateNote(String noteId, String newContent) {
         for (Note note : notes) {
-            if (noteId.equals(getNoteId(note))) {
+            if (noteId.equals(note.getId())) {
                 note.setContent(newContent);
                 return true;
             }
@@ -51,7 +51,7 @@ public class NoteManager {
 
     public Note getNoteById(String noteId) {
         for (Note note : notes) {
-            if (noteId.equals(getNoteId(note))) {
+            if (noteId.equals(note.getId())) {
                 return note;
             }
         }
@@ -85,9 +85,5 @@ public class NoteManager {
             });
 
         return sb.toString();
-    }
-
-    private String getNoteId(Note note) {
-        return note.getContent() + "|" + note.getCreationTime().toString();
     }
 }

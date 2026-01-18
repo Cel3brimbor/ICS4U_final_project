@@ -1,4 +1,4 @@
-import backend.FrontendDataHandler;
+package backend;
 
 public class TestJson {
     public static void main(String[] args) {
