@@ -318,21 +318,5 @@ function escapeHtml(text) {
 }
 
 function navigateTo(page) {
-    const navButtons = document.querySelectorAll('.nav-btn');
-    navButtons.forEach(btn => btn.classList.remove('active'));
-
-    event.target.classList.add('active');
-
-    switch(page) {
-        case 'home':
-            window.location.href = '/index.html';
-            break;
-        case 'notes':
-            break;
-        case 'timer':
-            window.location.href = '/timer.html';
-            break;
-        default:
-            alert(`${page.charAt(0).toUpperCase() + pageName.slice(1)} page coming soon!`);
-    }
+    window.location.href = page === 'home' ? 'index.html' : page === 'ai' ? 'ai.html' : page === 'tasks' ? 'tasks.html' : page === 'notes' ? 'note.html' : page === 'timer' ? 'timer.html' : 'index.html';
 }
