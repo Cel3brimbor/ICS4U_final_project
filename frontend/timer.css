@@ -578,6 +578,15 @@
     font-weight: 600;
 }
 
+.timeline-block.multi-day-task {
+    border-style: dashed;
+    border-width: 2px;
+}
+
+.timeline-block.multi-day-task .timeline-title {
+    font-style: italic;
+}
+
 /* Enhanced Timeline Block Styling */
 .timeline-block {
     position: absolute;
@@ -689,23 +698,107 @@ body.dark-mode .timeline-block.priority-event {
     box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
 }
 
+body.dark-mode .timeline-block.multi-day-task {
+    border-style: dashed;
+    border-color: rgba(102, 126, 234, 0.6);
+}
+
+body.dark-mode .task-input-section {
+    background: rgba(52, 52, 68, 0.8);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 12px;
+}
+
+body.dark-mode .timeline-container {
+    background: rgba(42, 42, 58, 0.9);
+    border-radius: 8px;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .timeline-header {
+    border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+    background: rgba(52, 52, 68, 0.6);
+}
+
+body.dark-mode .schedule-stats {
+    background: rgba(42, 42, 58, 0.8);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 8px;
+}
+
+body.dark-mode .setting-btn {
+    background: rgba(102, 126, 234, 0.8);
+    color: #f0f0f0;
+    border: 1px solid rgba(102, 126, 234, 0.3);
+}
+
+body.dark-mode .setting-btn:hover {
+    background: rgba(102, 126, 234, 0.9);
+    border-color: rgba(102, 126, 234, 0.5);
+    color: #ffffff;
+}
+
+/* Dark mode styles for schedule page headings */
+body.dark-mode .timer-container h2 {
+    color: #f0f0f0;
+}
+
+/* Dark mode styles for schedule page inputs */
+body.dark-mode #schedule-task-input {
+    background: rgba(62, 62, 78, 0.9);
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #f0f0f0;
+}
+
+body.dark-mode #schedule-task-input:focus {
+    border-color: #667eea;
+    background: rgba(72, 72, 88, 0.95);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode #priority-title,
+body.dark-mode #priority-start,
+body.dark-mode #priority-end,
+body.dark-mode #schedule-start-time,
+body.dark-mode #schedule-end-time {
+    background: rgba(62, 62, 78, 0.9);
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #f0f0f0;
+}
+
+body.dark-mode #priority-title:focus,
+body.dark-mode #priority-start:focus,
+body.dark-mode #priority-end:focus,
+body.dark-mode #schedule-start-time:focus,
+body.dark-mode #schedule-end-time:focus {
+    border-color: #667eea;
+    background: rgba(72, 72, 88, 0.95);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
 /* Responsive Design for Schedule Page */
 @media (max-width: 768px) {
-    .header-content {
-        flex-direction: column;
-        gap: 15px;
-        align-items: flex-start;
+    .app-header .back-btn {
+        position: static;
+        margin-bottom: 10px;
+        align-self: flex-start;
+    }
+
+    .page-title {
+        font-size: 1.8rem;
+        margin: 5px 0 15px 0;
     }
 
     .header-actions {
-        margin-left: 0;
-        width: 100%;
-        justify-content: center;
+        gap: 8px;
+        margin: 15px 0;
     }
 
     .clear-btn {
         flex: 1;
-        max-width: 120px;
+        min-width: 80px;
+        font-size: 0.85rem;
+        padding: 8px 12px;
     }
 
     .timeline-controls {
@@ -714,6 +807,16 @@ body.dark-mode .timeline-block.priority-event {
     }
 
     .control-group {
+        width: 100%;
+    }
+
+    .datetime-inputs {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .datetime-group {
+        min-width: unset;
         width: 100%;
     }
 
@@ -750,7 +853,8 @@ body.dark-mode .timer-main {
     color: #f0f0f0;
 }
 
-body.dark-mode .app-header h1 {
+body.dark-mode .app-header h1,
+body.dark-mode .page-title {
     color: #f0f0f0;
 }
 
@@ -845,6 +949,10 @@ body.dark-mode .progress-section h3 {
     color: #f0f0f0;
 }
 
+body.dark-mode .timer-container h3 {
+    color: #f0f0f0;
+}
+
 body.dark-mode .progress-item {
     background: rgba(52, 52, 68, 0.8);
     border: 2px solid rgba(102, 126, 234, 0.2);
@@ -888,7 +996,30 @@ body.dark-mode .time-input-group input:focus {
 .header-actions {
     display: flex;
     gap: 10px;
-    margin-left: auto;
+    justify-content: center;
+    margin: 10px 0;
+    flex-wrap: wrap;
+}
+
+/* Page title styling */
+.page-title {
+    text-align: center;
+    margin: 10px 0;
+    font-size: 2rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Header layout for schedule page */
+.app-header {
+    position: relative;
+    text-align: center;
+}
+
+.app-header .back-btn {
+    position: absolute;
+    left: 20px;
+    top: 20px;
 }
 
 .clear-btn {
@@ -915,21 +1046,29 @@ body.dark-mode .clear-btn:hover {
     border-color: rgba(102, 126, 234, 0.5) !important;
 }
 
-/* Date input styling */
-.date-input-group {
+/* Datetime input styling */
+.datetime-inputs {
     display: flex;
-    flex-direction: column;
-    gap: 5px;
+    gap: 15px;
+    flex-wrap: wrap;
     margin-top: 10px;
 }
 
-.date-input-group label {
+.datetime-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.datetime-group label {
     font-weight: 600;
     color: #2c3e50;
     font-size: 0.9rem;
 }
 
-.date-input-group input[type="date"] {
+.datetime-group input[type="datetime-local"] {
     padding: 10px 12px;
     border: 2px solid #e0e0e0;
     border-radius: 8px;
@@ -938,24 +1077,24 @@ body.dark-mode .clear-btn:hover {
     transition: border-color 0.3s ease;
 }
 
-.date-input-group input[type="date"]:focus {
+.datetime-group input[type="datetime-local"]:focus {
     outline: none;
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 /* Dark mode for date input */
-body.dark-mode .date-input-group label {
+body.dark-mode .datetime-group label {
     color: #f0f0f0;
 }
 
-body.dark-mode .date-input-group input[type="date"] {
+body.dark-mode .datetime-group input[type="datetime-local"] {
     background: rgba(62, 62, 78, 0.9);
     border-color: rgba(102, 126, 234, 0.3);
     color: #f0f0f0;
 }
 
-body.dark-mode .date-input-group input[type="date"]:focus {
+body.dark-mode .datetime-group input[type="datetime-local"]:focus {
     border-color: #667eea;
     background: rgba(72, 72, 88, 0.95);
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);

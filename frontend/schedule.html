@@ -9,16 +9,17 @@
 </head>
 <body>
 <header class="app-header">
-    <div class="header-content">
-        <button class="back-btn" onclick="goBack()">← Back to Dashboard</button>
-        <h1>Schedule & Timeline</h1>
+    <!-- Back button positioned left -->
+    <button class="back-btn" onclick="goBack()">← Back to Dashboard</button>
 
-        <!-- Quick Actions moved to header -->
-        <div class="header-actions">
-            <button class="nav-btn clear-btn" onclick="scrollToTaskForm()">+ Add Task</button>
-            <button class="nav-btn clear-btn" onclick="editTimelineWithAI()">🤖 AI Assistant</button>
-            <button class="nav-btn clear-btn" onclick="exportSchedule()">📤 Export</button>
-        </div>
+    <!-- Title centered -->
+    <h1 class="page-title">Schedule & Timeline</h1>
+
+    <!-- Quick Actions centered below title -->
+    <div class="header-actions">
+        <button class="nav-btn clear-btn" onclick="scrollToTaskForm()">+ Add Task</button>
+        <button class="nav-btn clear-btn" onclick="editTimelineWithAI()">🤖 AI Assistant</button>
+        <button class="nav-btn clear-btn" onclick="exportSchedule()">📤 Export</button>
     </div>
 </header>
 
@@ -28,14 +29,15 @@
         <h2>Add New Task</h2>
         <div class="task-input-section">
             <input type="text" id="schedule-task-input" placeholder="Enter a new task..." />
-            <div class="time-inputs">
-                <input type="time" id="schedule-start-time" />
-                <span>to</span>
-                <input type="time" id="schedule-end-time" />
-            </div>
-            <div class="date-input-group">
-                <label for="schedule-task-date">Date:</label>
-                <input type="date" id="schedule-task-date" />
+            <div class="datetime-inputs">
+                <div class="datetime-group">
+                    <label for="schedule-start-datetime">Start Date & Time:</label>
+                    <input type="datetime-local" id="schedule-start-datetime" />
+                </div>
+                <div class="datetime-group">
+                    <label for="schedule-end-datetime">End Date & Time:</label>
+                    <input type="datetime-local" id="schedule-end-datetime" />
+                </div>
             </div>
             <button id="schedule-add-task-btn">Add Task</button>
         </div>

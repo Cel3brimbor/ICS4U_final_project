@@ -27,7 +27,7 @@ function initializeAI() {
     }
 
     // Apply dark mode if enabled
-    const savedSettings = localStorage.getItem('productivitySettings');
+    const savedSettings = localStorage.getItem('appSettings');
     if (savedSettings) {
         try {
             const settings = JSON.parse(savedSettings);

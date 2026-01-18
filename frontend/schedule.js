@@ -12,7 +12,9 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeSchedulePage() {
     // Set default date to today
     document.getElementById('timeline-date').value = selectedDate;
-    document.getElementById('schedule-task-date').value = selectedDate;
+
+    // Set default datetime values (current time for start, +1 hour for end)
+    setDefaultDatetimeValues();
 
     // Event listeners
     document.getElementById('set-priority-event').addEventListener('click', setPriorityEvent);
@@ -25,10 +27,30 @@ function initializeSchedulePage() {
     loadSettings();
 }
 
+function setDefaultDatetimeValues() {
+    const now = new Date();
+    const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000); // Add 1 hour
+
+    // Format for datetime-local input (YYYY-MM-DDTHH:mm)
+    const formatDatetime = (date) => {
+        return date.toISOString().slice(0, 16);
+    };
+
+    document.getElementById('schedule-start-datetime').value = formatDatetime(now);
+    document.getElementById('schedule-end-datetime').value = formatDatetime(oneHourLater);
+}
+
 function loadSettings() {
-    const settings = JSON.parse(localStorage.getItem('productivitySettings')) || {};
-    if (settings.darkMode) {
-        document.body.classList.add('dark-mode');
+    const savedSettings = localStorage.getItem('appSettings');
+    if (savedSettings) {
+        try {
+            const settings = JSON.parse(savedSettings);
+            if (settings.darkMode) {
+                document.body.classList.add('dark-mode');
+            }
+        } catch (e) {
+            console.error('Error loading settings:', e);
+        }
     }
 }
 
@@ -188,16 +210,31 @@ function createTaskBlock(task) {
     const endHour = parseInt(task.endTime.split(':')[0]);
     const endMinute = parseInt(task.endTime.split(':')[1]);
 
+    // Check if this is a multi-day task (end time is before start time)
+    const isMultiDay = (endHour * 60 + endMinute) < (startHour * 60 + startMinute);
+
     const startPosition = (startHour * 60 + startMinute) / (24 * 60) * 100;
-    const duration = ((endHour * 60 + endMinute) - (startHour * 60 + startMinute)) / (24 * 60) * 100;
+
+    let duration;
+    let endTimeDisplay = task.endTime;
+
+    if (isMultiDay) {
+        // Multi-day task: show from start time to end of day (23:59)
+        duration = (24 * 60 - (startHour * 60 + startMinute)) / (24 * 60) * 100;
+        endTimeDisplay = "23:59 (next day)";
+        block.classList.add('multi-day-task');
+    } else {
+        // Single-day task
+        duration = ((endHour * 60 + endMinute) - (startHour * 60 + startMinute)) / (24 * 60) * 100;
+    }
 
     block.style.left = startPosition + '%';
     block.style.width = Math.max(duration, 1) + '%';
 
     block.innerHTML = `
         <div class="timeline-content">
-            <div class="timeline-title">${escapeHtml(task.description)}</div>
-            <div class="timeline-time">${task.startTime} - ${task.endTime}</div>
+            <div class="timeline-title">${escapeHtml(task.description)}${isMultiDay ? ' 🌙' : ''}</div>
+            <div class="timeline-time">${task.startTime} - ${endTimeDisplay}</div>
             <div class="timeline-priority">${task.priority}</div>
         </div>
     `;
@@ -263,24 +300,31 @@ function addTaskToTimeline() {
 // Add task directly from schedule page
 async function addTaskFromSchedule() {
     const taskInput = document.getElementById('schedule-task-input');
-    const startTime = document.getElementById('schedule-start-time');
-    const endTime = document.getElementById('schedule-end-time');
-    const taskDate = document.getElementById('schedule-task-date');
+    const startDatetime = document.getElementById('schedule-start-datetime');
+    const endDatetime = document.getElementById('schedule-end-datetime');
 
     const taskText = taskInput.value.trim();
-    const start = startTime.value;
-    const end = endTime.value;
-    const date = taskDate.value;
+    const startValue = startDatetime.value;
+    const endValue = endDatetime.value;
 
-    if (!taskText || !start || !end || !date) {
+    if (!taskText || !startValue || !endValue) {
         showMessage('Please fill in all fields', 'error');
         return;
     }
 
-    if (start >= end) {
-        showMessage('End time must be after start time', 'error');
+    // Parse datetime values
+    const startDateTime = new Date(startValue);
+    const endDateTime = new Date(endValue);
+
+    if (startDateTime >= endDateTime) {
+        showMessage('End date/time must be after start date/time', 'error');
         return;
     }
+
+    // Extract date and time components for backend compatibility
+    const date = startDateTime.toISOString().split('T')[0]; // YYYY-MM-DD format
+    const startTime = startDateTime.toTimeString().slice(0, 5); // HH:mm format
+    const endTime = endDateTime.toTimeString().slice(0, 5); // HH:mm format
 
     try {
         const response = await fetch('/api/tasks', {
@@ -290,8 +334,8 @@ async function addTaskFromSchedule() {
             },
             body: JSON.stringify({
                 description: taskText,
-                startTime: start,
-                endTime: end,
+                startTime: startTime,
+                endTime: endTime,
                 date: date,
                 priority: 'MEDIUM'
             })
@@ -301,16 +345,13 @@ async function addTaskFromSchedule() {
             throw new Error('Failed to add task');
         }
 
-        // Clear form
+        // Clear form and reset to defaults
         taskInput.value = '';
-        startTime.value = '';
-        endTime.value = '';
-        taskDate.value = selectedDate;
+        setDefaultDatetimeValues();
 
-        // Refresh timeline if the task was added for the current date
-        if (date === selectedDate) {
-            loadScheduleTimeline();
-        }
+        // Refresh timeline - check if task appears on current selected date
+        // For multi-day tasks, we'll show them on the start date
+        loadScheduleTimeline();
 
         showMessage('Task added successfully!', 'success');
 
