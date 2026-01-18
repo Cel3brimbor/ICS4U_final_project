@@ -399,9 +399,6 @@ function navigateTo(page) {
         case 'schedule':
             window.location.href = '/schedule.html';
             break;
-        case 'tasks':
-            document.querySelector('.task-planner').scrollIntoView({ behavior: 'smooth' });
-            break;
         case 'notes':
             window.location.href = '/note.html';
             break;
