@@ -1,1 +1,49 @@
 History for all prompts used
+
+Jan 15, 2026
+
+            String prompt = String.format(
+                "You are an AI assistant that can edit schedules. Current tasks for today:\n%s\n\n" +
+                "User instruction: %s\n\n" +
+                "Respond with a JSON object containing 'action' (ADD, UPDATE, DELETE, COMPLETE) and 'result' describing what you did. " +
+                "For ADD: include 'description', 'startTime' (HH:MM), 'endTime' (HH:MM) fields. " +
+                "For UPDATE/COMPLETE/DELETE: include 'taskId' field. " +
+                "Times should be in 24-hour format. If you need more information, set action to 'NEED_INFO' and explain what you need.",
+                scheduleContext,
+                instruction
+            );
+
+            String prompt = String.format(
+                "You are an AI assistant that can edit notes made by the user. User's current notes:\n%s\n\n" +
+                "User instruction: %s\n\n" +
+                "Respond with a JSON object containing 'action' (ADD, UPDATE, DELETE) and 'result' describing what you did. " +
+                "For ADD: include 'content' field. For UPDATE/DELETE: include 'noteId' field. " +
+                "If you need more information, set action to 'NEED_INFO' and explain what you need.",
+                notesContext,
+                instruction
+            );
+
+Jan 18, 2026
+
+            String prompt = String.format(
+                "You are an AI assistant that can edit schedules. Current tasks for today:\n%s\n\n" +
+                "User instruction: %s\n\n" +
+                "Respond with a JSON object. Examples:\n" +
+                "- To add a task: {\"action\":\"ADD\",\"description\":\"task name\",\"startTime\":\"14:00\",\"endTime\":\"15:00\"}\n" +
+                "- To complete a task: {\"action\":\"COMPLETE\",\"taskId\":\"task_12345\"}\n" +
+                "- To delete a task: {\"action\":\"DELETE\",\"taskId\":\"task_12345\"}\n\n" +
+                "Choose the appropriate action based on the user's instruction. Use 24-hour time format (HH:MM).",
+                scheduleContext,
+                instruction
+            );
+            String prompt = String.format(
+                "You are an AI assistant that can edit notes. User's current notes:\n%s\n\n" +
+                "User instruction: %s\n\n" +
+                "Respond with a JSON object. Examples:\n" +
+                "- To add a note: {\"action\":\"ADD\",\"content\":\"note content here\"}\n" +
+                "- To update a note: {\"action\":\"UPDATE\",\"noteId\":\"note_identifier\",\"content\":\"updated content\"}\n" +
+                "- To delete a note: {\"action\":\"DELETE\",\"noteId\":\"note_identifier\"}\n\n" +
+                "Choose the appropriate action based on the user's instruction.",
+                notesContext,
+                instruction
+            );
