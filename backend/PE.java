@@ -25,17 +25,17 @@ public class PE {
     private static String modelName;
     private static ScheduleManager scheduleManager;
     private static NoteManager noteManager;
+    private static AgentInputValidator inputValidator;
     private static String noteFormatSpec;
     private static String scheduleFormatSpec;
 
     public static void main(String[] args) {
         System.out.println("Prompt Engineering");
 
-        // Initialize managers
         scheduleManager = new ScheduleManager();
         noteManager = new NoteManager();
+        inputValidator = new AgentInputValidator();
 
-        // Load existing data
         TaskPersistence.loadTasks(scheduleManager);
         NotePersistence.loadNotes(noteManager);
 
@@ -100,7 +100,7 @@ public class PE {
         try {
             String response = callLMStudioAPI(message);
             String processedResponse = extractContentFromResponse(response);
-            System.out.println("\nProcessed Response:");
+        System.out.println("\nProcessed Response:");
             System.out.println(processedResponse);
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
@@ -188,6 +188,15 @@ public class PE {
         System.out.print("Enter planner instruction: ");
         String instruction = scanner.nextLine();
 
+        //pree-validation for insufficient context
+        // if (!inputValidator.hasEnoughContextForTask(instruction, scheduleManager.getTodayTasks().size())) {
+        //     System.out.println("Please provide more specific information. For example:");
+        //     System.out.println("- What task do you want to add/modify/delete?");
+        //     System.out.println("- What time should the task start/end?");
+        //     System.out.println("- Which specific task are you referring to?");
+        //     return;
+        // }
+
         try {
             List<Task> currentTasks = scheduleManager.getTodayTasks();
             String scheduleContext = formatTasksForAI(currentTasks);
@@ -195,10 +204,14 @@ public class PE {
             String prompt = String.format(
                 "You are an AI assistant that can edit schedules. Current tasks for today:\n%s\n\n" +
                 "User instruction: %s\n\n" +
+                "IMPORTANT VALIDATION:\n" +
+                "- For ADD: You MUST have description, start time, and end time\n" +
+                "- For UPDATE/COMPLETE/DELETE: You MUST identify which specific task\n" +
+                "- If information is missing, respond with {\"action\":\"NEED_INFO\",\"message\":\"what you need\"}\n\n" +
                 "Respond with a JSON object. Examples:\n" +
                 "- To add a task: {\"action\":\"ADD\",\"description\":\"task name\",\"startTime\":\"14:00\",\"endTime\":\"15:00\"}\n" +
                 "- To complete a task: {\"action\":\"COMPLETE\",\"taskId\":\"task_12345\"}\n" +
-                "- To delete a task: {\"action\":\"DELETE\",\"taskId\":\"task_12345\"}\n\n" +
+                "- If unclear: {\"action\":\"NEED_INFO\",\"message\":\"Please specify which task to complete\"}\n\n" +
                 "Choose the appropriate action based on the user's instruction. Use 24-hour time format (HH:MM).",
                 scheduleContext,
                 instruction
@@ -232,6 +245,14 @@ public class PE {
         System.out.print("Enter notes instruction: ");
         String instruction = scanner.nextLine();
 
+        // if (!inputValidator.hasEnoughContextForNote(instruction, noteManager.getAllNotes().size())) {
+        //     System.out.println("Please provide more specific information. For example:");
+        //     System.out.println("- What note content do you want to add?");
+        //     System.out.println("- Which specific note do you want to update/delete?");
+        //     System.out.println("- What should the updated content be?");
+        //     return;
+        // }
+
         try {
             List<Note> currentNotes = noteManager.getAllNotes();
             String notesContext = formatNotesForAI(currentNotes);
@@ -239,11 +260,17 @@ public class PE {
             String prompt = String.format(
                 "You are an AI assistant that can edit notes. User's current notes:\n%s\n\n" +
                 "User instruction: %s\n\n" +
+                "IMPORTANT VALIDATION:\n" +
+                "- For ADD: You MUST have meaningful content (not just a few words)\n" +
+                "- For UPDATE: You MUST have both noteId and new content\n" +
+                "- For DELETE: You MUST identify which specific note to delete\n" +
+                "- If information is missing or unclear, respond with {\"action\":\"NEED_INFO\",\"message\":\"what you need\"}\n\n" +
                 "Respond with a JSON object. Examples:\n" +
                 "- To add a note: {\"action\":\"ADD\",\"content\":\"note content here\"}\n" +
                 "- To update a note: {\"action\":\"UPDATE\",\"noteId\":\"note_identifier\",\"content\":\"updated content\"}\n" +
-                "- To delete a note: {\"action\":\"DELETE\",\"noteId\":\"note_identifier\"}\n\n" +
-                "Choose the appropriate action based on the user's instruction.",
+                "- To delete a note: {\"action\":\"DELETE\",\"noteId\":\"note_identifier\"}\n" +
+                "- If unclear: {\"action\":\"NEED_INFO\",\"message\":\"Please specify which note to update\"}\n\n" +
+                "Choose the appropriate action based on the user's instruction. Notes should be meaningful and detailed.",
                 notesContext,
                 instruction
             );
