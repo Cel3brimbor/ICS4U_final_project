@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule & Timeline - AI Productivity Planner</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="timer.css">
+</head>
+<body>
+<header class="app-header">
+    <div class="header-content">
+        <button class="back-btn" onclick="goBack()">← Back to Dashboard</button>
+        <h1>Schedule & Timeline</h1>
+
+        <!-- Quick Actions moved to header -->
+        <div class="header-actions">
+            <button class="nav-btn clear-btn" onclick="scrollToTaskForm()">+ Add Task</button>
+            <button class="nav-btn clear-btn" onclick="editTimelineWithAI()">🤖 AI Assistant</button>
+            <button class="nav-btn clear-btn" onclick="exportSchedule()">📤 Export</button>
+        </div>
+    </div>
+</header>
+
+<main class="timer-main">
+    <!-- Add Task Section -->
+    <div class="timer-container">
+        <h2>Add New Task</h2>
+        <div class="task-input-section">
+            <input type="text" id="schedule-task-input" placeholder="Enter a new task..." />
+            <div class="time-inputs">
+                <input type="time" id="schedule-start-time" />
+                <span>to</span>
+                <input type="time" id="schedule-end-time" />
+            </div>
+            <div class="date-input-group">
+                <label for="schedule-task-date">Date:</label>
+                <input type="date" id="schedule-task-date" />
+            </div>
+            <button id="schedule-add-task-btn">Add Task</button>
+        </div>
+    </div>
+
+    <!-- Priority Event Section -->
+        <div class="timer-container">
+            <h2>Priority Event</h2>
+            <p class="priority-description">Set an important event that will always appear at the top of your timeline</p>
+
+            <div class="custom-timer-input">
+                <div class="time-input-group">
+                    <label for="priority-title">Event Title:</label>
+                    <input type="text" id="priority-title" placeholder="e.g., Important Meeting" maxlength="50">
+                </div>
+                <div class="time-input-group">
+                    <label for="priority-start">Start Time:</label>
+                    <input type="time" id="priority-start">
+                </div>
+                <div class="time-input-group">
+                    <label for="priority-end">End Time:</label>
+                    <input type="time" id="priority-end">
+                </div>
+                <button id="set-priority-event" class="timer-btn">Set Priority Event</button>
+                <button id="clear-priority-event" class="timer-btn reset-btn">Clear Priority Event</button>
+            </div>
+
+            <!-- Current Priority Event Display -->
+            <div id="current-priority-display" class="priority-display" style="display: none;">
+                <h3>Current Priority Event</h3>
+                <div id="priority-event-card" class="priority-event-card">
+                    <!-- Priority event will be displayed here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule Timeline -->
+        <div class="timer-container">
+            <h2>Today's Timeline</h2>
+
+            <!-- Timeline Controls -->
+            <div class="timeline-controls">
+                <div class="control-group">
+                    <label for="timeline-date">Select Date:</label>
+                    <input type="date" id="timeline-date" class="setting-input">
+                </div>
+                <div class="control-group">
+                    <button id="refresh-timeline" class="setting-btn">Refresh Timeline</button>
+                </div>
+            </div>
+
+            <!-- Timeline Visualization -->
+            <div class="timeline-container">
+                <div class="timeline-header">
+                    <div class="time-marker">00:00</div>
+                    <div class="time-marker">06:00</div>
+                    <div class="time-marker">12:00</div>
+                    <div class="time-marker">18:00</div>
+                    <div class="time-marker">23:59</div>
+                </div>
+                <div id="schedule-timeline" class="schedule-timeline">
+                    <!-- Timeline will be populated here -->
+                </div>
+            </div>
+
+            <!-- Timeline Legend -->
+            <div class="timeline-legend">
+                <div class="legend-item">
+                    <div class="legend-color priority-event"></div>
+                    <span>Priority Event</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color pending"></div>
+                    <span>Pending Task</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color in-progress"></div>
+                    <span>In Progress</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color completed"></div>
+                    <span>Completed</span>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Schedule Summary -->
+        <div class="progress-section">
+            <h3>Schedule Summary</h3>
+            <div class="schedule-stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-tasks">0</div>
+                    <div class="stat-label">Total Tasks</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="scheduled-hours">0</div>
+                    <div class="stat-label">Scheduled Hours</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="free-hours">0</div>
+                    <div class="stat-label">Free Hours</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="completion-rate">0%</div>
+                    <div class="stat-label">Completion Rate</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="notification-sounds.js"></script>
+    <script src="schedule.js"></script>
+    <script src="timer-monitor.js"></script>
+</body>
+</html>

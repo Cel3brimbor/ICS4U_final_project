@@ -9,10 +9,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializeAI() {
     console.log('AI Assistant initialized');
-    setMode('chat');
+
+    // Check for schedule context from schedule page
+    const scheduleContext = localStorage.getItem('aiScheduleContext');
+    if (scheduleContext) {
+        try {
+            const context = JSON.parse(scheduleContext);
+            setMode('agent');
+            populateScheduleContext(context);
+            localStorage.removeItem('aiScheduleContext'); // Clean up
+        } catch (e) {
+            console.error('Error loading schedule context:', e);
+            setMode('chat');
+        }
+    } else {
+        setMode('chat');
+    }
 
     // Apply dark mode if enabled
-    const savedSettings = localStorage.getItem('appSettings');
+    const savedSettings = localStorage.getItem('productivitySettings');
     if (savedSettings) {
         try {
             const settings = JSON.parse(savedSettings);
@@ -23,6 +38,41 @@ function initializeAI() {
             console.error('Error loading dark mode setting:', e);
         }
     }
+}
+
+function populateScheduleContext(context) {
+    const instructionInput = document.getElementById('schedule-instruction');
+    if (instructionInput) {
+        let contextMessage = `I'm looking at your schedule for ${formatDate(context.date)}. `;
+
+        if (context.priorityEvent) {
+            contextMessage += `You have a priority event: "${context.priorityEvent.title}" from ${context.priorityEvent.startTime} to ${context.priorityEvent.endTime}. `;
+        }
+
+        if (context.tasks && context.tasks.length > 0) {
+            contextMessage += `You have ${context.tasks.length} tasks scheduled: `;
+            context.tasks.forEach(task => {
+                contextMessage += `"${task.description}" (${task.startTime}-${task.endTime}, ${task.status}), `;
+            });
+        } else {
+            contextMessage += "You don't have any tasks scheduled yet. ";
+        }
+
+        contextMessage += "How would you like me to help you manage this schedule?";
+
+        // Add context message to chat
+        addMessageToChat(contextMessage, 'ai');
+    }
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
 }
 
 function setupAIEventListeners() {

@@ -397,7 +397,7 @@ function navigateTo(page) {
             window.location.href = '/timer.html';
             break;
         case 'schedule':
-            document.querySelector('.schedule-overview').scrollIntoView({ behavior: 'smooth' });
+            window.location.href = '/schedule.html';
             break;
         case 'tasks':
             document.querySelector('.task-planner').scrollIntoView({ behavior: 'smooth' });

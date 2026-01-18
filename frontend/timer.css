@@ -415,6 +415,341 @@
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
+/* Schedule Page Styles */
+.priority-description {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+.priority-display {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 2px solid #667eea;
+}
+
+.priority-display h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+.priority-event-card {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.priority-event-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.priority-event-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.priority-event-time {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.priority-event-date {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.timeline-controls {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.control-group label {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 0.9rem;
+}
+
+.timeline-container {
+    position: relative;
+    margin: 20px 0;
+}
+
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding: 0 10px;
+}
+
+.time-marker {
+    font-size: 0.8rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.schedule-timeline {
+    position: relative;
+    height: 200px;
+    background: #f8f9fa;
+    border: 1px solid #e1e5e9;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.timeline-legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #2c3e50;
+}
+
+.legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+}
+
+.legend-color.priority-event {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    box-shadow: 0 0 0 2px #FFD700;
+}
+
+.legend-color.pending {
+    background: #ffc107;
+}
+
+.legend-color.in-progress {
+    background: #fd7e14;
+}
+
+.legend-color.completed {
+    background: #28a745;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.schedule-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* Priority Event Timeline Block */
+.timeline-block.priority-event {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #2c3e50;
+    border: 2px solid #FFD700;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+    z-index: 10;
+}
+
+.timeline-block.priority-event .timeline-title {
+    font-weight: 700;
+}
+
+.timeline-block.priority-event .timeline-time {
+    opacity: 1;
+    font-weight: 600;
+}
+
+/* Enhanced Timeline Block Styling */
+.timeline-block {
+    position: absolute;
+    top: 20px;
+    height: 60px;
+    border-radius: 6px;
+    color: white;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.timeline-block:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.timeline-block.timeline-pending {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+}
+
+.timeline-block.timeline-in_progress {
+    background: linear-gradient(135deg, #fd7e14, #dc3545);
+}
+
+.timeline-block.timeline-completed {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.timeline-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 4px 8px;
+}
+
+.timeline-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.timeline-time {
+    font-size: 0.75rem;
+    opacity: 0.9;
+}
+
+.timeline-priority {
+    font-size: 0.7rem;
+    opacity: 0.8;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* Dark Mode Styles for Schedule Page */
+body.dark-mode .priority-description {
+    color: #c0c0c0;
+}
+
+body.dark-mode .priority-display {
+    background: rgba(52, 52, 68, 0.8);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+body.dark-mode .priority-display h3 {
+    color: #f0f0f0;
+}
+
+body.dark-mode .timeline-controls .control-group label {
+    color: #f0f0f0;
+}
+
+body.dark-mode .schedule-timeline {
+    background: rgba(42, 42, 58, 0.8);
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .time-marker {
+    color: #c0c0c0;
+}
+
+body.dark-mode .timeline-legend .legend-item {
+    color: #f0f0f0;
+}
+
+body.dark-mode .legend-item {
+    color: #f0f0f0;
+}
+
+body.dark-mode .priority-event-card {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.8), rgba(255, 165, 0, 0.8));
+    color: #2c3e50;
+}
+
+body.dark-mode .timeline-block.priority-event {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.9), rgba(255, 165, 0, 0.9));
+    border-color: rgba(255, 215, 0, 0.8);
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+/* Responsive Design for Schedule Page */
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+
+    .header-actions {
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .clear-btn {
+        flex: 1;
+        max-width: 120px;
+    }
+
+    .timeline-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .control-group {
+        width: 100%;
+    }
+
+    .timeline-legend {
+        gap: 15px;
+    }
+
+    .legend-item {
+        font-size: 0.8rem;
+    }
+
+    .schedule-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .timeline-block {
+        height: 50px;
+        top: 15px;
+    }
+
+    .timeline-title {
+        font-size: 0.8rem;
+    }
+
+    .timeline-time {
+        font-size: 0.7rem;
+    }
+}
+
 /* Dark Mode Styles */
 body.dark-mode .timer-main {
     background: linear-gradient(135deg, #1e1e2e 0%, #2a2a3a 100%);
@@ -550,6 +885,83 @@ body.dark-mode .time-input-group input {
 }
 
 body.dark-mode .time-input-group input:focus {
+    border-color: #667eea;
+    background: rgba(72, 72, 88, 0.95);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+/* Header actions styling */
+.header-actions {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.clear-btn {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #f0f0f0 !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(10px);
+}
+
+.clear-btn:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Dark mode for header actions */
+body.dark-mode .clear-btn {
+    background: rgba(102, 126, 234, 0.15) !important;
+    color: #f0f0f0 !important;
+    border: 2px solid rgba(102, 126, 234, 0.3) !important;
+}
+
+body.dark-mode .clear-btn:hover {
+    background: rgba(102, 126, 234, 0.25) !important;
+    border-color: rgba(102, 126, 234, 0.5) !important;
+}
+
+/* Date input styling */
+.date-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.date-input-group label {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 0.9rem;
+}
+
+.date-input-group input[type="date"] {
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+}
+
+.date-input-group input[type="date"]:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Dark mode for date input */
+body.dark-mode .date-input-group label {
+    color: #f0f0f0;
+}
+
+body.dark-mode .date-input-group input[type="date"] {
+    background: rgba(62, 62, 78, 0.9);
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #f0f0f0;
+}
+
+body.dark-mode .date-input-group input[type="date"]:focus {
     border-color: #667eea;
     background: rgba(72, 72, 88, 0.95);
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);

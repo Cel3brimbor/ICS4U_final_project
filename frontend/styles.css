@@ -695,6 +695,13 @@ body {
     opacity: 0.9;
 }
 
+.timeline-priority {
+    font-size: 0.7rem;
+    opacity: 0.8;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
 .no-schedule {
     display: flex;
     align-items: center;

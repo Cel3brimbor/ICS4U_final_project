@@ -120,12 +120,14 @@ function handleTimerCompletion() {
     console.log('Settings:', settings);
     console.log('Notification permission:', Notification.permission);
     
-    // If we're on the timer page, the timer.js will handle notifications
+    // If we're on the timer page or schedule page, the respective JS will handle notifications
     // Only show notification if we're on a different page
     const isOnTimerPage = window.location.pathname.includes('timer.html');
-    console.log('Is on timer page:', isOnTimerPage);
-    
-    if (!isOnTimerPage) {
+    const isOnSchedulePage = window.location.pathname.includes('schedule.html');
+    const shouldShowNotification = !isOnTimerPage && !isOnSchedulePage;
+    console.log('Is on timer page:', isOnTimerPage, 'Is on schedule page:', isOnSchedulePage, 'Should show notification:', shouldShowNotification);
+
+    if (shouldShowNotification) {
         // Play notification sound only if sound effects are enabled
         if (settings.soundEffects) {
             console.log('Playing notification sound:', settings.notificationSound);
