@@ -19,6 +19,23 @@ body {
     text-align: center;
     margin-bottom: 30px;
     color: white;
+    position: relative;
+}
+
+.header-content {
+    position: relative;
+}
+
+.header-content .back-btn {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.header-content h1 {
+    text-align: center;
+    margin: 0;
 }
 
 .app-header h1 {
@@ -33,6 +50,23 @@ body {
     opacity: 0.9;
     font-weight: 300;
     margin-bottom: 20px;
+}
+
+/* Back button */
+.back-btn {
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
 }
 
 /* Navigation menu */
@@ -1595,6 +1629,17 @@ body.dark-mode {
 body.dark-mode .app-header h1,
 body.dark-mode .app-header p {
     color: #f0f0f0;
+}
+
+body.dark-mode .back-btn {
+    background: rgba(102, 126, 234, 0.15);
+    color: #f0f0f0;
+    border: 2px solid rgba(102, 126, 234, 0.3);
+}
+
+body.dark-mode .back-btn:hover {
+    background: rgba(102, 126, 234, 0.25);
+    border-color: rgba(102, 126, 234, 0.5);
 }
 
 body.dark-mode .main-navigation .nav-btn {

@@ -281,6 +281,10 @@ function showAgentResult(message, type) {
     }
 }
 
-function navigateTo(page) {
-    window.location.href = page === 'home' ? 'index.html' : page === 'ai' ? 'ai.html' : page === 'tasks' ? 'tasks.html' : page === 'notes' ? 'note.html' : page === 'timer' ? 'timer.html' : 'index.html';
+// function navigateTo(page) {
+//     window.location.href = page === 'home' ? 'index.html' : page === 'ai' ? 'ai.html' : page === 'tasks' ? 'tasks.html' : page === 'notes' ? 'note.html' : page === 'timer' ? 'timer.html' : 'index.html';
+// }
+
+function goBack() {
+    window.location.href = '/index.html';
 }
