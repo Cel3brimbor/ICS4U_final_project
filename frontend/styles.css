@@ -1588,103 +1588,331 @@ body {
 
 /* Dark Mode Support */
 body.dark-mode {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    color: #e0e0e0;
+    background: linear-gradient(135deg, #1e1e2e 0%, #2a2a3a 100%);
+    color: #f0f0f0;
 }
 
 body.dark-mode .app-header h1,
 body.dark-mode .app-header p {
-    color: #e0e0e0;
+    color: #f0f0f0;
 }
 
 body.dark-mode .main-navigation .nav-btn {
-    background: rgba(255, 255, 255, 0.1);
-    color: #e0e0e0;
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    background: rgba(102, 126, 234, 0.15);
+    color: #f0f0f0;
+    border: 2px solid rgba(102, 126, 234, 0.3);
 }
 
 body.dark-mode .main-navigation .nav-btn:hover,
 body.dark-mode .main-navigation .nav-btn.active {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(102, 126, 234, 0.25);
+    border-color: rgba(102, 126, 234, 0.5);
 }
 
 body.dark-mode .planner-container {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
+    background: rgba(30, 30, 46, 0.8);
+    backdrop-filter: blur(15px);
 }
 
 body.dark-mode .ai-assistant,
 body.dark-mode .task-planner,
 body.dark-mode .schedule-overview {
-    background: rgba(255, 255, 255, 0.08);
-    color: #e0e0e0;
+    background: rgba(42, 42, 58, 0.9);
+    color: #f0f0f0;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .ai-assistant h2,
+body.dark-mode .task-planner h2,
+body.dark-mode .schedule-overview h2 {
+    color: #f0f0f0;
+    border-bottom-color: #667eea;
 }
 
 body.dark-mode .task-item {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(52, 52, 68, 0.8);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    color: #f0f0f0;
 }
 
 body.dark-mode .task-item:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(62, 62, 78, 0.9);
+    border-color: rgba(102, 126, 234, 0.4);
+}
+
+body.dark-mode .task-item.completed {
+    background: rgba(34, 139, 34, 0.2);
+    border-left-color: #4CAF50;
+}
+
+body.dark-mode .task-item.completed .task-text {
+    color: #b0b0b0;
 }
 
 body.dark-mode .task-title {
-    color: #e0e0e0;
+    color: #f0f0f0;
 }
 
 body.dark-mode .task-time,
 body.dark-mode .task-duration,
 body.dark-mode .task-status {
-    color: #b0b0b0;
+    color: #c0c0c0;
 }
 
 body.dark-mode .task-input,
 body.dark-mode .time-inputs input {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
-    color: #e0e0e0;
+    background: rgba(52, 52, 68, 0.8);
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #f0f0f0;
 }
 
 body.dark-mode .task-input:focus,
 body.dark-mode .time-inputs input:focus {
     border-color: #667eea;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(62, 62, 78, 0.9);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
 }
 
 body.dark-mode .task-filters .filter-btn {
-    background: rgba(255, 255, 255, 0.1);
-    color: #e0e0e0;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(52, 52, 68, 0.8);
+    color: #f0f0f0;
+    border: 2px solid rgba(102, 126, 234, 0.3);
 }
 
 body.dark-mode .task-filters .filter-btn.active,
 body.dark-mode .task-filters .filter-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(102, 126, 234, 0.2);
+    color: #ffffff;
+    border-color: rgba(102, 126, 234, 0.5);
 }
 
 body.dark-mode .message {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(52, 52, 68, 0.9);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    color: #f0f0f0;
 }
 
 body.dark-mode .message.ai-message {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3));
+    border-color: rgba(102, 126, 234, 0.4);
+}
+
+body.dark-mode .message.user-message {
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.3), rgba(32, 201, 151, 0.3));
+    border-color: rgba(40, 167, 69, 0.4);
+}
+
+body.dark-mode .ai-chat {
+    background: rgba(42, 42, 58, 0.9);
+    border-radius: 15px;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .chat-messages {
+    background: rgba(52, 52, 68, 0.8);
+    border: 1px solid rgba(102, 126, 234, 0.2);
 }
 
 body.dark-mode .chat-input input {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
-    color: #e0e0e0;
+    background: rgba(52, 52, 68, 0.8);
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #f0f0f0;
 }
 
 body.dark-mode .chat-input input:focus {
     border-color: #667eea;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(62, 62, 78, 0.9);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
 }
 
 body.dark-mode .chat-input button {
     background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+/* Additional dark mode fixes for better visibility */
+body.dark-mode .schedule-timeline {
+    background: rgba(42, 42, 58, 0.8);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .time-slot {
+    background: rgba(52, 52, 68, 0.8);
+    border-left: 3px solid #667eea;
+    color: #f0f0f0;
+}
+
+body.dark-mode .time-slot:hover {
+    background: rgba(62, 62, 78, 0.9);
+}
+
+body.dark-mode .time-slot .time {
+    color: #667eea;
+}
+
+body.dark-mode .no-tasks,
+body.dark-mode .no-schedule {
+    color: #b0b0b0;
+}
+
+/* Notes section dark mode */
+body.dark-mode .notes-section {
+    background: rgba(42, 42, 58, 0.9);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .notes-section h2 {
+    color: #f0f0f0;
+}
+
+body.dark-mode #note-input {
+    background: rgba(52, 52, 68, 0.8);
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #f0f0f0;
+}
+
+body.dark-mode #note-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .note-item {
+    background: rgba(52, 52, 68, 0.8);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    color: #f0f0f0;
+}
+
+body.dark-mode .note-item:hover {
+    background: rgba(62, 62, 78, 0.9);
+}
+
+body.dark-mode .note-text {
+    color: #f0f0f0;
+}
+
+body.dark-mode .note-time {
+    color: #c0c0c0;
+}
+
+body.dark-mode .no-notes {
+    background: rgba(52, 52, 68, 0.8);
+    border: 2px dashed rgba(102, 126, 234, 0.3);
+    color: #b0b0b0;
+}
+
+/* AI Interface dark mode */
+body.dark-mode .ai-container,
+body.dark-mode .mode-selector,
+body.dark-mode .chat-interface,
+body.dark-mode .agent-interface {
+    background: rgba(42, 42, 58, 0.9);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .mode-selector h2,
+body.dark-mode .chat-header h2,
+body.dark-mode .agent-header h2 {
+    color: #f0f0f0;
+}
+
+body.dark-mode .mode-btn {
+    background: rgba(52, 52, 68, 0.8);
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    color: #f0f0f0;
+}
+
+body.dark-mode .mode-btn:hover {
+    background: rgba(62, 62, 78, 0.9);
+}
+
+body.dark-mode .mode-btn.active {
+    background: rgba(102, 126, 234, 0.2);
+    border-color: #667eea;
+}
+
+body.dark-mode .action-section {
+    background: rgba(52, 52, 68, 0.8);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .action-section h3 {
+    color: #f0f0f0;
+}
+
+body.dark-mode .action-input input,
+body.dark-mode .agent-results {
+    background: rgba(52, 52, 68, 0.8);
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #f0f0f0;
+}
+
+/* Progress page dark mode */
+body.dark-mode .progress-main .stats-overview,
+body.dark-mode .progress-main .progress-visualization,
+body.dark-mode .progress-main .session-rating,
+body.dark-mode .progress-main .historical-stats,
+body.dark-mode .progress-main .achievements {
+    background: rgba(42, 42, 58, 0.9);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .progress-main h2 {
+    color: #f0f0f0;
+}
+
+body.dark-mode .stat-card {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3));
+    color: #f0f0f0;
+}
+
+body.dark-mode .progress-item {
+    background: rgba(52, 52, 68, 0.8);
+    color: #b0b0b0;
+}
+
+body.dark-mode .progress-item.completed {
+    background: #4CAF50;
+    color: #ffffff;
+}
+
+body.dark-mode .rating-prompt,
+body.dark-mode .session-notes textarea {
+    color: #f0f0f0;
+}
+
+body.dark-mode .session-notes textarea {
+    background: rgba(52, 52, 68, 0.8);
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #f0f0f0;
+}
+
+body.dark-mode .tab-btn {
+    background: rgba(52, 52, 68, 0.8);
+    color: #f0f0f0;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .tab-btn.active,
+body.dark-mode .tab-btn:hover {
+    background: rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .history-stat {
+    background: rgba(52, 52, 68, 0.8);
+}
+
+body.dark-mode .achievement-card {
+    background: rgba(52, 52, 68, 0.8);
+    border: 2px solid rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .achievement-card.unlocked {
+    border-color: #4CAF50;
+    background: rgba(76, 175, 80, 0.1);
+}
+
+body.dark-mode .achievement-title,
+body.dark-mode .achievement-desc {
+    color: #f0f0f0;
 }
 
 /* Responsive Design */

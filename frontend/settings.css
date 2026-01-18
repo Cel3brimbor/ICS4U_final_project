@@ -208,49 +208,57 @@ input:checked + .toggle-slider:before {
 
 /* Dark Mode Styles */
 body.dark-mode {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    color: #e0e0e0;
+    background: linear-gradient(135deg, #1e1e2e 0%, #2a2a3a 100%);
+    color: #f0f0f0;
 }
 
 body.dark-mode .settings-section {
-    background: #2a2a3a;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #e0e0e0;
+    background: rgba(42, 42, 58, 0.9);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    color: #f0f0f0;
 }
 
 body.dark-mode .setting-item {
-    border-bottom-color: #3a3a4a;
+    border-bottom-color: rgba(102, 126, 234, 0.2);
 }
 
 body.dark-mode .setting-info h3 {
-    color: #e0e0e0;
+    color: #f0f0f0;
 }
 
 body.dark-mode .setting-info p {
-    color: #b0b0b0;
+    color: #c0c0c0;
 }
 
 body.dark-mode .setting-input,
 body.dark-mode .setting-select {
-    background: #3a3a4a;
-    border-color: #4a4a5a;
-    color: #e0e0e0;
+    background: rgba(52, 52, 68, 0.8);
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #f0f0f0;
 }
 
 body.dark-mode .setting-input:focus,
 body.dark-mode .setting-select:focus {
     border-color: #667eea;
+    background: rgba(62, 62, 78, 0.9);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
 }
 
 body.dark-mode .reset-btn {
-    background: #3a3a4a;
-    border-color: #4a4a5a;
-    color: #e0e0e0;
+    background: rgba(52, 52, 68, 0.8);
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #f0f0f0;
 }
 
 body.dark-mode .reset-btn:hover {
-    background: #4a4a5a;
-    border-color: #5a5a6a;
+    background: rgba(62, 62, 78, 0.9);
+    border-color: rgba(102, 126, 234, 0.4);
+}
+
+body.dark-mode .info-box {
+    background: rgba(102, 126, 234, 0.1);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    color: #f0f0f0;
 }
 
 /* Notification Status */

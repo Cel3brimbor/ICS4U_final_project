@@ -414,3 +414,143 @@
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
+
+/* Dark Mode Styles */
+body.dark-mode .timer-main {
+    background: linear-gradient(135deg, #1e1e2e 0%, #2a2a3a 100%);
+    color: #f0f0f0;
+}
+
+body.dark-mode .app-header h1 {
+    color: #f0f0f0;
+}
+
+body.dark-mode .back-btn {
+    background: rgba(102, 126, 234, 0.15);
+    color: #f0f0f0;
+    border: 2px solid rgba(102, 126, 234, 0.3);
+}
+
+body.dark-mode .back-btn:hover {
+    background: rgba(102, 126, 234, 0.25);
+    border-color: rgba(102, 126, 234, 0.5);
+}
+
+body.dark-mode .timer-container {
+    background: rgba(42, 42, 58, 0.9);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    color: #f0f0f0;
+}
+
+body.dark-mode .timer-circle {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.8));
+}
+
+body.dark-mode .timer-circle::before {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3));
+}
+
+body.dark-mode .timer-text {
+    color: #ffffff;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .timer-status {
+    color: #c0c0c0;
+}
+
+body.dark-mode .timer-btn {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .timer-btn:disabled {
+    opacity: 0.5;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .timer-modes .mode-btn {
+    background: rgba(52, 52, 68, 0.8);
+    color: #f0f0f0;
+    border: 3px solid rgba(102, 126, 234, 0.3);
+}
+
+body.dark-mode .timer-modes .mode-btn:hover {
+    background: rgba(62, 62, 78, 0.9);
+    border-color: rgba(102, 126, 234, 0.4);
+}
+
+body.dark-mode .timer-modes .mode-btn.active {
+    background: rgba(102, 126, 234, 0.2);
+    border-color: #667eea;
+    color: #ffffff;
+}
+
+body.dark-mode .mode-title,
+body.dark-mode .mode-desc {
+    color: inherit;
+}
+
+body.dark-mode .timer-stats {
+    border-top-color: rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .stat-card {
+    background: rgba(52, 52, 68, 0.8);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .stat-number {
+    color: #f0f0f0;
+}
+
+body.dark-mode .stat-label {
+    color: #c0c0c0;
+}
+
+body.dark-mode .progress-section {
+    background: rgba(42, 42, 58, 0.9);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .progress-section h3 {
+    color: #f0f0f0;
+}
+
+body.dark-mode .progress-item {
+    background: rgba(52, 52, 68, 0.8);
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    color: #c0c0c0;
+}
+
+body.dark-mode .progress-item.completed {
+    background: #4CAF50;
+    border-color: #4CAF50;
+    color: #ffffff;
+}
+
+body.dark-mode .progress-item.current {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-color: #667eea;
+    color: #ffffff;
+}
+
+body.dark-mode .custom-timer-input {
+    background: rgba(52, 52, 68, 0.8);
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .time-input-group label {
+    color: #f0f0f0;
+}
+
+body.dark-mode .time-input-group input {
+    background: rgba(62, 62, 78, 0.9);
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #f0f0f0;
+}
+
+body.dark-mode .time-input-group input:focus {
+    border-color: #667eea;
+    background: rgba(72, 72, 88, 0.95);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
