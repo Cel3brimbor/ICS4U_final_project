@@ -100,13 +100,16 @@ public class Agent {
             String prompt = String.format(
                 "You are an AI assistant that can edit schedules. Current tasks for today:\n%s\n\n" +
                 "User instruction: %s\n\n" +
-                "IMPORTANT VALIDATION AND TOOLS:\n" +
-                "- For ADD: You MUST have description, start time (HH:MM), and end time (HH:MM)\n" +
-                "- For UPDATE/COMPLETE/DELETE: You MUST identify which specific task by taskId\n" +
+                "IMPORTANT VALIDATION:\n" +
+                "- For ADD: You MUST have description, start time, and end time\n" +
+                "- For ADD_MULTIPLE: You MUST provide an array of tasks, each with description, startTime, and endTime\n" +
+                "- For UPDATE/COMPLETE/DELETE: You MUST identify which specific task\n" +
                 "- If the task requested to be edited or deleted doesn't exist, use {\"action\":\"ITEM_NOT_FOUND\",\"itemType\":\"task\",\"itemId\":\"taskId-here\"}\n" +
                 "- If information is missing, respond with {\"action\":\"NEED_INFO\",\"message\":\"what you need\"}\n\n" +
+                "- Tasks cannot happen simutaneously (i.e. have overlapped durations). A new task can only start before or after a current one."+
                 "Respond with a JSON object. Examples:\n" +
                 "- To add a task: {\"action\":\"ADD\",\"description\":\"task name\",\"startTime\":\"14:00\",\"endTime\":\"15:00\"}\n" +
+                "- To add multiple tasks: {\"action\":\"ADD_MULTIPLE\",\"tasks\":[{\"description\":\"task 1\",\"startTime\":\"14:00\",\"endTime\":\"15:00\"},{\"description\":\"task 2\",\"startTime\":\"15:30\",\"endTime\":\"16:30\"}, etc in this format]}\n" +
                 "- To complete a task: {\"action\":\"COMPLETE\",\"taskId\":\"task_12345\"}\n" +
                 "- To delete a task: {\"action\":\"DELETE\",\"taskId\":\"task_12345\"}\n" +
                 "- If unclear: {\"action\":\"NEED_INFO\",\"message\":\"Please specify which task to complete\"}\n\n" +
@@ -300,6 +303,51 @@ public class Agent {
                     } else {
                         return "Could not add task due to scheduling conflict.";
                     }
+                }
+            } else if (actionJson.contains("\"action\":\"ADD_MULTIPLE\"")) {
+                Pattern tasksPattern = Pattern.compile("\"tasks\"\\s*:\\s*\\[([^\\]]+)\\]");
+                Matcher tasksMatcher = tasksPattern.matcher(actionJson);
+
+                if (tasksMatcher.find()) {
+                    String tasksJson = tasksMatcher.group(1);
+                    String[] taskStrings = tasksJson.split("\\},\\s*\\{");
+
+                    StringBuilder resultMessage = new StringBuilder("Added multiple tasks:\n");
+                    int successCount = 0;
+                    int conflictCount = 0;
+
+                    for (String taskStr : taskStrings) {
+                        taskStr = taskStr.replaceAll("^\\s*\\{|\\}\\s*$", "");
+
+                        Pattern descPattern = Pattern.compile("\"description\"\\s*:\\s*\"([^\"]+)\"");
+                        Pattern startPattern = Pattern.compile("\"startTime\"\\s*:\\s*\"([^\"]+)\"");
+                        Pattern endPattern = Pattern.compile("\"endTime\"\\s*:\\s*\"([^\"]+)\"");
+
+                        Matcher descMatcher = descPattern.matcher(taskStr);
+                        Matcher startMatcher = startPattern.matcher(taskStr);
+                        Matcher endMatcher = endPattern.matcher(taskStr);
+
+                        if (descMatcher.find() && startMatcher.find() && endMatcher.find()) {
+                            String description = descMatcher.group(1);
+                            LocalTime startTime = LocalTime.parse(startMatcher.group(1));
+                            LocalTime endTime = LocalTime.parse(endMatcher.group(1));
+
+                            Task newTask = scheduleManager.addTask(description, startTime, endTime, LocalDate.now(), true);
+                            if (newTask != null) {
+                                resultMessage.append("- ").append(description).append(" (").append(startTime).append(" - ").append(endTime).append(")\n");
+                                successCount++;
+                            } else {
+                                resultMessage.append("- ").append(description).append(" (CONFLICT - not added)\n");
+                                conflictCount++;
+                            }
+                        }
+                    }
+
+                    resultMessage.append("\nSummary: ").append(successCount).append(" tasks added");
+                    if (conflictCount > 0) {
+                        resultMessage.append(", ").append(conflictCount).append(" conflicts");
+                    }
+                    return resultMessage.toString();
                 }
             } else if (actionJson.contains("\"action\":\"UPDATE\"")) {
                 Pattern idPattern = Pattern.compile("\"taskId\"\\s*:\\s*\"([^\"]+)\"");
