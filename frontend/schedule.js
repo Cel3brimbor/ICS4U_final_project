@@ -181,7 +181,7 @@ function updateScheduleTimeline(tasks) {
         timeline.appendChild(marker);
     }
 
-    // Add priority event first if it exists
+    // Add priority event first if it exists (always at the top)
     if (currentPriorityEvent && currentPriorityEvent.date === selectedDate) {
         const priorityBlock = createPriorityEventBlock(currentPriorityEvent, hourWidth, paddingLeft);
         timeline.appendChild(priorityBlock);
@@ -204,9 +204,12 @@ function updateScheduleTimeline(tasks) {
     // Sort tasks by start time
     tasks.sort((a, b) => a.startTime.localeCompare(b.startTime));
 
+    // Position tasks with stacking to avoid overlaps
+    const positionedTasks = positionTasksWithStacking(tasks, hourWidth, paddingLeft);
+
     // Create timeline blocks for tasks
-    tasks.forEach(task => {
-        const block = createTaskBlock(task, hourWidth, paddingLeft);
+    positionedTasks.forEach(taskData => {
+        const block = createTaskBlock(taskData.task, hourWidth, paddingLeft, taskData.top);
         timeline.appendChild(block);
     });
 }
@@ -241,7 +244,58 @@ function createPriorityEventBlock(event, hourWidth, paddingLeft) {
     return block;
 }
 
-function createTaskBlock(task, hourWidth, paddingLeft) {
+function positionTasksWithStacking(tasks, hourWidth, paddingLeft) {
+    const positionedTasks = [];
+    const rows = []; // Each row represents a vertical level
+
+    tasks.forEach(task => {
+        const startHour = parseInt(task.startTime.split(':')[0]);
+        const startMinute = parseInt(task.startTime.split(':')[1]);
+        const endHour = parseInt(task.endTime.split(':')[0]);
+        const endMinute = parseInt(task.endTime.split(':')[1]);
+
+        const isMultiDay = (endHour * 60 + endMinute) < (startHour * 60 + startMinute);
+        const startMinutes = startHour * 60 + startMinute;
+        let endMinutes = isMultiDay ? 24 * 60 : endHour * 60 + endMinute;
+
+        const leftPosition = paddingLeft + (startMinutes / (24 * 60)) * (24 * hourWidth);
+        const width = Math.max((endMinutes - startMinutes) / (24 * 60) * (24 * hourWidth), 60);
+
+        // Find the first row where this task doesn't overlap with existing tasks
+        let rowIndex = 0;
+        let foundRow = false;
+
+        while (!foundRow) {
+            if (!rows[rowIndex]) {
+                rows[rowIndex] = [];
+            }
+
+            // Check if this task overlaps with any task in this row
+            const overlaps = rows[rowIndex].some(existingTask => {
+                return !(leftPosition + width <= existingTask.left ||
+                        leftPosition >= existingTask.left + existingTask.width);
+            });
+
+            if (!overlaps) {
+                // Task fits in this row
+                rows[rowIndex].push({ left: leftPosition, width: width });
+                foundRow = true;
+            } else {
+                // Try next row
+                rowIndex++;
+            }
+        }
+
+        positionedTasks.push({
+            task: task,
+            top: 10 + (rowIndex * 75) // 10px base + 75px per row
+        });
+    });
+
+    return positionedTasks;
+}
+
+function createTaskBlock(task, hourWidth, paddingLeft, top = 10) {
     const block = document.createElement('div');
     block.className = `timeline-block timeline-${task.status.toLowerCase()}`;
 
@@ -274,6 +328,7 @@ function createTaskBlock(task, hourWidth, paddingLeft) {
     block.style.position = 'absolute';
     block.style.left = leftPosition + 'px';
     block.style.width = width + 'px';
+    block.style.top = top + 'px';
 
     block.innerHTML = `
         <div class="timeline-content">

@@ -235,58 +235,52 @@ function updateScheduleTimeline(tasks) {
 
     timeline.innerHTML = '';
 
-    // Add time markers/labels with responsive spacing
-    const screenWidth = window.innerWidth;
+    // Time markers are removed from schedule overview as requested
 
-    // Responsive marker intervals based on screen size
-    let markerInterval;
-    if (screenWidth < 640) {
-        markerInterval = 8; // Every 8 hours on very small screens
-    } else if (screenWidth < 1024) {
-        markerInterval = 6; // Every 6 hours on tablets
-    } else if (screenWidth < 1440) {
-        markerInterval = 4; // Every 4 hours on laptops
-    } else {
-        markerInterval = 3; // Every 3 hours on large screens
+    // Create task list instead of timeline blocks
+    if (tasks.length === 0) {
+        const noTasks = document.createElement('div');
+        noTasks.className = 'no-tasks';
+        noTasks.textContent = 'No tasks in progress';
+        timeline.appendChild(noTasks);
+        return;
     }
 
-    for (let hour = 0; hour <= 24; hour += markerInterval) {
-        if (hour > 24) break;
+    // Filter for tasks that are in progress or pending
+    const activeTasks = tasks.filter(task => task.status === 'IN_PROGRESS' || task.status === 'PENDING');
 
-        const marker = document.createElement('div');
-        marker.className = 'time-marker';
-        marker.style.left = (hour / 24) * 100 + '%';
-        marker.textContent = hour === 24 ? '24:00' : `${hour.toString().padStart(2, '0')}:00`;
-        marker.style.position = 'absolute';
-        marker.style.top = '-40px';
-        marker.style.zIndex = '20';
-        timeline.appendChild(marker);
+    if (activeTasks.length === 0) {
+        const noActiveTasks = document.createElement('div');
+        noActiveTasks.className = 'no-active-tasks';
+        noActiveTasks.textContent = 'No tasks currently in progress';
+        timeline.appendChild(noActiveTasks);
+        return;
     }
 
-    //create timeline blocks
-    tasks.forEach(task => {
-        const block = document.createElement('div');
-        block.className = `timeline-block timeline-${task.status.toLowerCase()}`;
+    // Sort by priority (HIGH > MEDIUM > LOW) then by start time
+    activeTasks.sort((a, b) => {
+        const priorityOrder = { 'HIGH': 3, 'MEDIUM': 2, 'LOW': 1 };
+        const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
+        if (priorityDiff !== 0) return priorityDiff;
+        return a.startTime.localeCompare(b.startTime);
+    });
 
-        //calculate position (simplified - assuming 24-hour timeline)
-        const startHour = parseInt(task.startTime.split(':')[0]);
-        const startMinute = parseInt(task.startTime.split(':')[1]);
-        const endHour = parseInt(task.endTime.split(':')[0]);
-        const endMinute = parseInt(task.endTime.split(':')[1]);
+    // Create task list items
+    activeTasks.forEach(task => {
+        const taskItem = document.createElement('div');
+        taskItem.className = `schedule-task-item task-${task.status.toLowerCase()}`;
 
-        const startPosition = (startHour * 60 + startMinute) / (24 * 60) * 100;
-        const duration = ((endHour * 60 + endMinute) - (startHour * 60 + startMinute)) / (24 * 60) * 100;
-
-        block.style.left = startPosition + '%';
-        block.style.width = Math.max(duration, 1) + '%'; // Minimum 1% width
-
-        block.innerHTML = `
-            <div class="timeline-content">
-                <div class="timeline-title">${escapeHtml(task.description)}</div>
+        taskItem.innerHTML = `
+            <div class="schedule-task-content">
+                <div class="schedule-task-name">${escapeHtml(task.description)}</div>
+                <div class="schedule-task-details">
+                    <span class="schedule-task-time">${task.startTime} - ${task.endTime}</span>
+                    <span class="schedule-task-priority priority-${task.priority.toLowerCase()}">${task.priority}</span>
+                </div>
             </div>
         `;
 
-        timeline.appendChild(block);
+        timeline.appendChild(taskItem);
     });
 }
 
