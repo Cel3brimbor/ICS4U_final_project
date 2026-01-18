@@ -59,11 +59,19 @@ public class Agent {
             String notesContext = formatNotesForAI(currentNotes);
 
             String prompt = String.format(
-                "You are an AI assistant that can edit notes made by the user. User's current notes:\n%s\n\n" +
+                "You are an AI assistant that can edit notes. User's current notes:\n%s\n\n" +
                 "User instruction: %s\n\n" +
-                "Respond with a JSON object containing 'action' (ADD, UPDATE, DELETE) and 'result' describing what you did. " +
-                "For ADD: include 'content' field. For UPDATE/DELETE: include 'noteId' field. " +
-                "If you need more information, set action to 'NEED_INFO' and explain what you need.",
+                "IMPORTANT VALIDATION AND TOOLS:\n" +
+                "- For UPDATE: You MUST have both noteId (UUID) and new content\n" +
+                "- For DELETE: You MUST have the noteId (UUID) to delete\n" +
+                "- If the note requested to be edited or deleted doesn't exist, use {\"action\":\"ITEM_NOT_FOUND\",\"itemType\":\"note\",\"itemId\":\"uuid-here\"}\n" +
+                "- If information is missing or unclear, respond with {\"action\":\"NEED_INFO\",\"message\":\"what you need\"}\n\n" +
+                "Respond with a JSON object. Examples:\n" +
+                "- To add a note: {\"action\":\"ADD\",\"content\":\"note content here\"}\n" +
+                "- To update a note: {\"action\":\"UPDATE\",\"noteId\":\"uuid-here\",\"content\":\"updated content\"}\n" +
+                "- To delete a note: {\"action\":\"DELETE\",\"noteId\":\"uuid-here\"}\n" +
+                "- If unclear: {\"action\":\"NEED_INFO\",\"message\":\"Please specify which note to update\"}\n\n" +
+                "Choose the appropriate action based on the user's instruction.",
                 notesContext,
                 instruction
             );
@@ -92,15 +100,22 @@ public class Agent {
             String prompt = String.format(
                 "You are an AI assistant that can edit schedules. Current tasks for today:\n%s\n\n" +
                 "User instruction: %s\n\n" +
-                "Respond with a JSON object containing 'action' (ADD, UPDATE, DELETE, COMPLETE) and 'result' describing what you did. " +
-                "For ADD: include 'description', 'startTime' (HH:MM), 'endTime' (HH:MM) fields. " +
-                "For UPDATE/COMPLETE/DELETE: include 'taskId' field. " +
-                "Times should be in 24-hour format. If you need more information, set action to 'NEED_INFO' and explain what you need.",
+                "IMPORTANT VALIDATION AND TOOLS:\n" +
+                "- For ADD: You MUST have description, start time (HH:MM), and end time (HH:MM)\n" +
+                "- For UPDATE/COMPLETE/DELETE: You MUST identify which specific task by taskId\n" +
+                "- If the task requested to be edited or deleted doesn't exist, use {\"action\":\"ITEM_NOT_FOUND\",\"itemType\":\"task\",\"itemId\":\"taskId-here\"}\n" +
+                "- If information is missing, respond with {\"action\":\"NEED_INFO\",\"message\":\"what you need\"}\n\n" +
+                "Respond with a JSON object. Examples:\n" +
+                "- To add a task: {\"action\":\"ADD\",\"description\":\"task name\",\"startTime\":\"14:00\",\"endTime\":\"15:00\"}\n" +
+                "- To complete a task: {\"action\":\"COMPLETE\",\"taskId\":\"task_12345\"}\n" +
+                "- To delete a task: {\"action\":\"DELETE\",\"taskId\":\"task_12345\"}\n" +
+                "- If unclear: {\"action\":\"NEED_INFO\",\"message\":\"Please specify which task to complete\"}\n\n" +
+                "Choose the appropriate action based on the user's instruction. Use 24-hour time format (HH:MM).",
                 scheduleContext,
                 instruction
             );
 
-            String aiResponse = callGeminiAPI(prompt, 300);
+            String aiResponse = callGeminiAPI(prompt, 500);
             String actionJson = extractContentFromResponse(aiResponse);
 
             //execute
@@ -177,7 +192,7 @@ public class Agent {
             Note note = notes.get(i);
             sb.append(String.format("%d. ID: %s, Content: %s\n",
                 i + 1,
-                getNoteId(note),
+                note.getId(),
                 note.getContent()
             ));
         }
@@ -240,6 +255,18 @@ public class Agent {
                         return "Could not find note with ID: " + noteId;
                     }
                 }
+            } else if (actionJson.contains("\"action\":\"ITEM_NOT_FOUND\"")) {
+                Pattern typePattern = Pattern.compile("\"itemType\"\\s*:\\s*\"([^\"]+)\"");
+                Pattern idPattern = Pattern.compile("\"itemId\"\\s*:\\s*\"([^\"]+)\"");
+                Matcher typeMatcher = typePattern.matcher(actionJson);
+                Matcher idMatcher = idPattern.matcher(actionJson);
+
+                if (typeMatcher.find() && idMatcher.find()) {
+                    String itemType = typeMatcher.group(1);
+                    String itemId = idMatcher.group(1);
+                    return "The " + itemType + " with ID " + itemId + " does not exist in the system.";
+                }
+                return "The requested item does not exist.";
             } else if (actionJson.contains("\"action\":\"NEED_INFO\"")) {
                 return "I need more information to complete this action.";
             }
@@ -307,6 +334,18 @@ public class Agent {
                         return "Could not find task with ID: " + taskId;
                     }
                 }
+            } else if (actionJson.contains("\"action\":\"ITEM_NOT_FOUND\"")) {
+                Pattern typePattern = Pattern.compile("\"itemType\"\\s*:\\s*\"([^\"]+)\"");
+                Pattern idPattern = Pattern.compile("\"itemId\"\\s*:\\s*\"([^\"]+)\"");
+                Matcher typeMatcher = typePattern.matcher(actionJson);
+                Matcher idMatcher = idPattern.matcher(actionJson);
+
+                if (typeMatcher.find() && idMatcher.find()) {
+                    String itemType = typeMatcher.group(1);
+                    String itemId = idMatcher.group(1);
+                    return "The " + itemType + " with ID " + itemId + " does not exist in the system.";
+                }
+                return "The requested item does not exist.";
             } else if (actionJson.contains("\"action\":\"NEED_INFO\"")) {
                 return "I need more information to complete this action.";
             }
@@ -316,9 +355,5 @@ public class Agent {
         } catch (Exception e) {
             return "Error executing schedule action: " + e.getMessage();
         }
-    }
-
-    private String getNoteId(Note note) {
-        return note.getContent() + "|" + note.getCreationTime().toString();
     }
 }

@@ -52,9 +52,11 @@ public class NotePersistence {
     private static String noteToJson(Note note) {
         return String.format(
             "  {\n" +
+            "    \"id\": \"%s\",\n" +
             "    \"content\": \"%s\",\n" +
             "    \"creationTime\": \"%s\"\n" +
             "  }",
+            note.getId(),
             escapeJsonString(note.getContent()),
             note.getCreationTime().format(DATETIME_FORMATTER)
         );
@@ -101,12 +103,17 @@ public class NotePersistence {
     //parses a single note from JSON object string
     private static Note parseNoteFromJson(String jsonObject) {
         try {
+            String id = extractJsonString(jsonObject, "id");
             String content = extractJsonString(jsonObject, "content");
             String timeStr = extractJsonString(jsonObject, "creationTime");
 
             java.time.LocalDateTime creationTime = java.time.LocalDateTime.parse(timeStr, DATETIME_FORMATTER);
 
-            return new Note(content, creationTime);
+            if (id != null && !id.isEmpty()) {
+                return new Note(id, content, creationTime);
+            } else {
+                return new Note(content, creationTime);
+            }
 
         } catch (Exception e) {
             System.err.println("Error parsing note from JSON: " + jsonObject + " - " + e.getMessage());

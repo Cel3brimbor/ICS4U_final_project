@@ -207,10 +207,12 @@ public class PE {
                 "IMPORTANT VALIDATION:\n" +
                 "- For ADD: You MUST have description, start time, and end time\n" +
                 "- For UPDATE/COMPLETE/DELETE: You MUST identify which specific task\n" +
-                "- If information is missing (such as lack of task duration), respond with {\"action\":\"NEED_INFO\",\"message\":\"what you need\"}\n\n" +
+                "- If the task requested to be edited or deleted doesn't exist, use {\"action\":\"ITEM_NOT_FOUND\",\"itemType\":\"task\",\"itemId\":\"taskId-here\"}\n" +
+                "- If information is missing, respond with {\"action\":\"NEED_INFO\",\"message\":\"what you need\"}\n\n" +
                 "Respond with a JSON object. Examples:\n" +
                 "- To add a task: {\"action\":\"ADD\",\"description\":\"task name\",\"startTime\":\"14:00\",\"endTime\":\"15:00\"}\n" +
                 "- To complete a task: {\"action\":\"COMPLETE\",\"taskId\":\"task_12345\"}\n" +
+                "- To delete a task: {\"action\":\"DELETE\",\"taskId\":\"task_12345\"}\n" +
                 "- If unclear: {\"action\":\"NEED_INFO\",\"message\":\"Please specify which task to complete\"}\n\n" +
                 "Choose the appropriate action based on the user's instruction. Use 24-hour time format (HH:MM).",
                 scheduleContext,
@@ -260,14 +262,15 @@ public class PE {
             String prompt = String.format(
                 "You are an AI assistant that can edit notes. User's current notes:\n%s\n\n" +
                 "User instruction: %s\n\n" +
-                "IMPORTANT VALIDATIOb:\n" +
-                "- For UPDATE: You MUST have both noteId and new content\n" +
-                "- For DELETE: You MUST identify which specific note to delete\n" +
-                "- If information is missing or unclear (such as lack of context), respond with {\"action\":\"NEED_INFO\",\"message\":\"what you need\"}\n\n" +
+                "IMPORTANT VALIDATION:\n" +
+                "- For UPDATE: You MUST have both noteId (UUID) and new content\n" +
+                "- For DELETE: You MUST have the noteId (UUID) to delete\n" +
+                "- If the note requested to be edited or deleted doesn't exist, use {\"action\":\"ITEM_NOT_FOUND\",\"itemType\":\"note\",\"itemId\":\"uuid-here\"}\n" +
+                "- If information is missing or unclear, respond with {\"action\":\"NEED_INFO\",\"message\":\"what you need\"}\n\n" +
                 "Respond with a JSON object. Examples:\n" +
                 "- To add a note: {\"action\":\"ADD\",\"content\":\"note content here\"}\n" +
-                "- To update a note: {\"action\":\"UPDATE\",\"noteId\":\"note_identifier\",\"content\":\"updated content\"}\n" +
-                "- To delete a note: {\"action\":\"DELETE\",\"noteId\":\"note_identifier\"}\n" +
+                "- To update a note: {\"action\":\"UPDATE\",\"noteId\":\"uuid-here\",\"content\":\"updated content\"}\n" +
+                "- To delete a note: {\"action\":\"DELETE\",\"noteId\":\"uuid-here\"}\n" +
                 "- If unclear: {\"action\":\"NEED_INFO\",\"message\":\"Please specify which note to update\"}\n\n" +
                 "Choose the appropriate action based on the user's instruction. Notes should be meaningful and detailed.",
                 notesContext,
@@ -588,6 +591,6 @@ public class PE {
     }
 
     private static String getNoteId(Note note) {
-        return note.getContent() + "|" + note.getCreationTime().toString();
+        return note.getId();
     }
 }
