@@ -98,13 +98,31 @@ async function loadTasks() {
         }
 
         const tasks = await response.json();
+        // Update localStorage with server data for consistency
+        localStorage.setItem('savedTasks', JSON.stringify(tasks));
         displayTasks(tasks);
-
         filterTasks('all');
 
     } catch (error) {
-        console.error('Error loading tasks:', error);
-        showError('Failed to load tasks. Please refresh the page.');
+        console.error('Error loading tasks from server:', error);
+
+        // Try to load from localStorage as fallback
+        try {
+            const savedTasks = localStorage.getItem('savedTasks');
+            if (savedTasks) {
+                const tasks = JSON.parse(savedTasks);
+                displayTasks(tasks);
+                filterTasks('all');
+                console.log('Loaded tasks from localStorage');
+                return;
+            }
+        } catch (localError) {
+            console.error('Error loading tasks from localStorage:', localError);
+        }
+
+        // If no tasks available, show empty state
+        displayTasks([]);
+        showError('Failed to load tasks. Please check server connection.');
     }
 }
 
@@ -227,6 +245,8 @@ function displayTasks(tasks) {
 
     if (!taskList) return;
 
+    console.log('displayTasks called with', tasks.length, 'tasks');
+
     //clear existing tasks
     taskList.innerHTML = '';
 
@@ -246,6 +266,7 @@ function displayTasks(tasks) {
     });
 
     //update schedule timeline
+    console.log('Calling updateScheduleTimeline with tasks:', tasks);
     updateScheduleTimeline(tasks);
 }
 
@@ -286,7 +307,9 @@ function updateScheduleTimeline(tasks) {
     const timeline = document.getElementById('schedule-timeline');
     if (!timeline) return;
 
+    // Clear timeline completely
     timeline.innerHTML = '';
+    console.log('Timeline cleared, updating with', tasks.length, 'tasks');
 
     // Time markers are removed from schedule overview as requested
 
@@ -296,17 +319,20 @@ function updateScheduleTimeline(tasks) {
         noTasks.className = 'no-tasks';
         noTasks.textContent = 'No tasks in progress';
         timeline.appendChild(noTasks);
+        console.log('Timeline: No tasks to display');
         return;
     }
 
     //filter for tasks that are in progress or pending
     const activeTasks = tasks.filter(task => task.status === 'IN_PROGRESS' || task.status === 'PENDING');
+    console.log('Timeline: Found', activeTasks.length, 'active tasks out of', tasks.length, 'total tasks');
 
     if (activeTasks.length === 0) {
         const noActiveTasks = document.createElement('div');
         noActiveTasks.className = 'no-active-tasks';
         noActiveTasks.textContent = 'No tasks currently in progress';
         timeline.appendChild(noActiveTasks);
+        console.log('Timeline: No active tasks to display');
         return;
     }
 
@@ -414,12 +440,35 @@ async function updateTaskStatus(taskId, status) {
         }
 
         //reload tasks
-        loadTasks();
+        await loadTasks();
         showSuccess('Task updated successfully!');
 
     } catch (error) {
-        console.error('Error updating task:', error);
-        showError('Failed to update task. Please try again.');
+        console.error('Error updating task on server:', error);
+
+        // Try to update in localStorage as fallback
+        try {
+            const savedTasks = localStorage.getItem('savedTasks');
+            if (savedTasks) {
+                let tasks = JSON.parse(savedTasks);
+                const taskIndex = tasks.findIndex(task => task.id === taskId);
+
+                if (taskIndex !== -1) {
+                    tasks[taskIndex].status = status;
+                    localStorage.setItem('savedTasks', JSON.stringify(tasks));
+                    // Update display with local tasks
+                    console.log('Calling displayTasks with local tasks after status update:', tasks);
+                    displayTasks(tasks);
+                    filterTasks('all');
+                    showSuccess('Task updated locally (server not available)');
+                    return;
+                }
+            }
+        } catch (localError) {
+            console.error('Error updating task in localStorage:', localError);
+        }
+
+        showError('Failed to update task. Please check server connection.');
     }
 }
 
@@ -438,12 +487,37 @@ async function deleteTask(taskId) {
         }
 
         //reload tasks
-        loadTasks();
+        console.log('Task deleted from server, reloading tasks...');
+        await loadTasks();
         showSuccess('Task deleted successfully!');
 
     } catch (error) {
-        console.error('Error deleting task:', error);
-        showError('Failed to delete task. Please try again.');
+        console.error('Error deleting task from server:', error);
+
+        // Try to delete from localStorage as fallback
+        try {
+            const savedTasks = localStorage.getItem('savedTasks');
+            if (savedTasks) {
+                let tasks = JSON.parse(savedTasks);
+                const originalLength = tasks.length;
+                tasks = tasks.filter(task => task.id !== taskId);
+
+                if (tasks.length < originalLength) {
+                    console.log('Task deleted from localStorage, updating display...');
+                    localStorage.setItem('savedTasks', JSON.stringify(tasks));
+                    // Update display with local tasks
+                    console.log('Calling displayTasks with local tasks after deletion:', tasks);
+                    displayTasks(tasks);
+                    filterTasks('all');
+                    showSuccess('Task deleted locally (server not available)');
+                    return;
+                }
+            }
+        } catch (localError) {
+            console.error('Error deleting task from localStorage:', localError);
+        }
+
+        showError('Failed to delete task. Please check server connection.');
     }
 }
 

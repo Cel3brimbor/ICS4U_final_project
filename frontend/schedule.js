@@ -6,7 +6,32 @@ let calendarStartDate = new Date();
 document.addEventListener('DOMContentLoaded', function() {
     initializeSchedulePage();
     loadPriorityEvent();
-    loadScheduleTimeline();
+    // Load timeline after a short delay to ensure everything is initialized
+    setTimeout(() => {
+        loadScheduleTimeline();
+    }, 100);
+});
+
+// Refresh timeline when page becomes visible (user returns to tab)
+document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+        console.log('Schedule page became visible, refreshing current view...');
+        if (currentView === 'timeline') {
+            loadScheduleTimeline();
+        } else {
+            loadCalendarView();
+        }
+    }
+});
+
+// Also refresh when window regains focus
+window.addEventListener('focus', function() {
+    console.log('Schedule page regained focus, refreshing current view...');
+    if (currentView === 'timeline') {
+        loadScheduleTimeline();
+    } else {
+        loadCalendarView();
+    }
 });
 
 function initializeSchedulePage() {
@@ -148,6 +173,7 @@ async function loadScheduleTimeline() {
             });
 
             console.log('API tasks for selected date:', dateTasks);
+            console.log('Updating schedule timeline with', dateTasks.length, 'tasks');
             updateScheduleTimeline(dateTasks);
             updateScheduleStats(dateTasks);
 
@@ -458,6 +484,7 @@ function timeToMinutes(timeString) {
 
 function handleDateChange(event) {
     selectedDate = event.target.value;
+    console.log('Date changed to:', selectedDate);
     if (currentView === 'timeline') {
         loadScheduleTimeline();
     } else {
@@ -592,6 +619,7 @@ function renderCalendar(calendarStart, calendarEnd, monthTasks) {
 }
 
 function refreshTimeline() {
+    console.log('Manual refresh triggered for view:', currentView);
     if (currentView === 'timeline') {
         loadScheduleTimeline();
         showMessage('Timeline refreshed', 'info');
