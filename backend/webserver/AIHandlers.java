@@ -55,8 +55,7 @@ public class AIHandlers {
                 System.err.println("Error in AI chat: " + e.getMessage());
                 String errorResponse = "{\"error\":\"Internal server error\"}";
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
-                //exchange.sendResponseHeaders(500, errorResponse.length());
-                //exchange.sendResponseHeaders(500, 0);
+                exchange.sendResponseHeaders(500, 0);
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(errorResponse.getBytes(StandardCharsets.UTF_8));
                 }
@@ -164,7 +163,18 @@ public class AIHandlers {
 
     private static String escapeForJson(String s) {
         if (s == null) return "";
-        return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t");
+        s = s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t");
+        //to handle long AI responses without breaking json
+        StringBuilder sb = new StringBuilder(s.length() * 2);
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c >= 0 && c <= 0x1F) {
+                sb.append(String.format("\\u%04x", (int) c));
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
     private static String extractJsonValue(String json, String key) {

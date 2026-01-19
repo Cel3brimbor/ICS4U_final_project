@@ -15,11 +15,12 @@ public class NoteManager {
     }
 
     public Note addNote(String content) {
-        if (content == null || content.trim().isEmpty()) {
+        String sanitized = JsonUtils.sanitizeUnicodePunctuation(content != null ? content : "");
+        if (sanitized.trim().isEmpty()) {
             throw new IllegalArgumentException("Note content cannot be empty");
         }
 
-        Note newNote = new Note(content.trim(), LocalDateTime.now());
+        Note newNote = new Note(sanitized.trim(), LocalDateTime.now());
         notes.add(newNote);
         return newNote;
     }
@@ -36,9 +37,10 @@ public class NoteManager {
     }
 
     public boolean updateNote(String noteId, String newContent) {
+        String sanitized = JsonUtils.sanitizeUnicodePunctuation(newContent != null ? newContent : "");
         for (Note note : notes) {
             if (noteId.equals(note.getId())) {
-                note.setContent(newContent);
+                note.setContent(sanitized);
                 return true;
             }
         }

@@ -132,7 +132,7 @@ public class NotePersistence {
             if (timeStr == null) return null;
 
             java.time.LocalDateTime creationTime = java.time.LocalDateTime.parse(timeStr, DATETIME_FORMATTER);
-            String safeContent = (content != null) ? content : "";
+            String safeContent = JsonUtils.sanitizeUnicodePunctuation((content != null) ? content : "");
 
             if (id != null && !id.isEmpty()) {
                 return new Note(id, safeContent, creationTime);

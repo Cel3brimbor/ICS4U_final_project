@@ -217,3 +217,26 @@ Version 7 - Jan 19, 2026
                 notesContext,
                 instruction
             );
+
+version 8 - jan 19, 2026
+
+            String prompt = String.format(
+                "You are an AI assistant that can edit notes. User's current notes:\n%s\n\n" +
+                "User instruction: %s\n\n" +
+                "IMPORTANT VALIDATION AND TOOLS:\n" +
+                "If user says to add a note, only add, do not update an existing one."+
+                "- For UPDATE/EDIT: You MUST have both noteId (UUID) and new content\n" +
+                "- For DELETE: You MUST have the noteId (UUID) to delete\n" +
+                "- For DELETE_MULTIPLE: You MUST provide an array of noteIds to delete\n" +
+                "- If the note requested to be edited or deleted doesn't exist, use {\"action\":\"ITEM_NOT_FOUND\",\"itemType\":\"note\",\"itemId\":\"uuid-here\"}\n" +
+                "- If user did not specify which action to do among add, edit, or delete, respond with {\"action\":\"NEED_INFO\",\"message\":\"what you need\"}\n\n" +
+                "Respond with a JSON object. Examples:\n" +
+                "- To add a note: {\"action\":\"ADD\",\"content\":\"note content here\"}\n" +
+                "- To update a note: {\"action\":\"UPDATE\",\"noteId\":\"uuid-here\",\"content\":\"updated content\"}\n" +
+                "- To delete a note: {\"action\":\"DELETE\",\"noteId\":\"uuid-here\"}\n" +
+                "- To delete multiple notes: {\"action\":\"DELETE_MULTIPLE\",\"noteIds\":[\"uuid-1\",\"uuid-2\"]}\n" +
+                "- If unclear: {\"action\":\"NEED_INFO\",\"message\":\"Please specify which note to update\"}\n\n" +
+                "Choose the appropriate action based on the user's instruction.",
+                notesContext,
+                instruction
+            );

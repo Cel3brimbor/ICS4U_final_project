@@ -56,7 +56,6 @@ public class WebServer {
         server.setExecutor(null);
         server.start();
 
-        System.out.println("Server started on http://localhost:" + PORT);
-        System.out.println("Open your browser and navigate to http://localhost:" + PORT);
+        System.out.println("\n\nServer started on http://localhost:" + PORT);
     }
 }

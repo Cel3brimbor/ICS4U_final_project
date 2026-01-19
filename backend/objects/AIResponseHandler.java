@@ -9,13 +9,9 @@ public class AIResponseHandler {
     public static String extractContentFromResponse(String responseBody) {
         try {
 
-            //lmstudio format
             if (responseBody.contains("\"choices\"")) {
-                Pattern lmStudioPattern = Pattern.compile("\"content\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"");
-                Matcher lmStudioMatcher = lmStudioPattern.matcher(responseBody);
-
-                if (lmStudioMatcher.find()) {
-                    String extracted = lmStudioMatcher.group(1);
+                String extracted = extractContentFromChoicesMessage(responseBody);
+                if (extracted != null) {
                     return cleanExtractedContent(extracted);
                 }
             }
@@ -42,6 +38,29 @@ public class AIResponseHandler {
         }
 
         return responseBody.length() > 500 ? responseBody.substring(0, 500) + "..." : responseBody;
+    }
+
+    private static String extractContentFromChoicesMessage(String responseBody) {
+        int choicesIdx = responseBody.indexOf("\"choices\"");
+        if (choicesIdx < 0) return null;
+        int contentIdx = responseBody.indexOf("\"content\"", choicesIdx);
+        if (contentIdx < 0) return null;
+        int colonIdx = responseBody.indexOf(":", contentIdx);
+        if (colonIdx < 0) return null;
+        int openQuote = responseBody.indexOf("\"", colonIdx);
+        if (openQuote < 0) return null;
+
+        int i = openQuote + 1;
+        StringBuilder sb = new StringBuilder(4096);
+        while (i < responseBody.length()) {
+            char c = responseBody.charAt(i);
+            if (c == '"' && (i == 0 || responseBody.charAt(i - 1) != '\\')) {
+                break;
+            }
+            sb.append(c);
+            i++;
+        }
+        return sb.length() > 0 ? sb.toString() : null;
     }
 
     private static String cleanExtractedContent(String extracted) {
