@@ -35,6 +35,13 @@ function setDefaultDatetimeValues() {
         return date.toTimeString().slice(0, 5); // HH:mm format
     };
 
+    // Set default date to today
+    const today = now.toISOString().split('T')[0];
+    const dateInput = document.getElementById('schedule-task-date');
+    if (dateInput) {
+        dateInput.value = today;
+    }
+
     document.getElementById('schedule-start-time').value = formatTime(now);
     document.getElementById('schedule-end-time').value = formatTime(oneHourLater);
 }
@@ -127,13 +134,61 @@ function displayPriorityEvent() {
 }
 
 async function loadScheduleTimeline() {
-    // Load tasks from localStorage (primary source)
     try {
-        loadTimelineFromLocalStorage();
+        // First try to load from API
+        const response = await fetch('/api/tasks');
+        if (response.ok) {
+            const apiTasks = await response.json();
+            console.log('Loaded tasks from API:', apiTasks);
+
+            // Filter tasks for the selected date
+            const dateTasks = apiTasks.filter(task => {
+                const taskDate = new Date(task.date).toISOString().split('T')[0];
+                return taskDate === selectedDate;
+            });
+
+            console.log('API tasks for selected date:', dateTasks);
+            updateScheduleTimeline(dateTasks);
+            updateScheduleStats(dateTasks);
+
+            // Also merge with localStorage tasks for the same date
+            try {
+                const savedTasks = localStorage.getItem('savedTasks');
+                if (savedTasks) {
+                    const localTasks = JSON.parse(savedTasks);
+                    const localDateTasks = localTasks.filter(task => {
+                        let taskDate = task.date;
+                        if (task.date && task.date.includes('T')) {
+                            taskDate = task.date.split('T')[0];
+                        }
+                        return taskDate === selectedDate;
+                    });
+
+                    // Merge local tasks that aren't already in API tasks
+                    const mergedTasks = [...dateTasks];
+                    localDateTasks.forEach(localTask => {
+                        const exists = mergedTasks.some(apiTask => apiTask.id === localTask.id);
+                        if (!exists) {
+                            mergedTasks.push(localTask);
+                        }
+                    });
+
+                    if (mergedTasks.length > dateTasks.length) {
+                        console.log('Added local tasks to API tasks:', mergedTasks);
+                        updateScheduleTimeline(mergedTasks);
+                        updateScheduleStats(mergedTasks);
+                    }
+                }
+            } catch (localError) {
+                console.log('No local tasks to merge');
+            }
+        } else {
+            console.log('API not available, loading from localStorage');
+            loadTimelineFromLocalStorage();
+        }
     } catch (error) {
-        console.error('Error loading timeline:', error);
-        updateScheduleTimeline([]);
-        updateScheduleStats([]);
+        console.error('Error loading timeline from API, trying localStorage:', error);
+        loadTimelineFromLocalStorage();
     }
 }
 
@@ -562,15 +617,16 @@ async function addTaskFromSchedule() {
     const taskInput = document.getElementById('schedule-task-input');
     const startTimeInput = document.getElementById('schedule-start-time');
     const endTimeInput = document.getElementById('schedule-end-time');
+    const dateInput = document.getElementById('schedule-task-date');
     const prioritySelect = document.getElementById('schedule-task-priority');
-    const selectedDate = document.getElementById('timeline-date').value;
+    const selectedDate = dateInput.value;
 
     const taskText = taskInput.value.trim();
     const startTime = startTimeInput.value;
     const endTime = endTimeInput.value;
     const priority = prioritySelect.value;
 
-    if (!taskText || !startTime || !endTime) {
+    if (!taskText || !startTime || !endTime || !selectedDate) {
         showMessage('Please fill in all fields', 'error');
         return;
     }

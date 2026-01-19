@@ -16,13 +16,12 @@ function initializeApp() {
     //initialize navigation
     initializeNavigation();
 
-    // Date input initialization commented out for AI agent demo compatibility
     // Set default date to today
-    // const today = new Date().toISOString().split('T')[0];
-    // const dateInput = document.getElementById('task-date');
-    // if (dateInput) {
-    //     dateInput.value = today;
-    // }
+    const today = new Date().toISOString().split('T')[0];
+    const dateInput = document.getElementById('task-date');
+    if (dateInput) {
+        dateInput.value = today;
+    }
 
     // Apply dark mode if enabled
     const savedSettings = localStorage.getItem('appSettings');
@@ -113,14 +112,13 @@ async function addTask() {
     const taskInput = document.getElementById('task-input');
     const startTimeInput = document.getElementById('start-time');
     const endTimeInput = document.getElementById('end-time');
-    // const dateInput = document.getElementById('task-date'); // Temporarily commented out
+    const dateInput = document.getElementById('task-date');
     const priorityInput = document.getElementById('task-priority');
 
     const description = taskInput.value.trim();
     const startTime = startTimeInput.value;
     const endTime = endTimeInput.value;
-    // const selectedDate = dateInput.value; // Temporarily commented out
-    const selectedDate = new Date().toISOString().split('T')[0]; // Use today's date
+    const selectedDate = dateInput.value;
     const priority = priorityInput.value;
 
     //validation
@@ -135,11 +133,10 @@ async function addTask() {
         return;
     }
 
-    // Date validation commented out - using today's date by default
-    // if (!selectedDate) {
-    //     showError('Please select a date for the task');
-    //     return;
-    // }
+    if (!selectedDate) {
+        showError('Please select a date for the task');
+        return;
+    }
 
     if (startTime >= endTime) {
         showError('End time must be after start time');
