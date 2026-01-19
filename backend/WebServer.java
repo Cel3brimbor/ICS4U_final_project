@@ -12,14 +12,11 @@ import backend.webserver.AIHandlers;
 import backend.webserver.TimerHandlers;
 import backend.webserver.StatsHandlers;
 
-import com.sun.net.httpserver.HttpExchange;
 import java.io.*;
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 
 public class WebServer {
     private static final int PORT = 8000;
-    private static final String FRONTEND_PATH = "frontend/";
     private ScheduleManager scheduleManager;
     private NoteManager noteManager;
     private Agent aiAgent;
@@ -61,62 +58,5 @@ public class WebServer {
 
         System.out.println("Server started on http://localhost:" + PORT);
         System.out.println("Open your browser and navigate to http://localhost:" + PORT);
-    }
-
-    // Utility methods for JSON value extraction
-    private String extractJsonValue(String json, String key) {
-        String pattern = "\"" + key + "\"\\s*:\\s*\"([^\"]+)\"";
-        java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
-        java.util.regex.Matcher m = p.matcher(json);
-        if (m.find()) {
-            return m.group(1);
-        }
-        return null;
-    }
-
-    //http response helper methods
-    private void sendSuccess(HttpExchange exchange, String message) throws IOException {
-        String response = "{\"message\":\"" + message + "\"}";
-        exchange.getResponseHeaders().set("Content-Type", "application/json");
-        exchange.sendResponseHeaders(200, response.length());
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(response.getBytes(StandardCharsets.UTF_8));
-        }
-    }
-
-    private void sendBadRequest(HttpExchange exchange, String message) throws IOException {
-        String response = "{\"error\":\"" + message + "\"}";
-        exchange.getResponseHeaders().set("Content-Type", "application/json");
-        exchange.sendResponseHeaders(400, response.length());
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(response.getBytes(StandardCharsets.UTF_8));
-        }
-    }
-
-    private void sendConflict(HttpExchange exchange, String message) throws IOException {
-        String response = "{\"error\":\"" + message + "\"}";
-        exchange.getResponseHeaders().set("Content-Type", "application/json");
-        exchange.sendResponseHeaders(409, response.length());
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(response.getBytes(StandardCharsets.UTF_8));
-        }
-    }
-
-    private void sendNotFound(HttpExchange exchange, String message) throws IOException {
-        String response = "{\"error\":\"" + message + "\"}";
-        exchange.getResponseHeaders().set("Content-Type", "application/json");
-        exchange.sendResponseHeaders(404, response.length());
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(response.getBytes(StandardCharsets.UTF_8));
-        }
-    }
-
-    private void sendMethodNotAllowed(HttpExchange exchange) throws IOException {
-        String response = "{\"error\":\"Method not allowed\"}";
-        exchange.getResponseHeaders().set("Content-Type", "application/json");
-        exchange.sendResponseHeaders(405, response.length());
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(response.getBytes(StandardCharsets.UTF_8));
-        }
     }
 }

@@ -8,8 +8,6 @@ import backend.FrontendDataHandler;
 import backend.objects.Task;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 public class TaskHandlers {
@@ -129,63 +127,6 @@ public class TaskHandlers {
             }
             return sb.toString();
         }
-
-        //parse JSON directly into Task object
-        private Task parseTaskFromJson(String json) {
-            try {
-                // Simple JSON parsing - extract field values directly into Task constructor
-                String description = extractJsonString(json, "description");
-                String startTimeStr = extractJsonString(json, "startTime");
-                String endTimeStr = extractJsonString(json, "endTime");
-
-                if (description == null || startTimeStr == null || endTimeStr == null) {
-                    return null;
-                }
-
-                LocalTime startTime = LocalTime.parse(startTimeStr);
-                LocalTime endTime = LocalTime.parse(endTimeStr);
-
-                return new Task(description, startTime, endTime);
-            } catch (Exception e) {
-                System.err.println("Error parsing task JSON: " + e.getMessage());
-                return null;
-            }
-        }
-
-        //validate Task object
-        private List<String> validateTask(Task task) {
-            List<String> errors = new ArrayList<>();
-
-            if (task.getDescription() == null || task.getDescription().trim().isEmpty()) {
-                errors.add("Task description cannot be empty");
-            }
-            if (task.getStartTime() == null) {
-                errors.add("Start time cannot be null");
-            }
-            if (task.getEndTime() == null) {
-                errors.add("End time cannot be null");
-            }
-            if (task.getStartTime() != null && task.getEndTime() != null) {
-                if (task.getStartTime().isAfter(task.getEndTime()) || task.getStartTime().equals(task.getEndTime())) {
-                    errors.add("Start time must be before end time");
-                }
-            }
-
-            return errors;
-        }
-
-        //create validation error response
-        private String createValidationErrorResponse(List<String> errors) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("{\"error\":\"Validation failed\",\"details\":[");
-            for (int i = 0; i < errors.size(); i++) {
-                sb.append("\"").append(errors.get(i)).append("\"");
-                if (i < errors.size() - 1) sb.append(",");
-            }
-            sb.append("]}");
-            return sb.toString();
-        }
-
         //convert Task to JSON
         private String taskToJson(Task task) {
             return String.format(

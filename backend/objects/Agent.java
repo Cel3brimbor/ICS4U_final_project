@@ -84,7 +84,7 @@ public class Agent {
         String prompt = message;
 
         try {
-            String response = callAIAPI(prompt, 10000); //higher token limit
+            String response = callAIAPI(prompt, 2000); //higher token limit
             return AIResponseHandler.extractContentFromResponse(response);
         } catch (Exception e) {
             System.err.println("Chat failed: " + e.getMessage());
@@ -105,11 +105,11 @@ public class Agent {
                 "You are an AI assistant that can edit notes. User's current notes:\n%s\n\n" +
                 "User instruction: %s\n\n" +
                 "IMPORTANT VALIDATION AND TOOLS:\n" +
-                "- For UPDATE: You MUST have both noteId (UUID) and new content\n" +
+                "- For UPDATE/EDIT: You MUST have both noteId (UUID) and new content\n" +
                 "- For DELETE: You MUST have the noteId (UUID) to delete\n" +
                 "- For DELETE_MULTIPLE: You MUST provide an array of noteIds to delete\n" +
                 "- If the note requested to be edited or deleted doesn't exist, use {\"action\":\"ITEM_NOT_FOUND\",\"itemType\":\"note\",\"itemId\":\"uuid-here\"}\n" +
-                "- If information is missing or unclear, respond with {\"action\":\"NEED_INFO\",\"message\":\"what you need\"}\n\n" +
+                "- If user did not specify which action to do among add, edit, or delete, respond with {\"action\":\"NEED_INFO\",\"message\":\"what you need\"}\n\n" +
                 "Respond with a JSON object. Examples:\n" +
                 "- To add a note: {\"action\":\"ADD\",\"content\":\"note content here\"}\n" +
                 "- To update a note: {\"action\":\"UPDATE\",\"noteId\":\"uuid-here\",\"content\":\"updated content\"}\n" +
@@ -153,7 +153,7 @@ public class Agent {
                 "- For DELETE_MULTIPLE: You MUST provide an array of taskIds to delete\n" +
                 "- If the task requested to be edited or deleted doesn't exist, use {\"action\":\"ITEM_NOT_FOUND\",\"itemType\":\"task\",\"itemId\":\"taskId-here\"}\n" +
                 "- If information is missing, respond with {\"action\":\"NEED_INFO\",\"message\":\"what you need\"}\n\n" +
-                "- Tasks cannot happen simutaneously (i.e. have overlapped durations). A new task can only start before or after another one. If user is asking you to add a task that conflicts with another, tell them that is not allowed."+
+                "- Tasks cannot happen simutaneously (i.e. have overlapped durations). A new task can only start before or after another one. If user is asking you to add a task that conflicts with another's time, return not enough info with reason being time conflict."+
                 "Respond with a JSON object. Examples:\n" +
                 "- To add a task: {\"action\":\"ADD\",\"description\":\"task name\",\"startTime\":\"14:00\",\"endTime\":\"15:00\",\"priority\":\"HIGH\"}\n" +
                 "- To add multiple tasks: {\"action\":\"ADD_MULTIPLE\",\"tasks\":[{\"description\":\"task 1\",\"startTime\":\"14:00\",\"endTime\":\"15:00\",\"priority\":\"HIGH\"},{\"description\":\"task 2\",\"startTime\":\"15:30\",\"endTime\":\"16:30\"}]}\n" +

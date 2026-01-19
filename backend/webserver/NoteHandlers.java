@@ -4,6 +4,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import backend.NoteManager;
 import backend.NotePersistence;
+import backend.JsonUtils;
 import backend.objects.Note;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -61,8 +62,7 @@ public class NoteHandlers {
                 }
                 String requestBody = sb.toString();
 
-                //parse JSON
-                String content = extractJsonString(requestBody, "content");
+                String content = JsonUtils.extractJsonStringValue(requestBody, "content");
                 if (content == null || content.trim().isEmpty()) {
                     sendBadRequest(exchange, "Note content is required");
                     return;
@@ -107,23 +107,9 @@ public class NoteHandlers {
             );
         }
 
-        private String extractJsonString(String json, String fieldName) {
-            String pattern = "\"" + fieldName + "\":\\s*\"([^\"]*)\"";
-            java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
-            java.util.regex.Matcher m = p.matcher(json);
-            if (m.find()) {
-                return m.group(1);
-            }
-            return null;
-        }
-
         private String escapeJsonString(String str) {
             if (str == null) return "";
-            return str.replace("\\", "\\\\")
-                      .replace("\"", "\\\"")
-                      .replace("\n", "\\n")
-                      .replace("\r", "\\r")
-                      .replace("\t", "\\t");
+            return str.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t");
         }
     }
 
@@ -159,7 +145,7 @@ public class NoteHandlers {
             try {
                 String requestBody = readRequestBody(exchange);
 
-                String newContent = extractJsonString(requestBody, "content");
+                String newContent = JsonUtils.extractJsonStringValue(requestBody, "content");
                 if (newContent == null || newContent.trim().isEmpty()) {
                     sendBadRequest(exchange, "Note content is required");
                     return;
@@ -196,16 +182,6 @@ public class NoteHandlers {
                 sb.append(line);
             }
             return sb.toString();
-        }
-
-        private String extractJsonString(String json, String fieldName) {
-            String pattern = "\"" + fieldName + "\":\\s*\"([^\"]*)\"";
-            java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
-            java.util.regex.Matcher m = p.matcher(json);
-            if (m.find()) {
-                return m.group(1);
-            }
-            return null;
         }
     }
 
