@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 
     loadTasks();
+    loadPriorityEvent();
 
     setupEventListeners();
 });
@@ -87,6 +88,56 @@ function setupEventListeners() {
         });
     });
 
+}
+
+function loadPriorityEvent() {
+    const saved = localStorage.getItem('priorityEvent');
+    if (saved) {
+        try {
+            const priorityEvent = JSON.parse(saved);
+            displayPriorityEvent(priorityEvent);
+        } catch (error) {
+            console.error('Error loading priority event:', error);
+            displayPriorityEvent(null); // Hide if there's an error
+        }
+    } else {
+        displayPriorityEvent(null); // Hide if no priority event is saved
+    }
+}
+
+function displayPriorityEvent(event) {
+    const displayDiv = document.getElementById('priority-event-display');
+    if (!displayDiv) return;
+
+    if (!event) {
+        displayDiv.style.display = 'none';
+        return;
+    }
+
+    displayDiv.style.display = 'block';
+    displayDiv.innerHTML = `
+        <div class="priority-event-card">
+            <div class="priority-event-header">
+                <span class="priority-event-star">⭐</span>
+                <span class="priority-event-label">PRIORITY EVENT</span>
+            </div>
+            <div class="priority-event-content">
+                <div class="priority-event-title">${escapeHtml(event.title)}</div>
+                <div class="priority-event-time">${event.startTime} - ${event.endTime}</div>
+                <div class="priority-event-date">${formatDate(event.date)}</div>
+            </div>
+        </div>
+    `;
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
 }
 
 async function loadTasks() {

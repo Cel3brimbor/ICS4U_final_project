@@ -37,6 +37,9 @@ function initializeSchedulePage() {
 
     setDefaultDatetimeValues();
 
+    // Set default date for priority event
+    document.getElementById('priority-date').value = selectedDate;
+
     document.getElementById('set-priority-event').addEventListener('click', setPriorityEvent);
     document.getElementById('clear-priority-event').addEventListener('click', clearPriorityEvent);
     document.getElementById('refresh-timeline').addEventListener('click', refreshTimeline);
@@ -85,10 +88,11 @@ function loadSettings() {
 
 function setPriorityEvent() {
     const title = document.getElementById('priority-title').value.trim();
+    const date = document.getElementById('priority-date').value;
     const startTime = document.getElementById('priority-start').value;
     const endTime = document.getElementById('priority-end').value;
 
-    if (!title || !startTime || !endTime) {
+    if (!title || !date || !startTime || !endTime) {
         showMessage('Please fill in all fields for the priority event', 'error');
         return;
     }
@@ -103,14 +107,25 @@ function setPriorityEvent() {
         title: title,
         startTime: startTime,
         endTime: endTime,
-        date: selectedDate,
+        date: date,
         type: 'priority'
     };
 
     savePriorityEvent();
     displayPriorityEvent();
-    loadScheduleTimeline();
+
+    // Refresh the current view
+    if (currentView === 'timeline') {
+        loadScheduleTimeline();
+    } else {
+        loadCalendarView();
+    }
+
     showMessage('Priority event set successfully!', 'success');
+}
+
+function savePriorityEvent() {
+    localStorage.setItem('priorityEvent', JSON.stringify(currentPriorityEvent));
 }
 
 function clearPriorityEvent() {
@@ -118,15 +133,22 @@ function clearPriorityEvent() {
     localStorage.removeItem('priorityEvent');
     document.getElementById('current-priority-display').style.display = 'none';
     document.getElementById('priority-title').value = '';
+    document.getElementById('priority-date').value = '';
     document.getElementById('priority-start').value = '';
     document.getElementById('priority-end').value = '';
-    loadScheduleTimeline();
+    document.getElementById('priority-start').value = '';
+    document.getElementById('priority-end').value = '';
+
+    // Refresh the current view
+    if (currentView === 'timeline') {
+        loadScheduleTimeline();
+    } else {
+        loadCalendarView();
+    }
+
     showMessage('Priority event cleared', 'info');
 }
 
-function savePriorityEvent() {
-    localStorage.setItem('priorityEvent', JSON.stringify(currentPriorityEvent));
-}
 
 function loadPriorityEvent() {
     const saved = localStorage.getItem('priorityEvent');
@@ -152,6 +174,7 @@ function displayPriorityEvent() {
     `;
 
     document.getElementById('priority-title').value = currentPriorityEvent.title;
+    document.getElementById('priority-date').value = currentPriorityEvent.date;
     document.getElementById('priority-start').value = currentPriorityEvent.startTime;
     document.getElementById('priority-end').value = currentPriorityEvent.endTime;
 }
@@ -329,7 +352,7 @@ function createPriorityEventBlock(event, hourWidth, paddingLeft) {
     const durationMinutes = endMinutes - startMinutes;
 
     const leftPosition = paddingLeft + (startMinutes / (24 * 60)) * (24 * hourWidth);
-    const width = Math.max((durationMinutes / (24 * 60)) * (24 * hourWidth), 60); 
+    const width = Math.max((durationMinutes / (24 * 60)) * (24 * hourWidth), 60);
 
     block.style.left = leftPosition + 'px';
     block.style.width = width + 'px';
@@ -340,6 +363,9 @@ function createPriorityEventBlock(event, hourWidth, paddingLeft) {
             <div class="timeline-priority">PRIORITY</div>
         </div>
     `;
+
+    // Make the priority event clickable to show details
+    block.addEventListener('click', () => showPriorityEventDetails(event));
 
     return block;
 }
@@ -581,9 +607,26 @@ function renderCalendar(calendarStart, calendarEnd, monthTasks) {
 
             cell.innerHTML = `<div class="calendar-day-number">${dayNumber}</div>`;
 
-            // Add tasks for this day
+            // Check for priority event on this date
+            const priorityEvent = getPriorityEventForDate(dateStr);
+
+            // Add priority event first if it exists
+            if (priorityEvent) {
+                const priorityElement = document.createElement('div');
+                priorityElement.className = 'calendar-priority-event';
+                priorityElement.innerHTML = `
+                    <div class="calendar-priority-icon">⭐</div>
+                    <div class="calendar-priority-text">${priorityEvent.title.length > 12 ? priorityEvent.title.substring(0, 12) + '...' : priorityEvent.title}</div>
+                `;
+                priorityElement.title = `${priorityEvent.title} (${priorityEvent.startTime} - ${priorityEvent.endTime})`;
+                priorityElement.addEventListener('click', () => showPriorityEventDetails(priorityEvent));
+                cell.appendChild(priorityElement);
+            }
+
+            // Add tasks for this day (limit to 2 if priority event exists, otherwise 3)
             const dayTasks = monthTasks[dateStr] || [];
-            dayTasks.slice(0, 3).forEach(task => { // Limit to 3 tasks per day for space
+            const maxTasks = priorityEvent ? 2 : 3;
+            dayTasks.slice(0, maxTasks).forEach(task => {
                 const taskElement = document.createElement('div');
                 taskElement.className = `calendar-task ${task.status.toLowerCase()}`;
                 taskElement.textContent = task.description.length > 15 ? task.description.substring(0, 15) + '...' : task.description;
@@ -593,11 +636,11 @@ function renderCalendar(calendarStart, calendarEnd, monthTasks) {
             });
 
             // Add indicator if there are more tasks
-            if (dayTasks.length > 3) {
+            if (dayTasks.length > maxTasks) {
                 const moreIndicator = document.createElement('div');
                 moreIndicator.className = 'calendar-more-tasks';
-                moreIndicator.textContent = `+${dayTasks.length - 3} more`;
-                moreIndicator.title = `${dayTasks.length - 3} additional tasks`;
+                moreIndicator.textContent = `+${dayTasks.length - maxTasks} more`;
+                moreIndicator.title = `${dayTasks.length - maxTasks} additional tasks`;
                 cell.appendChild(moreIndicator);
             }
 
@@ -892,6 +935,84 @@ function closeTaskModal() {
     }
 }
 
+// Priority Event Details Modal
+function showPriorityEventDetails(event) {
+    // Create modal overlay
+    const modal = document.createElement('div');
+    modal.className = 'task-modal-overlay';
+    modal.innerHTML = `
+        <div class="task-modal">
+            <div class="task-modal-header">
+                <h3>⭐ Priority Event Details</h3>
+                <button class="modal-close-btn" onclick="closePriorityEventModal()">×</button>
+            </div>
+            <div class="task-modal-content">
+                <div class="task-detail-row">
+                    <strong>Title:</strong>
+                    <span>${escapeHtml(event.title)}</span>
+                </div>
+                <div class="task-detail-row">
+                    <strong>Time:</strong>
+                    <span>${event.startTime} - ${event.endTime}</span>
+                </div>
+                <div class="task-detail-row">
+                    <strong>Date:</strong>
+                    <span>${formatDate(event.date)}</span>
+                </div>
+                <div class="task-detail-row">
+                    <strong>Type:</strong>
+                    <span class="status-badge status-priority">PRIORITY EVENT</span>
+                </div>
+                <div class="task-detail-row">
+                    <strong>Duration:</strong>
+                    <span>${calculateDuration(event.startTime, event.endTime)}</span>
+                </div>
+            </div>
+            <div class="task-modal-actions">
+                <button class="modal-btn edit-btn" onclick="editPriorityEvent()">Edit Event</button>
+                <button class="modal-btn close-btn" onclick="closePriorityEventModal()">Close</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
+
+    // Close modal when clicking outside
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closePriorityEventModal();
+        }
+    });
+
+    // Close modal on escape key
+    document.addEventListener('keydown', handlePriorityEventEscapeKey);
+}
+
+function closePriorityEventModal() {
+    const modal = document.querySelector('.task-modal-overlay');
+    if (modal) {
+        modal.remove();
+        document.body.style.overflow = '';
+        document.removeEventListener('keydown', handlePriorityEventEscapeKey);
+    }
+}
+
+function editPriorityEvent() {
+    // Scroll to the priority event form
+    document.querySelector('.timer-container h2').scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('priority-title').focus();
+    closePriorityEventModal();
+}
+
+function handlePriorityEventEscapeKey(e) {
+    if (e.key === 'Escape') {
+        closePriorityEventModal();
+    }
+}
+
 function saveTaskToLocalStorage(task) {
     try {
         const savedTasks = localStorage.getItem('savedTasks');
@@ -907,6 +1028,20 @@ function handleEscapeKey(e) {
     if (e.key === 'Escape') {
         closeTaskModal();
     }
+}
+
+function getPriorityEventForDate(dateStr) {
+    const saved = localStorage.getItem('priorityEvent');
+    if (saved) {
+        try {
+            const priorityEvent = JSON.parse(saved);
+            return priorityEvent.date === dateStr ? priorityEvent : null;
+        } catch (error) {
+            console.error('Error parsing priority event:', error);
+            return null;
+        }
+    }
+    return null;
 }
 
 function calculateDuration(startTime, endTime) {

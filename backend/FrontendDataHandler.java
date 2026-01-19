@@ -5,8 +5,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 import backend.objects.Task;
 
@@ -495,8 +493,9 @@ public class FrontendDataHandler {
         return sb.toString();
     }
 
-    public static String createSuccessResponse(String message) 
+    public static String createSuccessResponse(String message)
     {
         return String.format("{\"message\":\"%s\"}", escapeJsonString(message));
     }
+
 }
