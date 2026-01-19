@@ -8,8 +8,6 @@ import backend.FrontendDataHandler;
 import backend.objects.Task;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 public class TaskHandlers {

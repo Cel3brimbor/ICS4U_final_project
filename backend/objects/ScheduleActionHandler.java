@@ -214,7 +214,8 @@ public class ScheduleActionHandler {
                 }
                 return "The requested item does not exist.";
             } else if (AIResponseHandler.containsAction(actionJson, "NEED_INFO")) {
-                return "I need more information to complete this action.";
+                String msg = backend.JsonUtils.extractJsonStringValue(actionJson, "message");
+                return (msg != null && !msg.isEmpty()) ? msg : "I need more information to complete this action.";
             }
 
             //this return should not occur if AI successfully does everyting above

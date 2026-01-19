@@ -42,7 +42,7 @@ public class AIHandlers {
                 }
 
                 String response = aiAgent.chat(message);
-                String jsonResponse = String.format("{\"response\":\"%s\"}", response.replace("\"", "\\\"").replace("\n", "\\n"));
+                String jsonResponse = "{\"response\":\"" + escapeForJson(response) + "\"}";
 
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
                 //exchange.sendResponseHeaders(200, jsonResponse.length());
@@ -93,7 +93,7 @@ public class AIHandlers {
                 }
 
                 String result = aiAgent.editNotes(instruction);
-                String jsonResponse = String.format("{\"result\":\"%s\"}", result.replace("\"", "\\\"").replace("\n", "\\n"));
+                String jsonResponse = "{\"result\":\"" + escapeForJson(result) + "\"}";
 
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
                 exchange.sendResponseHeaders(200, 0);
@@ -142,7 +142,7 @@ public class AIHandlers {
                 }
 
                 String result = aiAgent.editSchedule(instruction);
-                String jsonResponse = String.format("{\"result\":\"%s\"}", result.replace("\"", "\\\"").replace("\n", "\\n"));
+                String jsonResponse = "{\"result\":\"" + escapeForJson(result) + "\"}";
 
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
                 exchange.sendResponseHeaders(200, 0);
@@ -160,6 +160,11 @@ public class AIHandlers {
                 }
             }
         }
+    }
+
+    private static String escapeForJson(String s) {
+        if (s == null) return "";
+        return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t");
     }
 
     private static String extractJsonValue(String json, String key) {

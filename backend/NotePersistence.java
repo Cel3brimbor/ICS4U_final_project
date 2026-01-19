@@ -66,33 +66,17 @@ public class NotePersistence {
     private static List<Note> parseNotesFromJson(String jsonContent) {
         List<Note> notes = new ArrayList<>();
         try {
-            // Simple JSON parsing - remove array brackets and split by objects
             String content = jsonContent.trim();
             if (content.startsWith("[") && content.endsWith("]")) {
                 content = content.substring(1, content.length() - 1).trim();
             }
+            if (content.isEmpty()) return notes;
 
-            if (content.isEmpty()) {
-                return notes;
-            }
-
-            // Split by "}," followed by optional whitespace and newline, then "{"
-            String[] objects = content.split("\\}\\s*,\\s*\\{");
-            for (int i = 0; i < objects.length; i++) {
-                String obj = objects[i].trim();
-                // Add braces back
-                if (!obj.startsWith("{")) {
-                    obj = "{" + obj;
-                }
-                if (!obj.endsWith("}")) {
-                    obj = obj + "}";
-                }
-                if (!obj.trim().isEmpty()) {
-                    Note note = parseNoteFromJson(obj);
-                    if (note != null) {
-                        notes.add(note);
-                    }
-                }
+            java.util.List<String> objects = extractJsonObjects(content);
+            for (String obj : objects) {
+                if (obj == null || obj.trim().isEmpty()) continue;
+                Note note = parseNoteFromJson(obj);
+                if (note != null) notes.add(note);
             }
         } catch (Exception e) {
             System.err.println("Error parsing JSON: " + e.getMessage());
@@ -100,19 +84,60 @@ public class NotePersistence {
         return notes;
     }
 
+    private static java.util.List<String> extractJsonObjects(String content) {
+        java.util.List<String> out = new ArrayList<>();
+        int len = content.length();
+        boolean inString = false;
+        char stringChar = '"';
+        boolean afterBackslash = false;
+        int depth = 0;
+        int start = -1;
+        int i = 0;
+        while (i < len) {
+            char c = content.charAt(i);
+            if (inString) {
+                if (afterBackslash) { afterBackslash = false; i++; continue; }
+                if (c == '\\') { afterBackslash = true; i++; continue; }
+                if (c == stringChar) { inString = false; i++; continue; }
+                i++;
+                continue;
+            }
+            if (c == '"' || c == '\'') { inString = true; stringChar = c; i++; continue; }
+            if (c == '{') {
+                if (depth == 0) start = i;
+                depth++;
+                i++;
+                continue;
+            }
+            if (c == '}') {
+                depth--;
+                if (depth == 0 && start >= 0) {
+                    out.add(content.substring(start, i + 1));
+                    start = -1;
+                }
+                i++;
+                continue;
+            }
+            i++;
+        }
+        return out;
+    }
+
     //parses a single note from JSON object string
     private static Note parseNoteFromJson(String jsonObject) {
         try {
-            String id = extractJsonString(jsonObject, "id");
-            String content = extractJsonString(jsonObject, "content");
-            String timeStr = extractJsonString(jsonObject, "creationTime");
+            String id = JsonUtils.extractJsonStringValue(jsonObject, "id");
+            String content = JsonUtils.extractJsonStringValue(jsonObject, "content");
+            String timeStr = JsonUtils.extractJsonStringValue(jsonObject, "creationTime");
+            if (timeStr == null) return null;
 
             java.time.LocalDateTime creationTime = java.time.LocalDateTime.parse(timeStr, DATETIME_FORMATTER);
+            String safeContent = (content != null) ? content : "";
 
             if (id != null && !id.isEmpty()) {
-                return new Note(id, content, creationTime);
+                return new Note(id, safeContent, creationTime);
             } else {
-                return new Note(content, creationTime);
+                return new Note(safeContent, creationTime);
             }
 
         } catch (Exception e) {
@@ -143,22 +168,6 @@ public class NotePersistence {
                   .replace("\n", "\\n")
                   .replace("\r", "\\r")
                   .replace("\t", "\\t");
-    }
-
-    //extracts string value from JSON field
-    private static String extractJsonString(String json, String fieldName) {
-        String pattern = "\"" + fieldName + "\":\\s*\"([^\"]*)\"";
-        java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
-        java.util.regex.Matcher m = p.matcher(json);
-        if (m.find()) {
-            String value = m.group(1);
-            return value.replace("\\\"", "\"")
-                       .replace("\\n", "\n")
-                       .replace("\\r", "\r")
-                       .replace("\\t", "\t")
-                       .replace("\\\\", "\\");
-        }
-        return "";
     }
 
     //clears the notes file (useful for testing or reset)

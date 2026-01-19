@@ -19,7 +19,7 @@ public class NoteActionHandler {
                 Matcher contentMatcher = contentPattern.matcher(actionJson);
                 if (contentMatcher.find()) {
                     String content = contentMatcher.group(1);
-                    Note newNote = noteManager.addNote(content);
+                    noteManager.addNote(content);
                     backend.NotePersistence.saveNotes(noteManager);
                     return "Added new note: " + content;
                 }
@@ -95,7 +95,8 @@ public class NoteActionHandler {
                 }
                 return "The requested item does not exist.";
             } else if (AIResponseHandler.containsAction(actionJson, "NEED_INFO")) {
-                return "I need more information to complete this action.";
+                String msg = backend.JsonUtils.extractJsonStringValue(actionJson, "message");
+                return (msg != null && !msg.isEmpty()) ? msg : "I need more information to complete this action.";
             }
 
             return "Action completed successfully.";
