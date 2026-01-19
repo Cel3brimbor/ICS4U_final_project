@@ -16,6 +16,14 @@ function initializeApp() {
     //initialize navigation
     initializeNavigation();
 
+    // Date input initialization commented out for AI agent demo compatibility
+    // Set default date to today
+    // const today = new Date().toISOString().split('T')[0];
+    // const dateInput = document.getElementById('task-date');
+    // if (dateInput) {
+    //     dateInput.value = today;
+    // }
+
     // Apply dark mode if enabled
     const savedSettings = localStorage.getItem('appSettings');
     if (savedSettings) {
@@ -80,6 +88,7 @@ function setupEventListeners() {
             filterTasks(filter);
         });
     });
+
 }
 
 async function loadTasks() {
@@ -104,11 +113,14 @@ async function addTask() {
     const taskInput = document.getElementById('task-input');
     const startTimeInput = document.getElementById('start-time');
     const endTimeInput = document.getElementById('end-time');
+    // const dateInput = document.getElementById('task-date'); // Temporarily commented out
     const priorityInput = document.getElementById('task-priority');
 
     const description = taskInput.value.trim();
     const startTime = startTimeInput.value;
     const endTime = endTimeInput.value;
+    // const selectedDate = dateInput.value; // Temporarily commented out
+    const selectedDate = new Date().toISOString().split('T')[0]; // Use today's date
     const priority = priorityInput.value;
 
     //validation
@@ -122,6 +134,12 @@ async function addTask() {
         showError('Please select both start and end times');
         return;
     }
+
+    // Date validation commented out - using today's date by default
+    // if (!selectedDate) {
+    //     showError('Please select a date for the task');
+    //     return;
+    // }
 
     if (startTime >= endTime) {
         showError('End time must be after start time');
@@ -138,6 +156,7 @@ async function addTask() {
                 description: description,
                 startTime: startTime,
                 endTime: endTime,
+                date: selectedDate,
                 priority: priority
             })
         });
@@ -157,6 +176,9 @@ async function addTask() {
 
         const newTask = await response.json();
 
+        // Save to localStorage as backup
+        saveTaskToLocalStorage(newTask);
+
         //clear form
         taskInput.value = '';
         startTimeInput.value = '';
@@ -170,7 +192,35 @@ async function addTask() {
 
     } catch (error) {
         console.error('Error adding task:', error);
-        showError('Failed to add task. Please try again.');
+        // If API fails, save to localStorage anyway
+        const localTask = {
+            id: Date.now().toString(),
+            description: description,
+            startTime: startTime,
+            endTime: endTime,
+            date: selectedDate,
+            priority: priority,
+            status: 'PENDING'
+        };
+        saveTaskToLocalStorage(localTask);
+        loadTasks(); // Refresh the display
+        showSuccess('Task added locally (server not available)');
+
+        //clear form
+        taskInput.value = '';
+        startTimeInput.value = '';
+        endTimeInput.value = '';
+    }
+}
+
+function saveTaskToLocalStorage(task) {
+    try {
+        const savedTasks = localStorage.getItem('savedTasks');
+        const tasks = savedTasks ? JSON.parse(savedTasks) : [];
+        tasks.push(task);
+        localStorage.setItem('savedTasks', JSON.stringify(tasks));
+    } catch (error) {
+        console.error('Error saving to localStorage:', error);
     }
 }
 

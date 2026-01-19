@@ -1050,6 +1050,54 @@ body.dark-mode .calendar-task.completed {
     box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
 }
 
+/* Timeline Content Area */
+.timeline-content-area {
+    position: relative;
+    background: rgba(248, 249, 250, 0.8);
+    border: 1px solid #e1e5e9;
+    border-radius: 8px;
+    overflow: visible;
+}
+
+.timeline-date-marker {
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-top: 15px;
+    padding: 10px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 6px;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+/* Timeline container adjustments */
+.schedule-timeline {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    margin: 50px auto 0;
+    border: 1px solid #e1e5e9;
+    border-radius: 8px;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Dark mode fixes for timeline */
+body.dark-mode .timeline-content-area {
+    background: rgba(42, 42, 58, 0.8);
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .timeline-date-marker {
+    background: rgba(102, 126, 234, 0.15);
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #f0f0f0;
+}
+
 /* Responsive calendar */
 @media (max-width: 768px) {
     .calendar-container {
@@ -1158,13 +1206,28 @@ body.dark-mode .calendar-task.completed {
         font-size: 0.65rem;
         padding: 1px 2px;
     }
+
+    .timeline-content-area {
+        height: 300px;
+        margin-top: 40px;
+    }
+
+    .timeline-date-marker {
+        font-size: 0.8rem;
+        padding: 6px;
+    }
 }
 
 /* Tablet Styles */
 @media (max-width: 1024px) and (min-width: 769px) {
     .schedule-timeline {
-        height: 550px;
         max-width: 1200px;
+        margin-top: 45px;
+        padding: 15px;
+    }
+
+    .timeline-content-area {
+        height: 350px;
         margin-top: 45px;
     }
 

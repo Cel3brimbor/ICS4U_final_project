@@ -260,6 +260,33 @@ body {
     font-weight: 500;
 }
 
+.date-input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.date-input-group label {
+    font-weight: 600;
+    color: #2c3e50;
+    min-width: 45px;
+}
+
+.date-input-group input[type="date"] {
+    flex: 1;
+    padding: 10px 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.date-input-group input[type="date"]:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
 #add-task-btn {
     padding: 12px 24px;
     background: linear-gradient(135deg, #28a745, #20c997);
@@ -555,6 +582,14 @@ body {
     .task-input-section {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    .date-input-group {
+        justify-content: space-between;
+    }
+
+    .date-input-group label {
+        min-width: auto;
     }
 
     .modal-content {
@@ -1646,10 +1681,17 @@ body.dark-mode .time-inputs input {
 }
 
 body.dark-mode .task-input:focus,
-body.dark-mode .time-inputs input:focus {
+body.dark-mode .time-inputs input:focus,
+body.dark-mode .date-input-group input[type="date"]:focus {
     border-color: #667eea;
     background: rgba(62, 62, 78, 0.9);
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+body.dark-mode .date-input-group input[type="date"] {
+    background: rgba(52, 52, 68, 0.8);
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #f0f0f0;
 }
 
 body.dark-mode .task-filters .filter-btn {

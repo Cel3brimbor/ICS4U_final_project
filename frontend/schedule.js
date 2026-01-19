@@ -127,94 +127,116 @@ function displayPriorityEvent() {
 }
 
 async function loadScheduleTimeline() {
+    // Load tasks from localStorage (primary source)
     try {
-        const response = await fetch('/api/tasks');
-        const tasks = await response.json();
+        loadTimelineFromLocalStorage();
+    } catch (error) {
+        console.error('Error loading timeline:', error);
+        updateScheduleTimeline([]);
+        updateScheduleStats([]);
+    }
+}
 
-        const dateTasks = tasks.filter(task => {
-            const taskDate = new Date(task.date).toISOString().split('T')[0];
+function loadTimelineFromLocalStorage() {
+    console.log('Loading tasks from localStorage as fallback');
+    try {
+        // Try to get tasks from localStorage
+        const savedTasks = localStorage.getItem('savedTasks');
+        let localTasks = [];
+        if (savedTasks) {
+            localTasks = JSON.parse(savedTasks);
+        }
+
+        // Filter tasks for the selected date
+        const dateTasks = localTasks.filter(task => {
+            // Handle both date formats: YYYY-MM-DD and full ISO string
+            let taskDate = task.date;
+            if (task.date && task.date.includes('T')) {
+                taskDate = task.date.split('T')[0];
+            }
             return taskDate === selectedDate;
         });
 
         updateScheduleTimeline(dateTasks);
         updateScheduleStats(dateTasks);
+
+        if (dateTasks.length === 0) {
+            // Don't show message here, let the timeline display handle it
+        }
     } catch (error) {
-        console.error('Error loading schedule timeline:', error);
-        showMessage('Failed to load schedule', 'error');
+        console.error('Error loading from localStorage:', error);
+        updateScheduleTimeline([]);
+        updateScheduleStats([]);
+        showMessage('Error loading tasks from storage.', 'error');
     }
 }
 
 function updateScheduleTimeline(tasks) {
     const timeline = document.getElementById('schedule-timeline');
-    if (!timeline) return;
+    if (!timeline) {
+        return;
+    }
 
     timeline.innerHTML = '';
 
+    // Get timeline dimensions for positioning
     const timelineRect = timeline.getBoundingClientRect();
     const style = getComputedStyle(timeline);
     const paddingLeft = parseFloat(style.paddingLeft) || 20;
     const paddingRight = parseFloat(style.paddingRight) || 20;
-    const timelineContentWidth = timelineRect.width - paddingLeft - paddingRight;
-    const hourWidth = timelineContentWidth / 24;
+    const timelineWidth = timelineRect.width - paddingLeft - paddingRight;
+    const hourWidth = timelineWidth / 24;
 
-    // Create time markers container at top
-    const topMarkers = document.createElement('div');
-    topMarkers.className = 'timeline-markers-top';
-    for (let hour = 0; hour <= 24; hour++) {
-        const marker = document.createElement('div');
-        marker.className = 'time-marker-hour';
-        marker.style.left = ((hour / 24) * 100) + '%';
-        marker.textContent = hour === 24 ? '24:00' : `${hour.toString().padStart(2, '0')}:00`;
-        topMarkers.appendChild(marker);
-    }
-    timeline.appendChild(topMarkers);
+    // Time markers removed - tasks can be clicked to see details
 
-    // Create tasks container
-    const tasksContainer = document.createElement('div');
-    tasksContainer.className = 'timeline-tasks-container';
-    timeline.appendChild(tasksContainer);
+    // Create content area for tasks
+    const contentArea = document.createElement('div');
+    contentArea.className = 'timeline-content-area';
+    contentArea.style.position = 'relative';
+    contentArea.style.height = '400px';
+    contentArea.style.marginTop = '50px';
+    contentArea.style.marginBottom = '20px';
+    timeline.appendChild(contentArea);
 
     if (tasks.length === 0 && !currentPriorityEvent) {
         const noSchedule = document.createElement('div');
         noSchedule.className = 'no-schedule';
-        noSchedule.textContent = 'No tasks scheduled for this date';
+        noSchedule.innerHTML = `
+            <div>No tasks scheduled for this date</div>
+            <div style="font-size: 0.9rem; margin-top: 10px; color: #999;">
+                Add tasks from the homepage with the selected date.
+            </div>
+        `;
+        noSchedule.style.position = 'absolute';
+        noSchedule.style.top = '50%';
+        noSchedule.style.left = '50%';
+        noSchedule.style.transform = 'translate(-50%, -50%)';
         noSchedule.style.color = '#6c757d';
         noSchedule.style.fontSize = '1.1rem';
-        tasksContainer.appendChild(noSchedule);
+        noSchedule.style.textAlign = 'center';
+        contentArea.appendChild(noSchedule);
         return;
     }
 
     // Add priority event first if exists
     if (currentPriorityEvent && currentPriorityEvent.date === selectedDate) {
-        const priorityBlock = createPriorityEventBlock(currentPriorityEvent, hourWidth, paddingLeft);
-        tasksContainer.appendChild(priorityBlock);
+        const priorityBlock = createPriorityEventBlock(currentPriorityEvent, hourWidth, 0);
+        contentArea.appendChild(priorityBlock);
     }
 
     // Sort tasks by start time
     tasks.sort((a, b) => a.startTime.localeCompare(b.startTime));
 
     // Position tasks with stacking
-    const positionedTasks = positionTasksWithStacking(tasks, hourWidth, paddingLeft);
+    const positionedTasks = positionTasksWithStacking(tasks, hourWidth, 0);
 
     // Create task blocks
     positionedTasks.forEach(taskData => {
-        const block = createTaskBlock(taskData.task, hourWidth, paddingLeft, taskData.top);
-        tasksContainer.appendChild(block);
+        const block = createTaskBlock(taskData.task, hourWidth, 0, taskData.top);
+        contentArea.appendChild(block);
     });
 
-    // Create time markers container at bottom
-    const bottomMarkers = document.createElement('div');
-    bottomMarkers.className = 'timeline-markers-bottom';
-    for (let hour = 0; hour <= 24; hour++) {
-        const marker = document.createElement('div');
-        marker.className = 'time-marker-hour';
-        marker.style.left = ((hour / 24) * 100) + '%';
-        marker.textContent = hour === 24 ? '24:00' : `${hour.toString().padStart(2, '0')}:00`;
-        bottomMarkers.appendChild(marker);
-    }
-    timeline.appendChild(bottomMarkers);
-
-    // Add date display at the bottom
+    // Add date display
     const dateMarker = document.createElement('div');
     dateMarker.className = 'timeline-date-marker';
     dateMarker.textContent = formatDate(selectedDate);
@@ -494,7 +516,7 @@ function renderCalendar(calendarStart, calendarEnd, monthTasks) {
                 taskElement.className = `calendar-task ${task.status.toLowerCase()}`;
                 taskElement.textContent = task.description.length > 15 ? task.description.substring(0, 15) + '...' : task.description;
                 taskElement.title = `${task.description} (${task.startTime} - ${task.endTime})`;
-                taskElement.addEventListener('click', () => editTask(task.id));
+                taskElement.addEventListener('click', () => showTaskDetails(task));
                 cell.appendChild(taskElement);
             });
 
@@ -578,13 +600,19 @@ async function addTaskFromSchedule() {
         });
 
         const responseText = await response.text();
-        // console.log('Response status:', response.status);
-        // console.log('Response text:', responseText);
 
         if (!response.ok) {
-            // console.error('Task creation failed:', response.status, errorText);
+            console.error('Task creation failed:', response.status, responseText);
             showMessage(`Failed to add task: ${responseText || 'Unknown error'}`, 'error');
             return;
+        }
+
+        try {
+            const newTask = JSON.parse(responseText);
+            // Save to localStorage as backup
+            saveTaskToLocalStorage(newTask);
+        } catch (parseError) {
+            console.error('Error parsing response:', parseError);
         }
 
         // Clear form and reset to defaults
@@ -601,8 +629,31 @@ async function addTaskFromSchedule() {
         showMessage('Task added successfully!', 'success');
 
     } catch (error) {
-        // console.error('Error adding task:', error);
-        showMessage('Failed to add task', 'error');
+        console.error('Error adding task:', error);
+        // If API fails, save to localStorage anyway
+        const localTask = {
+            id: Date.now().toString(),
+            description: taskText,
+            startTime: startTime,
+            endTime: endTime,
+            date: selectedDate,
+            priority: priority,
+            status: 'PENDING'
+        };
+        saveTaskToLocalStorage(localTask);
+
+        // Clear form and reset to defaults
+        taskInput.value = '';
+        setDefaultDatetimeValues();
+
+        // Refresh display based on current view
+        if (currentView === 'timeline') {
+            loadScheduleTimeline();
+        } else {
+            loadCalendarView();
+        }
+
+        showMessage('Task added locally (server not available)', 'info');
     }
 }
 
@@ -765,6 +816,17 @@ function closeTaskModal() {
         modal.remove();
         document.body.style.overflow = '';
         document.removeEventListener('keydown', handleEscapeKey);
+    }
+}
+
+function saveTaskToLocalStorage(task) {
+    try {
+        const savedTasks = localStorage.getItem('savedTasks');
+        const tasks = savedTasks ? JSON.parse(savedTasks) : [];
+        tasks.push(task);
+        localStorage.setItem('savedTasks', JSON.stringify(tasks));
+    } catch (error) {
+        console.error('Error saving to localStorage:', error);
     }
 }
 
