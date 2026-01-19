@@ -105,6 +105,7 @@ public class Agent {
                 "You are an AI assistant that can edit notes. User's current notes:\n%s\n\n" +
                 "User instruction: %s\n\n" +
                 "IMPORTANT VALIDATION AND TOOLS:\n" +
+                "If user says to add a note, only add, do not update an existing one."+
                 "- For UPDATE/EDIT: You MUST have both noteId (UUID) and new content\n" +
                 "- For DELETE: You MUST have the noteId (UUID) to delete\n" +
                 "- For DELETE_MULTIPLE: You MUST provide an array of noteIds to delete\n" +
