@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', function() {
 // Refresh timeline when page becomes visible (user returns to tab)
 document.addEventListener('visibilitychange', function() {
     if (!document.hidden) {
-        console.log('Schedule page became visible, refreshing current view...');
         if (currentView === 'timeline') {
             loadScheduleTimeline();
         } else {
@@ -26,7 +25,6 @@ document.addEventListener('visibilitychange', function() {
 
 // Also refresh when window regains focus
 window.addEventListener('focus', function() {
-    console.log('Schedule page regained focus, refreshing current view...');
     if (currentView === 'timeline') {
         loadScheduleTimeline();
     } else {
@@ -164,7 +162,6 @@ async function loadScheduleTimeline() {
         const response = await fetch('/api/tasks');
         if (response.ok) {
             const apiTasks = await response.json();
-            console.log('Loaded tasks from API:', apiTasks);
 
             // Filter tasks for the selected date
             const dateTasks = apiTasks.filter(task => {
@@ -172,8 +169,6 @@ async function loadScheduleTimeline() {
                 return taskDate === selectedDate;
             });
 
-            console.log('API tasks for selected date:', dateTasks);
-            console.log('Updating schedule timeline with', dateTasks.length, 'tasks');
             updateScheduleTimeline(dateTasks);
             updateScheduleStats(dateTasks);
 
@@ -200,16 +195,13 @@ async function loadScheduleTimeline() {
                     });
 
                     if (mergedTasks.length > dateTasks.length) {
-                        console.log('Added local tasks to API tasks:', mergedTasks);
                         updateScheduleTimeline(mergedTasks);
                         updateScheduleStats(mergedTasks);
                     }
                 }
             } catch (localError) {
-                console.log('No local tasks to merge');
             }
         } else {
-            console.log('API not available, loading from localStorage');
             loadTimelineFromLocalStorage();
         }
     } catch (error) {
@@ -219,7 +211,6 @@ async function loadScheduleTimeline() {
 }
 
 function loadTimelineFromLocalStorage() {
-    console.log('Loading tasks from localStorage as fallback');
     try {
         // Try to get tasks from localStorage
         const savedTasks = localStorage.getItem('savedTasks');
@@ -484,7 +475,6 @@ function timeToMinutes(timeString) {
 
 function handleDateChange(event) {
     selectedDate = event.target.value;
-    console.log('Date changed to:', selectedDate);
     if (currentView === 'timeline') {
         loadScheduleTimeline();
     } else {
@@ -619,7 +609,6 @@ function renderCalendar(calendarStart, calendarEnd, monthTasks) {
 }
 
 function refreshTimeline() {
-    console.log('Manual refresh triggered for view:', currentView);
     if (currentView === 'timeline') {
         loadScheduleTimeline();
         showMessage('Timeline refreshed', 'info');

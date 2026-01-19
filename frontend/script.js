@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeApp() {
-    console.log('StudyFlow Productivity Planner initialized');
 
     //update greeting with current time
     updateGreeting();
@@ -113,7 +112,6 @@ async function loadTasks() {
                 const tasks = JSON.parse(savedTasks);
                 displayTasks(tasks);
                 filterTasks('all');
-                console.log('Loaded tasks from localStorage');
                 return;
             }
         } catch (localError) {
@@ -245,7 +243,6 @@ function displayTasks(tasks) {
 
     if (!taskList) return;
 
-    console.log('displayTasks called with', tasks.length, 'tasks');
 
     //clear existing tasks
     taskList.innerHTML = '';
@@ -266,7 +263,6 @@ function displayTasks(tasks) {
     });
 
     //update schedule timeline
-    console.log('Calling updateScheduleTimeline with tasks:', tasks);
     updateScheduleTimeline(tasks);
 }
 
@@ -309,7 +305,6 @@ function updateScheduleTimeline(tasks) {
 
     // Clear timeline completely
     timeline.innerHTML = '';
-    console.log('Timeline cleared, updating with', tasks.length, 'tasks');
 
     // Time markers are removed from schedule overview as requested
 
@@ -319,20 +314,17 @@ function updateScheduleTimeline(tasks) {
         noTasks.className = 'no-tasks';
         noTasks.textContent = 'No tasks in progress';
         timeline.appendChild(noTasks);
-        console.log('Timeline: No tasks to display');
         return;
     }
 
     //filter for tasks that are in progress or pending
     const activeTasks = tasks.filter(task => task.status === 'IN_PROGRESS' || task.status === 'PENDING');
-    console.log('Timeline: Found', activeTasks.length, 'active tasks out of', tasks.length, 'total tasks');
 
     if (activeTasks.length === 0) {
         const noActiveTasks = document.createElement('div');
         noActiveTasks.className = 'no-active-tasks';
         noActiveTasks.textContent = 'No tasks currently in progress';
         timeline.appendChild(noActiveTasks);
-        console.log('Timeline: No active tasks to display');
         return;
     }
 
@@ -457,7 +449,6 @@ async function updateTaskStatus(taskId, status) {
                     tasks[taskIndex].status = status;
                     localStorage.setItem('savedTasks', JSON.stringify(tasks));
                     // Update display with local tasks
-                    console.log('Calling displayTasks with local tasks after status update:', tasks);
                     displayTasks(tasks);
                     filterTasks('all');
                     showSuccess('Task updated locally (server not available)');
@@ -487,7 +478,6 @@ async function deleteTask(taskId) {
         }
 
         //reload tasks
-        console.log('Task deleted from server, reloading tasks...');
         await loadTasks();
         showSuccess('Task deleted successfully!');
 
@@ -503,10 +493,8 @@ async function deleteTask(taskId) {
                 tasks = tasks.filter(task => task.id !== taskId);
 
                 if (tasks.length < originalLength) {
-                    console.log('Task deleted from localStorage, updating display...');
                     localStorage.setItem('savedTasks', JSON.stringify(tasks));
                     // Update display with local tasks
-                    console.log('Calling displayTasks with local tasks after deletion:', tasks);
                     displayTasks(tasks);
                     filterTasks('all');
                     showSuccess('Task deleted locally (server not available)');
@@ -626,7 +614,6 @@ function navigateTo(page) {
             window.location.href = '/settings.html';
             break;
         default:
-            console.log(`Navigation to ${page} not implemented yet`);
     }
 }
 

@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeAI() {
-    console.log('AI Assistant initialized');
 
     // Check for schedule context from schedule page
     const scheduleContext = localStorage.getItem('aiScheduleContext');

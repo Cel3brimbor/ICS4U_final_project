@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeNotes() {
-    console.log('Notes page initialized');
 
     // Apply dark mode if enabled
     const savedSettings = localStorage.getItem('appSettings');

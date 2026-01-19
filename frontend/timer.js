@@ -606,10 +606,8 @@ function requestNotificationPermission() {
         if (Notification.permission === 'default') {
             // Request permission
             Notification.requestPermission().then(function(permission) {
-                console.log('Notification permission:', permission);
             });
         } else if (Notification.permission === 'denied') {
-            console.log('Notifications denied by user');
         }
     }
 }
@@ -622,7 +620,6 @@ function setupPageVisibilityHandling() {
         if (document.hidden) {
             // Page became hidden
             hiddenStartTime = Date.now();
-            console.log('Page hidden - timer may be less reliable');
 
             // Show warning notification if timer is running
             if (isRunning && Notification.permission === 'granted') {
@@ -635,7 +632,6 @@ function setupPageVisibilityHandling() {
             // Page became visible again
             if (hiddenStartTime && isRunning) {
                 const hiddenDuration = Date.now() - hiddenStartTime;
-                console.log(`Page was hidden for ${Math.round(hiddenDuration / 1000)} seconds`);
 
                 // Show welcome back notification
                 if (Notification.permission === 'granted') {
@@ -654,11 +650,9 @@ function setupPageVisibilityHandling() {
 
     // Also handle page focus/blur events
     window.addEventListener('blur', function() {
-        console.log('Window lost focus');
     });
 
     window.addEventListener('focus', function() {
-        console.log('Window regained focus');
         if (isRunning && Notification.permission === 'granted') {
             // Show a subtle notification that the timer is still running
             new Notification('Timer Active', {
@@ -680,7 +674,6 @@ function recalibrateTimer(hiddenDuration) {
 
     if (hiddenSeconds > 0 && currentTime > hiddenSeconds) {
         // Try to account for missed time
-        console.log(`Adjusting timer by ${hiddenSeconds} seconds due to page being hidden`);
         currentTime = Math.max(0, currentTime - hiddenSeconds);
 
         if (currentTime <= 0) {

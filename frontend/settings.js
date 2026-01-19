@@ -230,7 +230,6 @@ function updateNotificationStatus() {
 function requestNotificationPermission() {
     if ('Notification' in window) {
         Notification.requestPermission().then(function(permission) {
-            console.log('Notification permission:', permission);
             updateNotificationStatus();
 
             if (permission === 'granted') {
