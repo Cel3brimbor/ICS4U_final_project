@@ -8,6 +8,33 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeAI() {
+    // Index page: only schedule agent, no mode selector — skip ai.html-specific init
+    const isIndexPage = !document.getElementById('chat-mode-btn');
+    if (isIndexPage) {
+        const scheduleContext = localStorage.getItem('aiScheduleContext');
+        if (scheduleContext) {
+            try {
+                const context = JSON.parse(scheduleContext);
+                localStorage.removeItem('aiScheduleContext');
+                const msg = "I'm looking at your schedule for " + formatDate(context.date) + ". " +
+                    (context.tasks && context.tasks.length > 0
+                        ? "You have " + context.tasks.length + " tasks. "
+                        : "You don't have any tasks scheduled yet. ") +
+                    "How would you like me to help?";
+                addMessage(msg, 'ai');
+            } catch (e) {
+                console.error('Error loading schedule context:', e);
+            }
+        }
+        const savedSettings = localStorage.getItem('appSettings');
+        if (savedSettings) {
+            try {
+                const settings = JSON.parse(savedSettings);
+                if (settings.darkMode) document.body.classList.add('dark-mode');
+            } catch (e) {}
+        }
+        return;
+    }
 
     // Check for schedule context from schedule page
     const scheduleContext = localStorage.getItem('aiScheduleContext');
@@ -139,19 +166,46 @@ function loadAccessToken() {
 
 function sendMessage() {
     const input = document.getElementById('ai-input');
+    if (!input) return;
     const message = input.value.trim();
-
     if (!message) return;
 
     addMessage(message, 'user');
-
     input.value = '';
-
     showTypingIndicator();
+
+    const isIndexPage = !document.getElementById('chat-mode-btn');
+    if (isIndexPage) {
+        sendToScheduleAgent(message);
+        return;
+    }
 
     if (currentMode === 'chat') {
         chatWithAI(message);
     }
+}
+
+function sendToScheduleAgent(instruction) {
+    fetch('/api/ai/edit-schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ instruction: instruction })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideTypingIndicator();
+        if (data.error) {
+            addMessage('**Error:** ' + data.error, 'ai');
+        } else {
+            addMessage(data.result || 'Done.', 'ai');
+            if (typeof loadTasks === 'function') loadTasks();
+        }
+    })
+    .catch(error => {
+        hideTypingIndicator();
+        console.error('Error:', error);
+        addMessage('*Sorry, I encountered an error. Please try again.*', 'ai');
+    });
 }
 
 function chatWithAI(message) {

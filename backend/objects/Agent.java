@@ -84,7 +84,7 @@ public class Agent {
         String prompt = message;
 
         try {
-            String response = callAIAPI(prompt, 1000); //higher token limit
+            String response = callAIAPI(prompt, 10000); //higher token limit
             return AIResponseHandler.extractContentFromResponse(response);
         } catch (Exception e) {
             System.err.println("Chat failed: " + e.getMessage());
@@ -153,7 +153,7 @@ public class Agent {
                 "- For DELETE_MULTIPLE: You MUST provide an array of taskIds to delete\n" +
                 "- If the task requested to be edited or deleted doesn't exist, use {\"action\":\"ITEM_NOT_FOUND\",\"itemType\":\"task\",\"itemId\":\"taskId-here\"}\n" +
                 "- If information is missing, respond with {\"action\":\"NEED_INFO\",\"message\":\"what you need\"}\n\n" +
-                "- Tasks cannot happen simutaneously (i.e. have overlapped durations). A new task can only start before or after another one."+
+                "- Tasks cannot happen simutaneously (i.e. have overlapped durations). A new task can only start before or after another one. If user is asking you to add a task that conflicts with another, tell them that is not allowed."+
                 "Respond with a JSON object. Examples:\n" +
                 "- To add a task: {\"action\":\"ADD\",\"description\":\"task name\",\"startTime\":\"14:00\",\"endTime\":\"15:00\",\"priority\":\"HIGH\"}\n" +
                 "- To add multiple tasks: {\"action\":\"ADD_MULTIPLE\",\"tasks\":[{\"description\":\"task 1\",\"startTime\":\"14:00\",\"endTime\":\"15:00\",\"priority\":\"HIGH\"},{\"description\":\"task 2\",\"startTime\":\"15:30\",\"endTime\":\"16:30\"}]}\n" +

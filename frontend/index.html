@@ -28,12 +28,11 @@
             <div class="ai-chat">
                 <div id="chat-messages" class="chat-messages">
                     <div class="message ai-message">
-                        Hello! I'm your AI productivity assistant. I can help you plan your day, prioritize tasks, and optimize your schedule. What would you like to accomplish today?
                     </div>
                 </div>
                 <div class="chat-input">
                     <input type="text" id="ai-input" placeholder="Ask me for help with your planning..." />
-                    <button id="send-button">Send</button>
+                    <button id="send-button" onclick="sendMessage()">Send</button>
                 </div>
             </div>
         </section>
@@ -112,6 +111,7 @@
 
     <script src="notification-sounds.js"></script>
     <script src="script.js"></script>
+    <script src="ai.js"></script>
     <script src="timer-monitor.js"></script>
 </body>
 </html>

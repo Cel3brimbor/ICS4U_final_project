@@ -52,7 +52,7 @@ function updateGreeting() {
     //update the AI message if it exists
     const aiMessage = document.querySelector('.ai-message');
     if (aiMessage) {
-        aiMessage.textContent = `${greeting}! I'm your AI productivity assistant. I can help you plan your day, prioritize tasks, and optimize your schedule. What would you like to accomplish today?`;
+        aiMessage.textContent = `${greeting}! I'm your AI schedule manager. I can help you plan your day and optimize your schedule. Please provide me with your task(s)'s name, duration, and start time.`;
     }
 }
 
