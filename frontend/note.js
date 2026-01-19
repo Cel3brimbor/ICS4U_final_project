@@ -126,7 +126,7 @@ function displayNotes(notes) {
 function createNoteElement(note) {
     const noteDiv = document.createElement('div');
     noteDiv.className = 'note-item';
-    noteDiv.setAttribute('data-note-id', note.content + '|' + note.creationTime);
+    noteDiv.setAttribute('data-note-id', note.id);
 
     const formattedTime = formatTime(note.creationTime);
 
@@ -138,10 +138,10 @@ function createNoteElement(note) {
             </div>
         </div>
         <div class="note-actions">
-            <button class="note-action-btn edit-btn" onclick="editNote('${note.content + '|' + note.creationTime}')">
+            <button class="note-action-btn edit-btn" onclick="editNote('${note.id}')">
                 ✏️ Edit
             </button>
-            <button class="note-action-btn delete-btn" onclick="deleteNote('${note.content + '|' + note.creationTime}')">
+            <button class="note-action-btn delete-btn" onclick="deleteNote('${note.id}')">
                 🗑️ Delete
             </button>
         </div>
@@ -173,7 +173,7 @@ async function editNote(noteId) {
     const originalButtons = actionsDiv.innerHTML;
 
     actionsDiv.innerHTML = `
-        <button class="note-action-btn save-btn" onclick="saveNote('${noteId}', this)">
+        <button class="note-action-btn save-btn" onclick="saveNote('${noteId}')">
             Save
         </button>
         <button class="note-action-btn cancel-btn" onclick="cancelEdit('${noteId}', '${escapeHtml(originalContent)}')">
@@ -182,7 +182,7 @@ async function editNote(noteId) {
     `;
 }
 
-async function saveNote(noteId, saveBtn) {
+async function saveNote(noteId) {
     const noteElement = document.querySelector(`[data-note-id="${noteId}"]`);
     const textarea = noteElement.querySelector('.note-edit-input');
     const newContent = textarea.value.trim();
@@ -193,7 +193,7 @@ async function saveNote(noteId, saveBtn) {
     }
 
     try {
-        const response = await fetch(`/api/notes/${encodeURIComponent(noteId)}`, {
+        const response = await fetch(`/api/notes/${noteId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -242,7 +242,7 @@ async function deleteNote(noteId) {
     }
 
     try {
-        const response = await fetch(`/api/notes/${encodeURIComponent(noteId)}`, {
+        const response = await fetch(`/api/notes/${noteId}`, {
             method: 'DELETE'
         });
 

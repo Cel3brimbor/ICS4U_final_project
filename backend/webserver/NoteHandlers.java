@@ -100,7 +100,8 @@ public class NoteHandlers {
 
         private String noteToJson(Note note) {
             return String.format(
-                "{\"content\":\"%s\",\"creationTime\":\"%s\"}",
+                "{\"id\":\"%s\",\"content\":\"%s\",\"creationTime\":\"%s\"}",
+                note.getId(),
                 escapeJsonString(note.getContent()),
                 note.getCreationTime()
             );
