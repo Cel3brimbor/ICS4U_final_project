@@ -113,7 +113,11 @@ function displayNotes(notes) {
     }
 
     //sort notes by creation time (newest first)
-    notes.sort((a, b) => new Date(b.creationTime.replace(' ', 'T')) - new Date(a.creationTime.replace(' ', 'T')));
+    notes.sort((a, b) => {
+        const timeA = a.creationTime ? new Date(a.creationTime.replace(' ', 'T')) : 0;
+        const timeB = b.creationTime ? new Date(b.creationTime.replace(' ', 'T')) : 0;
+        return timeB - timeA;
+    });
 
     //display notes
     notes.forEach(note => {
@@ -148,6 +152,36 @@ function createNoteElement(note) {
 
     return noteDiv;
 }
+
+// function createNoteElement(note) {
+//     const noteDiv = document.createElement('div');
+//     noteDiv.className = 'note-item';
+    
+//     // Check all possible ID names (id, noteId, or noteid)
+//     const actualId = note.noteid || note.noteId || note.id;
+//     noteDiv.setAttribute('data-note-id', actualId);
+
+//     const formattedTime = formatTime(note.creationTime);
+
+//     noteDiv.innerHTML = `
+//         <div class="note-content">
+//             <div class="note-text">${escapeHtml(note.content)}</div>
+//             <div class="note-meta">
+//                 <span class="note-time">Created: ${formattedTime}</span>
+//             </div>
+//         </div>
+//         <div class="note-actions">
+//             <button class="note-action-btn edit-btn" onclick="editNote('${actualId}')">
+//                 ✏️ Edit
+//             </button>
+//             <button class="note-action-btn delete-btn" onclick="deleteNote('${actualId}')">
+//                 🗑️ Delete
+//             </button>
+//         </div>
+//     `;
+
+//     return noteDiv;
+// }
 
 async function editNote(noteId) {
     //find the note element
