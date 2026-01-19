@@ -152,46 +152,73 @@ function updateScheduleTimeline(tasks) {
 
     const timelineRect = timeline.getBoundingClientRect();
     const style = getComputedStyle(timeline);
-    const paddingLeft = parseFloat(style.paddingLeft);
-    const paddingRight = parseFloat(style.paddingRight);
+    const paddingLeft = parseFloat(style.paddingLeft) || 20;
+    const paddingRight = parseFloat(style.paddingRight) || 20;
     const timelineContentWidth = timelineRect.width - paddingLeft - paddingRight;
     const hourWidth = timelineContentWidth / 24;
 
+    // Create time markers container at top
+    const topMarkers = document.createElement('div');
+    topMarkers.className = 'timeline-markers-top';
     for (let hour = 0; hour <= 24; hour++) {
         const marker = document.createElement('div');
-        marker.className = 'time-marker';
-        marker.style.left = (paddingLeft + hour * hourWidth) + 'px';
+        marker.className = 'time-marker-hour';
+        marker.style.left = ((hour / 24) * 100) + '%';
         marker.textContent = hour === 24 ? '24:00' : `${hour.toString().padStart(2, '0')}:00`;
-        timeline.appendChild(marker);
+        topMarkers.appendChild(marker);
     }
+    timeline.appendChild(topMarkers);
 
-    if (currentPriorityEvent && currentPriorityEvent.date === selectedDate) {
-        const priorityBlock = createPriorityEventBlock(currentPriorityEvent, hourWidth, paddingLeft);
-        timeline.appendChild(priorityBlock);
-    }
+    // Create tasks container
+    const tasksContainer = document.createElement('div');
+    tasksContainer.className = 'timeline-tasks-container';
+    timeline.appendChild(tasksContainer);
 
     if (tasks.length === 0 && !currentPriorityEvent) {
         const noSchedule = document.createElement('div');
         noSchedule.className = 'no-schedule';
         noSchedule.textContent = 'No tasks scheduled for this date';
-        noSchedule.style.position = 'absolute';
-        noSchedule.style.top = '50%';
-        noSchedule.style.left = '50%';
-        noSchedule.style.transform = 'translate(-50%, -50%)';
         noSchedule.style.color = '#6c757d';
         noSchedule.style.fontSize = '1.1rem';
-        timeline.appendChild(noSchedule);
+        tasksContainer.appendChild(noSchedule);
         return;
     }
 
+    // Add priority event first if exists
+    if (currentPriorityEvent && currentPriorityEvent.date === selectedDate) {
+        const priorityBlock = createPriorityEventBlock(currentPriorityEvent, hourWidth, paddingLeft);
+        tasksContainer.appendChild(priorityBlock);
+    }
+
+    // Sort tasks by start time
     tasks.sort((a, b) => a.startTime.localeCompare(b.startTime));
 
+    // Position tasks with stacking
     const positionedTasks = positionTasksWithStacking(tasks, hourWidth, paddingLeft);
 
+    // Create task blocks
     positionedTasks.forEach(taskData => {
         const block = createTaskBlock(taskData.task, hourWidth, paddingLeft, taskData.top);
-        timeline.appendChild(block);
+        tasksContainer.appendChild(block);
     });
+
+    // Create time markers container at bottom
+    const bottomMarkers = document.createElement('div');
+    bottomMarkers.className = 'timeline-markers-bottom';
+    for (let hour = 0; hour <= 24; hour++) {
+        const marker = document.createElement('div');
+        marker.className = 'time-marker-hour';
+        marker.style.left = ((hour / 24) * 100) + '%';
+        marker.textContent = hour === 24 ? '24:00' : `${hour.toString().padStart(2, '0')}:00`;
+        bottomMarkers.appendChild(marker);
+    }
+    timeline.appendChild(bottomMarkers);
+
+    // Add date display at the bottom
+    const dateMarker = document.createElement('div');
+    dateMarker.className = 'timeline-date-marker';
+    dateMarker.textContent = formatDate(selectedDate);
+    timeline.appendChild(dateMarker);
 }
 
 function createPriorityEventBlock(event, hourWidth, paddingLeft) {
@@ -205,10 +232,10 @@ function createPriorityEventBlock(event, hourWidth, paddingLeft) {
 
     const startMinutes = startHour * 60 + startMinute;
     const endMinutes = endHour * 60 + endMinute;
-    const durationMinutes = Math.max(endMinutes - startMinutes, 30);
+    const durationMinutes = endMinutes - startMinutes;
 
     const leftPosition = paddingLeft + (startMinutes / (24 * 60)) * (24 * hourWidth);
-    const width = Math.max((durationMinutes / (24 * 60)) * (24 * hourWidth), 80); 
+    const width = Math.max((durationMinutes / (24 * 60)) * (24 * hourWidth), 60); 
 
     block.style.left = leftPosition + 'px';
     block.style.width = width + 'px';
@@ -297,11 +324,12 @@ function createTaskBlock(task, hourWidth, paddingLeft, top = 10) {
         endMinutes = endHour * 60 + endMinute;
     }
 
-    const durationMinutes = Math.max(endMinutes - startMinutes, 15); // Minimum 15 minutes for visibility
+    const durationMinutes = endMinutes - startMinutes;
 
     // Calculate position and width using pixel values, adjusting for padding
+    // Width is proportional to actual duration, with minimum 60px for visibility
     const leftPosition = paddingLeft + (startMinutes / (24 * 60)) * (24 * hourWidth);
-    const width = Math.max((durationMinutes / (24 * 60)) * (24 * hourWidth), 60); // Minimum 60px width
+    const width = Math.max((durationMinutes / (24 * 60)) * (24 * hourWidth), 60);
 
     block.style.position = 'absolute';
     block.style.left = leftPosition + 'px';
