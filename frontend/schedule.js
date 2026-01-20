@@ -65,11 +65,12 @@ function setDefaultDatetimeValues() {
         return date.toTimeString().slice(0, 5); // HH:mm format
     };
 
-    // Set default date to today
-    const today = now.toISOString().split('T')[0];
+    const todayLocal = now.getFullYear() + '-' +
+        String(now.getMonth() + 1).padStart(2, '0') + '-' +
+        String(now.getDate()).padStart(2, '0');
     const dateInput = document.getElementById('schedule-task-date');
     if (dateInput) {
-        dateInput.value = today;
+        dateInput.value = todayLocal;
     }
 
     document.getElementById('schedule-start-time').value = formatTime(now);
@@ -750,6 +751,10 @@ async function addTaskFromSchedule() {
 
     } catch (error) {
         console.error('Error adding task:', error);
+        if (!taskText || !selectedDate) {
+            showMessage('Could not add task. Please check your connection.', 'error');
+            return;
+        }
         // If API fails, save to localStorage anyway
         const localTask = {
             id: Date.now().toString(),

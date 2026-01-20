@@ -16,11 +16,13 @@ function initializeApp() {
     //initialize navigation
     initializeNavigation();
 
-    // Set default date to today
-    const today = new Date().toISOString().split('T')[0];
+    const d = new Date();
+    const todayLocal = d.getFullYear() + '-' +
+        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+        String(d.getDate()).padStart(2, '0');
     const dateInput = document.getElementById('task-date');
     if (dateInput) {
-        dateInput.value = today;
+        dateInput.value = todayLocal;
     }
 
     // Apply dark mode if enabled
@@ -258,6 +260,10 @@ async function addTask() {
 
     } catch (error) {
         console.error('Error adding task:', error);
+        if (!description || !selectedDate) {
+            showError('Could not add task. Please check your connection.');
+            return;
+        }
         // If API fails, save to localStorage anyway
         const localTask = {
             id: Date.now().toString(),
