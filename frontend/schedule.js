@@ -954,7 +954,7 @@ function showPriorityEventDetails(event) {
     modal.innerHTML = `
         <div class="task-modal">
             <div class="task-modal-header">
-                <h3>⭐ Priority Event Details</h3>
+                <h3>Priority Event Details</h3>
                 <button class="modal-close-btn" onclick="closePriorityEventModal()">×</button>
             </div>
             <div class="task-modal-content">

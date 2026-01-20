@@ -81,7 +81,11 @@ public class Agent {
             return "Unknown AI provider: " + apiProvider;
         }
 
-        String prompt = message;
+        String prompt = String.format(
+            "You are in chat mode. If user asks you to edit their notes or schedule, please refer them to use Agent mode that can be toggled above chat box.\n" +
+            "User prompt: %s\n\n", 
+            message
+        );
 
         try {
             String response = callAIAPI(prompt, 2000); //higher token limit
@@ -153,8 +157,8 @@ public class Agent {
                 "- For UPDATE/COMPLETE/DELETE: You MUST identify which specific task\n" +
                 "- For DELETE_MULTIPLE: You MUST provide an array of taskIds to delete\n" +
                 "- If the task requested to be edited or deleted doesn't exist, use {\"action\":\"ITEM_NOT_FOUND\",\"itemType\":\"task\",\"itemId\":\"taskId-here\"}\n" +
-                "- If information is missing, respond with {\"action\":\"NEED_INFO\",\"message\":\"what you need\"}\n\n" +
-                "- Tasks cannot happen simutaneously (i.e. have overlapped durations). A new task can only start before or after another one. If user is asking you to add a task that conflicts with another's time, return not enough info with reason being time conflict."+
+                "- If information is missing, respond with {\"action\":\"NEED_INFO\",\"message\":\"what you need\"}\n" +
+                "- Tasks cannot happen simutaneously (i.e. have overlapped durations). A new task can only start before or after another one. If user is asking you to add a task that conflicts with another's time, return not enough info with reason being time conflict.\n\n"+
                 "Respond with a JSON object. Examples:\n" +
                 "- To add a task: {\"action\":\"ADD\",\"description\":\"task name\",\"startTime\":\"14:00\",\"endTime\":\"15:00\",\"priority\":\"HIGH\"}\n" +
                 "- To add multiple tasks: {\"action\":\"ADD_MULTIPLE\",\"tasks\":[{\"description\":\"task 1\",\"startTime\":\"14:00\",\"endTime\":\"15:00\",\"priority\":\"HIGH\"},{\"description\":\"task 2\",\"startTime\":\"15:30\",\"endTime\":\"16:30\"}]}\n" +

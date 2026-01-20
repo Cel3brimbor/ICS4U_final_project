@@ -9,13 +9,10 @@
 </head>
 <body>
 <header class="app-header">
-    <!-- Back button positioned left -->
     <button class="back-btn" onclick="goBack()">← Back to Dashboard</button>
 
-    <!-- Title centered -->
     <h1 class="page-title">Schedule & Timeline</h1>
 
-    <!-- Quick Actions centered below title -->
     <div class="header-actions">
         <button class="nav-btn clear-btn" onclick="scrollToTaskForm()">+ Add Task</button>
         <button class="nav-btn clear-btn" onclick="editTimelineWithAI()">🤖 AI Assistant</button>
@@ -24,7 +21,6 @@
 </header>
 
 <main class="timer-main">
-    <!-- Add Task Section -->
     <div class="timer-container">
         <h2>Add New Task</h2>
         <div class="task-input-section">
@@ -76,16 +72,13 @@
                 <button id="clear-priority-event" class="timer-btn reset-btn">Clear Priority Event</button>
             </div>
 
-            <!-- Current Priority Event Display -->
             <div id="current-priority-display" class="priority-display" style="display: none;">
                 <h3>Current Priority Event</h3>
                 <div id="priority-event-card" class="priority-event-card">
-                    <!-- Priority event will be displayed here -->
                 </div>
             </div>
         </div>
 
-        <!-- Schedule Timeline -->
         <div class="timer-container">
             <h2>Today's Timeline</h2>
 
@@ -107,11 +100,9 @@
                 </div>
             </div>
 
-            <!-- Timeline Visualization -->
             <div id="timeline-view" class="view-container">
                 <div class="timeline-container">
                     <div id="schedule-timeline" class="schedule-timeline">
-                        <!-- Timeline will be populated here -->
                     </div>
                 </div>
             </div>
@@ -142,7 +133,6 @@
                 </div>
             </div>
 
-            <!-- Timeline Legend -->
             <div class="timeline-legend">
                 <div class="legend-item">
                     <div class="legend-color priority-event"></div>

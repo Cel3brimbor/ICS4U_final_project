@@ -144,8 +144,8 @@ function setMode(mode) {
         chatInterface.classList.remove('hidden');
         agentInterface.classList.add('hidden');
 
-        document.getElementById('chat-title').textContent = '💬 Chat Mode';
-        document.getElementById('chat-description').textContent = 'Ask me anything - I\'m here to help!';
+        document.getElementById('chat-title').textContent = 'Chat Mode';
+        document.getElementById('chat-description').textContent = 'Ask me anything';
 
         const messages = document.getElementById('chat-messages');
         if (messages.children.length === 1) {
