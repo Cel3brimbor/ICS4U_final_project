@@ -1,5 +1,9 @@
 let currentPriorityEvent = null;
-let selectedDate = new Date().toISOString().split('T')[0];
+// Get today's date in local timezone as YYYY-MM-DD
+const today = new Date();
+let selectedDate = today.getFullYear() + '-' +
+    String(today.getMonth() + 1).padStart(2, '0') + '-' +
+    String(today.getDate()).padStart(2, '0');
 let currentView = 'timeline'; 
 let calendarStartDate = new Date(); 
 
@@ -835,7 +839,9 @@ function exportSchedule() {
 }
 
 function formatDate(dateString) {
-    const date = new Date(dateString);
+    // Parse the YYYY-MM-DD string manually to avoid timezone issues
+    const [year, month, day] = dateString.split('-').map(Number);
+    const date = new Date(year, month - 1, day); // month is 0-based in Date constructor
     return date.toLocaleDateString('en-US', {
         weekday: 'long',
         year: 'numeric',
