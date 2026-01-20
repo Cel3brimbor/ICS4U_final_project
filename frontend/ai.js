@@ -1,3 +1,9 @@
+/**
+ * Logic and interactivity developed with help from Grok AI (xAI).
+ * Specifically: Error handling and rendering
+ * Date: January 2026
+ */
+
 let currentMode = 'chat';
 let accessToken = null;
 

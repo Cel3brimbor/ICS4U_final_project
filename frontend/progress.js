@@ -1,3 +1,8 @@
+/**
+ * Logic and interactivity developed with help from Grok AI (xAI).
+ * Date: January 2026
+ */
+
 document.addEventListener('DOMContentLoaded', function() {
     initializeProgressPage();
 });

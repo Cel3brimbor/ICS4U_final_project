@@ -1,4 +1,7 @@
-// Notification sound library - uses MP3 files for ringtones
+/**
+ * Logic and interactivity developed with help from Grok AI (xAI).
+ * Date: January 2026
+ */
 
 // Main function to play notification sound
 function playNotificationSound(soundType, volume, playCount = 3) {

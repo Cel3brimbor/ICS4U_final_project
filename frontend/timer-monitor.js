@@ -1,3 +1,8 @@
+/**
+ * Logic and interactivity developed with help from Grok AI (xAI).
+ * Date: January 2026
+ */
+
 // Global timer monitor - runs on all pages
 // Monitors backend timer and shows notifications when timer completes
 

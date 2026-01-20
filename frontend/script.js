@@ -1,3 +1,9 @@
+/**
+ * Logic and interactivity developed with help from Grok AI (xAI).
+ * Specifically: navigation functions and error handling
+ * Date: January 2026
+ */
+
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 

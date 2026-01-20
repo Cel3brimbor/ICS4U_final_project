@@ -1,3 +1,8 @@
+/**
+ * Logic and interactivity developed with help from Grok AI (xAI).
+ * Date: January 2026
+ */
+
 let currentPriorityEvent = null;
 // Get today's date in local timezone as YYYY-MM-DD
 const today = new Date();
