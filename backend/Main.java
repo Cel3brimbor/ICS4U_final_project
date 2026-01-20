@@ -17,8 +17,6 @@ public class Main {
         ScheduleManager scheduleManager = new ScheduleManager();
         NoteManager noteManager = new NoteManager();
 
-        TaskPersistence.migrateFromTxtToJson();
-
         //load existing tasks from file
         System.out.println("Loading existing tasks...");
         TaskPersistence.loadTasks(scheduleManager);
